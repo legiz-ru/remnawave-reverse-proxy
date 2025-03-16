@@ -35,5 +35,5 @@ This script is designed for quick setup of a reverse proxy server based on NGINX
 To set up the server, run this command on it:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh)
 ```
