@@ -1685,7 +1685,8 @@ installation_panel() {
 
     echo -e "${COLOR_YELLOW}${LANG[REGISTERING_REMNAWAVE]}${COLOR_RESET}"
     sleep 20
-	
+
+    local domain_url="127.0.0.1:3000"
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
     until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
@@ -1693,7 +1694,6 @@ installation_panel() {
     done
 
     # Register Remnawave
-    local domain_url="127.0.0.1:3000"
     local token=$(register_remnawave "$domain_url" "$SUPERADMIN_USERNAME" "$SUPERADMIN_PASSWORD" "$PANEL_DOMAIN")
     echo -e "${COLOR_GREEN}${LANG[REGISTRATION_SUCCESS]}${COLOR_RESET}"
 	
