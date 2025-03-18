@@ -857,7 +857,7 @@ install_remnawave() {
     cookies_random2=$(generate_user)
 
     METRICS_USER=$(generate_user)
-    METRICS_PASS=$(generate_password)
+    METRICS_PASS=$(generate_user)
 
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
@@ -1340,7 +1340,7 @@ install_remnawave_panel() {
     cookies_random2=$(generate_user)
 
     METRICS_USER=$(generate_user)
-    METRICS_PASS=$(generate_password)
+    METRICS_PASS=$(generate_user)
 
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
