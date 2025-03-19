@@ -31,7 +31,7 @@ To ensure proper operation, you need to prepare three domains (or subdomains) in
    - Select the option to install both the panel and node on the same machine. Once the process is complete, the script will automatically restart the panel and provide all necessary login credentials.
 ### 2. Dual Server Setup
    - Start by installing the panel on the first server. Wait for the script to finish the setup and provide the login credentials for the panel.
-   - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the Important button. In the pop-up window, you’ll see an icon to copy the certificate—copy it.
+   - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the Important button. In the pop-up window, you’ll see an icon to copy the certificate — copy it.
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
 -----
