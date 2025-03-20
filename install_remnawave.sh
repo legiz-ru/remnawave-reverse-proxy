@@ -1890,6 +1890,7 @@ echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
     install_remnawave_node
 
     ufw allow from $PANEL_IP to any port 2222 
+    ufw reload
 
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
