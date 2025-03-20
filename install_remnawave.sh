@@ -992,7 +992,7 @@ services:
       retries: 3
 
   remnawave:
-    image: remnawave/backend:latest
+    image: remnawave/backend:dev
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -1058,7 +1058,7 @@ services:
       - remnawave-network
 
   remnanode:
-    image: remnawave/node:latest
+    image: remnawave/node:dev
     container_name: remnanode
     hostname: remnanode
     restart: always
@@ -1468,7 +1468,7 @@ services:
       retries: 3
 
   remnawave:
-    image: remnawave/backend:latest
+    image: remnawave/backend:dev
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -1831,7 +1831,7 @@ services:
       - remnanode
 
   remnanode:
-    image: remnawave/node:latest
+    image: remnawave/node:dev
     container_name: remnanode
     hostname: remnanode
     restart: always
