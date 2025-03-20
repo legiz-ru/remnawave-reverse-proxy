@@ -377,7 +377,10 @@ spinner() {
 
 randomhtml() {
     cd /root/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
-
+    
+    rm -f main.zip 2>/dev/null
+    rm -rf simple-web-templates-main/ 2>/dev/null
+    
     echo -e "${COLOR_YELLOW}${LANG[RANDOM_TEMPLATE]}${COLOR_RESET}"
     spinner $$ "${LANG[WAITING]}" &
     spinner_pid=$!
