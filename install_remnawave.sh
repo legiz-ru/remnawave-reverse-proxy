@@ -43,6 +43,7 @@ set_language() {
                 [INSTALLING]="Installing Remnawave"
                 [ENTER_PANEL_DOMAIN]="Enter panel domain (e.g. panel.example.com):"
                 [ENTER_SUB_DOMAIN]="Enter subscription domain (e.g. sub.example.com):"
+		[ENTER_NODE_DOMAIN]="Enter selfsteal domain for node (e.g. node.example.com):"
                 [ENTER_CF_TOKEN]="Enter your Cloudflare API token or global API key:"
                 [ENTER_CF_EMAIL]="Enter your Cloudflare registered email:"
                 [CHECK_CERTS]="Checking certificates..."
