@@ -45,14 +45,15 @@ set_language() {
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+                [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
                 [MENU_3]="Installing only the node"
                 [MENU_4]="Reinstall panel/node"
                 [MENU_5]="Install random template for selfsteal node"
-                [MENU_6]="Exit"
-                [PROMPT_ACTION]="Select action (1-6):"
-                [INVALID_CHOICE]="Invalid choice. Please select 1-6."
+                [MENU_6]="Disable IPv6"
+                [PROMPT_ACTION]="Select action (0-6):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-6."
                 [EXITING]="Exiting"
                 #Remna
                 [INSTALL_PACKAGES]="Installing required packages..."
@@ -142,6 +143,9 @@ set_language() {
                 [NODE_LAUNCHED]="Node successfully launched!"
                 [NODE_NOT_CONNECTED]="Node not connected after %d attempts!"
                 [CHECK_CONFIG]="Check the configuration or restart the panel."
+                #IPv6
+                [DISABLING_IPV6]="Disabling IPv6..."
+                [IPV6_DISABLED]="IPv6 has been disabled."
             )
             ;;
         ru)
@@ -151,14 +155,15 @@ set_language() {
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 #Menu
+                [MENU_0]="Выход"
                 [MENU_1]="Установить панель и ноду на один сервер"
                 [MENU_2]="Установить только панель"
                 [MENU_3]="Установить только ноду"
                 [MENU_4]="Переустановить панель/ноду"
                 [MENU_5]="Установить случайный шаблон для selfsteal ноды"
-                [MENU_6]="Выход"
-                [PROMPT_ACTION]="Выберите действие (1-6):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 1-6."
+                [MENU_6]="Отключить IPv6"
+                [PROMPT_ACTION]="Выберите действие (0-6):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-6."
                 [EXITING]="Выход"
                 #Remna
                 [INSTALL_PACKAGES]="Установка необходимых пакетов..."
@@ -247,6 +252,9 @@ set_language() {
                 [NODE_LAUNCHED]="Нода успешно подключена!"
                 [NODE_NOT_CONNECTED]="Нода не подключена после %d попыток!"
                 [CHECK_CONFIG]="Проверьте конфигурацию или перезапустите панель."
+                #IPv6
+                [DISABLING_IPV6]="Отключение IPv6..."
+                [IPV6_DISABLED]="IPv6 отключен."
             )
             ;;
     esac
@@ -340,6 +348,8 @@ show_menu() {
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}"
     echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
 }
 
 show_reinstall_options() {
@@ -349,7 +359,7 @@ show_reinstall_options() {
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_6]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -503,23 +513,6 @@ install_packages() {
         echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
     fi
 
-    # IPv6
-    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
-    if ! grep -q "net.ipv6.conf.all.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.default.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.lo.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.$interface_name.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-
-    sysctl -p > /dev/null 2>&1
-
     # UFW
     ufw --force reset
     ufw allow 22/tcp comment 'SSH'
@@ -534,6 +527,27 @@ install_packages() {
 
     touch ${DIR_REMNAWAVE}install_packages
     clear
+}
+
+disable_ipv6() {
+    echo -e "${COLOR_YELLOW}${LANG[DISABLING_IPV6]}${COLOR_RESET}"
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
+    
+    if ! grep -q "net.ipv6.conf.all.disable_ipv6 = 1" /etc/sysctl.conf; then
+        echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+    fi
+    if ! grep -q "net.ipv6.conf.default.disable_ipv6 = 1" /etc/sysctl.conf; then
+        echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+    fi
+    if ! grep -q "net.ipv6.conf.lo.disable_ipv6 = 1" /etc/sysctl.conf; then
+        echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+    fi
+    if ! grep -q "net.ipv6.conf.$interface_name.disable_ipv6 = 1" /etc/sysctl.conf; then
+        echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
+    fi
+
+    sysctl -p > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[IPV6_DISABLED]}${COLOR_RESET}"
 }
 
 extract_domain() {
@@ -2080,7 +2094,11 @@ case $OPTION in
         log_clear
         ;;
     6)
-        echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+        disable_ipv6
+        log_clear
+        ;;
+    0)
+        echo -e "${COLOR_YELLOW}${LANG[MENU_0]}${COLOR_RESET}"
         exit 0
         ;;
     *)
