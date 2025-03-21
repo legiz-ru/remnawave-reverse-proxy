@@ -957,10 +957,6 @@ install_remnawave() {
     METRICS_USER=$(generate_user)
     METRICS_PASS=$(generate_password)
 
-    POSTGRES_USER=$(generate_user)
-    POSTGRES_PASSWORD=$(generate_password)
-    POSTGRES_DB=$(generate_user)
-
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
 
@@ -1032,9 +1028,9 @@ CLOUDFLARE_TOKEN=ey...
 ### Database ###
 ### For Postgres Docker container ###
 # NOT USED BY THE APP ITSELF
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_DB=${POSTGRES_DB}
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -1445,10 +1441,6 @@ install_remnawave_panel() {
     METRICS_USER=$(generate_user)
     METRICS_PASS=$(generate_user)
 
-    POSTGRES_USER=$(generate_user)
-    POSTGRES_PASSWORD=$(generate_password)
-    POSTGRES_DB=$(generate_user)
-
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
 
@@ -1512,9 +1504,9 @@ CLOUDFLARE_TOKEN=ey...
 ### Database ###
 ### For Postgres Docker container ###
 # NOT USED BY THE APP ITSELF
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_DB=${POSTGRES_DB}
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
 EOL
 
     cat > docker-compose.yml <<EOL
