@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
+LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
 
 COLOR_RESET="\033[0m"
@@ -9,11 +10,26 @@ COLOR_YELLOW="\033[1;33m"
 COLOR_WHITE="\033[1;37m"
 COLOR_RED="\033[1;31m"
 
+load_language() {
+    if [ -f "$LANG_FILE" ]; then
+        local saved_lang=$(cat "$LANG_FILE")
+        case $saved_lang in
+            1) set_language en ;;
+            2) set_language ru ;;
+            *) 
+                rm -f "$LANG_FILE"
+                return 1 ;;
+        esac
+        return 0
+    fi
+    return 1
+}
+
 # Language variables
 declare -A LANG=(
     [CHOOSE_LANG]="Select language:"
     [LANG_EN]="English"
-    [LANG_RU]="Russian"
+    [LANG_RU]="Русский"
 )
 
 set_language() {
@@ -23,27 +39,29 @@ set_language() {
                 #Lang
                 [CHOOSE_LANG]="Select language:"
                 [LANG_EN]="English"
-                [LANG_RU]="Russian"
+                [LANG_RU]="Русский"
                 #check
                 [ERROR_ROOT]="Script must be run as root"
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
                 #Menu
-                [MENU_TITLE]="REMNAWAVE REVERSE-PROXY"
-                [MENU_1]="Installation with panel and node"
+                [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+                [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
                 [MENU_3]="Installing only the node"
-                [MENU_4]="Reinstall panel"
-                [MENU_5]="Select random site template"
+                [MENU_4]="Reinstall panel/node"
+                [MENU_5]="Install random template for selfsteal node"
                 [MENU_6]="Exit"
                 [PROMPT_ACTION]="Select action (1-6):"
                 [INVALID_CHOICE]="Invalid choice. Please select 1-6."
                 [EXITING]="Exiting"
                 #Remna
                 [INSTALL_PACKAGES]="Installing required packages..."
-                [INSTALLING]="Installing Remnawave"
+                [INSTALLING]="Installing panel and node"
+                [INSTALLING_PANEL]="Installing panel"
+                [INSTALLING_NODE]="Installing node"
                 [ENTER_PANEL_DOMAIN]="Enter panel domain (e.g. panel.example.com):"
                 [ENTER_SUB_DOMAIN]="Enter subscription domain (e.g. sub.example.com):"
-		[ENTER_NODE_DOMAIN]="Enter selfsteal domain for node (e.g. node.example.com):"
+                [ENTER_NODE_DOMAIN]="Enter selfsteal domain for node (e.g. node.example.com):"
                 [ENTER_CF_TOKEN]="Enter your Cloudflare API token or global API key:"
                 [ENTER_CF_EMAIL]="Enter your Cloudflare registered email:"
                 [CHECK_CERTS]="Checking certificates..."
@@ -69,15 +87,17 @@ set_language() {
                 [CREATE_HOST]="Creating host with UUID: "
                 [HOST_CREATED]="Host successfully created."
                 #Stop/Start
-                [STARTING_REMNAWAVE]="Starting Remnawave"
-                [STOPPING_REMNAWAVE]="Stopping Remnawave"
+                [STARTING_PANEL_NODE]="Starting panel and node"
+                [STARTING_PANEL]="Starting panel"
+                [STARTING_NODE]="Starting node"
+                [STOPPING_REMNAWAVE]="Stopping panel and node"
                 #Menu End
                 [INSTALL_COMPLETE]="               INSTALLATION COMPLETE!"
                 [PANEL_ACCESS]="Panel URL:"
                 [ADMIN_CREDS]="To log into the panel, use the following data:"
                 [USERNAME]="Username:"
                 [PASSWORD]="Password:"
-                [RELAUNCH_CMD]="To relaunch script use command:"
+                [RELAUNCH_CMD]="To relaunch the manager, use the following command:"
                 #RandomHTML
                 [RANDOM_TEMPLATE]="Installing random template for camouflage site"
                 [DOWNLOAD_FAIL]="Download failed, retrying..."
@@ -101,18 +121,27 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Registration error - empty server response"
                 [ERROR_REGISTER]="Registration error"
                 #Reinstall
-                [REINSTALL_TYPE_TITLE]="Select installation type after reinstall:"
-                [REINSTALL_PROMPT]="Select action (1-2):"
-                [POST_PANEL_MESSAGE]="The panel is installed, now run this script on the server where the node will be"
-                [POST_PANEL_INSTRUCTION]="And select 'Install only the node'"
+                [REINSTALL_WARNING]="All data will be deleted from the server. Are you sure? (y/n):"
+                [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
+                [REINSTALL_PROMPT]="Select action (1-4):"
+                [INVALID_REINSTALL_CHOICE]="Invalid choice. Please select 1-4."
+                [POST_PANEL_MESSAGE]="Panel successfully installed!"
+                [POST_PANEL_INSTRUCTION]="To install the node, follow these steps:\n1. Run this script on the server where the node will be installed.\n2. Select 'Install only the node'."
                 [SELFSTEAL_PROMPT]="Enter the selfsteal domain for the node (e.g. node.example.com):"
                 [SELFSTEAL]="Enter the selfsteal domain for the node specified during panel installation:"
                 [PANEL_IP_PROMPT]="Enter the IP address of the panel to establish a connection between the panel and the node:"
                 [IP_ERROR]="Enter a valid IP address in the format X.X.X.X (e.g., 192.168.1.1)"
-                [CERT_PROMPT]="Enter the server certificate (paste the content and press Enter twice):"
+                [CERT_PROMPT]="Enter the certificate obtained from the panel, keeping the SSL_CERT= line (paste the content and press Enter twice):"
                 [CERT_CONFIRM]="Are you sure the certificate is correct? (y/n):"
                 [ABORT_MESSAGE]="Installation aborted by user"
                 [SUCCESS_MESSAGE]="Node successfully connected"
+                #Node Check
+                [NODE_CHECK]="Checking node connection for %s..."
+                [NODE_ATTEMPT]="Attempt %d of %d..."
+                [NODE_UNAVAILABLE]="Node is unavailable on attempt %d."
+                [NODE_LAUNCHED]="Node successfully launched!"
+                [NODE_NOT_CONNECTED]="Node not connected after %d attempts!"
+                [CHECK_CONFIG]="Check the configuration or restart the panel."
             )
             ;;
         ru)
@@ -120,20 +149,22 @@ set_language() {
                 #check
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
-                [MENU_TITLE]="REMNAWAVE REVERSE-PROXY"
+                [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 #Menu
-                [MENU_1]="Установка панели и ноды на этом же сервере"
+                [MENU_1]="Установить панель и ноду на один сервер"
                 [MENU_2]="Установить только панель"
                 [MENU_3]="Установить только ноду"
-                [MENU_4]="Переустановить панель"
-                [MENU_5]="Выбрать случайный шаблон"
+                [MENU_4]="Переустановить панель/ноду"
+                [MENU_5]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_6]="Выход"
                 [PROMPT_ACTION]="Выберите действие (1-6):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 1-6."
                 [EXITING]="Выход"
                 #Remna
                 [INSTALL_PACKAGES]="Установка необходимых пакетов..."
-                [INSTALLING]="Установка Remnawave"
+                [INSTALLING]="Установка панели и ноды"
+                [INSTALLING_PANEL]="Установка панели"
+                [INSTALLING_NODE]="Установка ноды"
                 [ENTER_PANEL_DOMAIN]="Введите домен панели (например, panel.example.com):"
                 [ENTER_SUB_DOMAIN]="Введите домен подписки (например, sub.example.com):"
                 [ENTER_NODE_DOMAIN]="Введите selfsteal домен для ноды (например, node.example.com):"
@@ -162,15 +193,17 @@ set_language() {
                 [CREATE_HOST]="Создаем хост с UUID: "
                 [HOST_CREATED]="Хост успешно создан."
                 #Stop/Start
-                [STOPPING_REMNAWAVE]="Остановка Remnawave"
-                [STARTING_REMNAWAVE]="Запуск Remnawave"
+                [STARTING_PANEL_NODE]="Запуск панели и ноды"
+                [STARTING_PANEL]="Запуск панели"
+                [STARTING_NODE]="Запуск ноды"
+                [STOPPING_REMNAWAVE]="Остановка панели и ноды"
                 #Menu End
                 [INSTALL_COMPLETE]="               УСТАНОВКА ЗАВЕРШЕНА!"
                 [PANEL_ACCESS]="Панель доступна по адресу:"
                 [ADMIN_CREDS]="Для входа в панель используйте следующие данные:"
                 [USERNAME]="Логин:"
                 [PASSWORD]="Пароль:"
-                [RELAUNCH_CMD]="Для повторного запуска:"
+                [RELAUNCH_CMD]="Для повторного запуска менеджера используйте команду:"
                 #RandomHTML
                 [DOWNLOAD_FAIL]="Ошибка загрузки, повторная попытка..."
                 [UNPACK_ERROR]="Ошибка распаковки архива"
@@ -194,17 +227,26 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Ошибка при регистрации - пустой ответ сервера"
                 [ERROR_REGISTER]="Ошибка регистрации"
                 #Reinstall
-                [REINSTALL_TYPE_TITLE]="Выберите тип установки после переустановки:"
-                [REINSTALL_PROMPT]="Выберите действие (1-2):"
-                [POST_PANEL_MESSAGE]="Панель установлена, теперь запустите этот скрипт на сервере, где будет нода"
-                [POST_PANEL_INSTRUCTION]="И выберите 'Установить только ноду'"
+                [REINSTALL_WARNING]="Все данные будут удалены с сервера. Вы уверены? (y/n):"
+                [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
+                [REINSTALL_PROMPT]="Выберите действие (1-4):"
+                [INVALID_REINSTALL_CHOICE]="Неверный выбор. Выберите 1-4."
+                [POST_PANEL_MESSAGE]="Панель успешно установлена!"
+                [POST_PANEL_INSTRUCTION]="Для установки ноды выполните следующие шаги:\n1. Запустите этот скрипт на сервере, где будет установлена нода.\n2. Выберите 'Установить только ноду'."
                 [SELFSTEAL]="Введите selfsteal домен для ноды, который указали при установке панели:"
                 [PANEL_IP_PROMPT]="Введите IP адрес панели, чтобы установить соединение между панелью и ноды:"
                 [IP_ERROR]="Введите корректный IP-адрес в формате X.X.X.X (например, 192.168.1.1)"
-                [CERT_PROMPT]="Введите сертификат сервера (вставьте содержимое и 2 раза нажмите Enter):"
+                [CERT_PROMPT]="Введите сертификат, полученный от панели, сохраняя строку SSL_CERT= (вставьте содержимое и 2 раза нажмите Enter):"
                 [CERT_CONFIRM]="Вы уверены, что сертификат правильный? (y/n):"
                 [ABORT_MESSAGE]="Установка прервана пользователем"
                 [SUCCESS_MESSAGE]="Нода успешно подключена"
+                #Node Check
+                [NODE_CHECK]="Проверка подключения ноды для %s..."
+                [NODE_ATTEMPT]="Попытка %d из %d..."
+                [NODE_UNAVAILABLE]="Нода недоступна на попытке %d."
+                [NODE_LAUNCHED]="Нода успешно подключена!"
+                [NODE_NOT_CONNECTED]="Нода не подключена после %d попыток!"
+                [CHECK_CONFIG]="Проверьте конфигурацию или перезапустите панель."
             )
             ;;
     esac
@@ -263,8 +305,8 @@ generate_password() {
     local upper_chars='A-Z'
     local lower_chars='a-z'
     local digit_chars='0-9'
-    local special_chars='!@#$%^&*()_+'
-    local all_chars='A-Za-z0-9!@#$%^&*()_+'
+    local special_chars='!@#%^&*()_+'
+    local all_chars='A-Za-z0-9!@#%^&*()_+'
 
     password+=$(head /dev/urandom | tr -dc "$upper_chars" | head -c 1)
     password+=$(head /dev/urandom | tr -dc "$lower_chars" | head -c 1)
@@ -306,6 +348,8 @@ show_reinstall_options() {
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_6]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -336,8 +380,18 @@ choose_reinstall_type() {
             fi
             installation_panel
             ;;
+        3)
+            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                install_packages
+            fi
+            installation_node
+            ;;
+        4)
+            echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+            exit 0
+            ;;
         *)
-            echo -e "${COLOR_YELLOW}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
             exit 1
             ;;
     esac
@@ -492,7 +546,7 @@ check_certificates() {
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
         if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ]; then
-            echo "${LANG[CERT_EXIST1]}""$DOMAIN"
+            echo -e "${COLOR_GREEN}${LANG[CERT_EXIST1]}${COLOR_RESET}""$DOMAIN"
             return 0
         fi
     fi
@@ -889,6 +943,10 @@ install_remnawave() {
     METRICS_USER=$(generate_user)
     METRICS_PASS=$(generate_password)
 
+    POSTGRES_USER=$(generate_user)
+    POSTGRES_PASSWORD=$(generate_password)
+    POSTGRES_DB=$(generate_user)
+
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
 
@@ -960,9 +1018,9 @@ CLOUDFLARE_TOKEN=ey...
 ### Database ###
 ### For Postgres Docker container ###
 # NOT USED BY THE APP ITSELF
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=postgres
+POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_DB=${POSTGRES_DB}
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -1268,13 +1326,13 @@ installation() {
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
     if check_certificates $DOMAIN; then
-        echo -e "${COLOR_GREEN}${LANG[CERT_EXIST]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
     else
         echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
         get_certificates $DOMAIN
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[STARTING_REMNAWAVE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
     cd /root/remnawave
     docker compose up -d > /dev/null 2>&1 &
@@ -1331,7 +1389,7 @@ installation() {
     docker compose down > /dev/null 2>&1 &
     spinner $! "${LANG[WAITING]}"
 	
-    echo -e "${COLOR_YELLOW}${LANG[STARTING_REMNAWAVE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
     docker compose up -d > /dev/null 2>&1 &
     spinner $! "${LANG[WAITING]}"
@@ -1349,7 +1407,7 @@ installation() {
     echo -e "${COLOR_YELLOW}${LANG[PASSWORD]} ${COLOR_WHITE}$SUPERADMIN_PASSWORD${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}-------------------------------------------------${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_RESET}"
-    echo -e "${COLOR_WHITE}remnawave_reverse${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}remnawave_reverse${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
 
     randomhtml
@@ -1372,6 +1430,10 @@ install_remnawave_panel() {
 
     METRICS_USER=$(generate_user)
     METRICS_PASS=$(generate_user)
+
+    POSTGRES_USER=$(generate_user)
+    POSTGRES_PASSWORD=$(generate_password)
+    POSTGRES_DB=$(generate_user)
 
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
@@ -1436,9 +1498,9 @@ CLOUDFLARE_TOKEN=ey...
 ### Database ###
 ### For Postgres Docker container ###
 # NOT USED BY THE APP ITSELF
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=postgres
+POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_DB=${POSTGRES_DB}
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -1693,7 +1755,7 @@ EOL
 }
 
 installation_panel() {
-    echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_PANEL]}${COLOR_RESET}"
     sleep 1
 
     install_remnawave_panel
@@ -1707,7 +1769,7 @@ installation_panel() {
         get_certificates $DOMAIN
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[STARTING_REMNAWAVE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
     cd /root/remnawave
     docker compose up -d > /dev/null 2>&1 &
@@ -1749,11 +1811,10 @@ installation_panel() {
     # Create host
     create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
 
-    #clear
+    clear
 
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
-    echo -e "${COLOR_RED}${LANG[POST_PANEL_MESSAGE]}${COLOR_RESET}"
-    echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[INSTALL_COMPLETE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[PANEL_ACCESS]}${COLOR_RESET}"
     echo -e "${COLOR_WHITE}https://${PANEL_DOMAIN}/auth/login?${cookies_random1}=${cookies_random2}${COLOR_RESET}"
@@ -1761,7 +1822,11 @@ installation_panel() {
     echo -e "${COLOR_YELLOW}${LANG[ADMIN_CREDS]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[USERNAME]} ${COLOR_WHITE}$SUPERADMIN_USERNAME${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[PASSWORD]} ${COLOR_WHITE}$SUPERADMIN_PASSWORD${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}-------------------------------------------------${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}remnawave_reverse${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+    echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
 }
 
 install_remnawave_node() {
@@ -1781,7 +1846,7 @@ install_remnawave_node() {
         fi
     done
 
-    echo -e "${COLOR_YELLOW}${LANG[CERT_PROMPT]}${COLOR_RESET}"
+    echo -n "$(question "${LANG[CERT_PROMPT]}")"
     CERTIFICATE=""
     while IFS= read -r line; do
         if [ -z "$line" ]; then
@@ -1884,7 +1949,7 @@ EOL
 
 installation_node() {
 
-echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     sleep 1
 
     install_remnawave_node
@@ -1901,16 +1966,37 @@ echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
         get_certificates $DOMAIN
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[STARTING_REMNAWAVE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[STARTING_NODE]}${COLOR_RESET}"
     sleep 3
     cd /root/remnawave
     docker compose up -d > /dev/null 2>&1 &
     
     spinner $! "${LANG[WAITING]}"
 
-    randomhtml
+    sleep 5
+    printf "${COLOR_YELLOW}${LANG[NODE_CHECK]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
+    local max_attempts=3
+    local attempt=1
+    local delay=10
 
-    echo -e "${COLOR_GREEN}${LANG[SUCCESS_MESSAGE]}${COLOR_RESET}"
+while [ $attempt -le $max_attempts ]; do
+        printf "${COLOR_YELLOW}${LANG[NODE_ATTEMPT]}${COLOR_RESET}\n" "$attempt" "$max_attempts"
+        if curl -s --fail --max-time 10 "https://$SELFSTEAL_DOMAIN" | grep -q "html"; then
+            echo -e "${COLOR_GREEN}${LANG[NODE_LAUNCHED]}${COLOR_RESET}"
+            break
+        else
+            printf "${COLOR_RED}${LANG[NODE_UNAVAILABLE]}${COLOR_RESET}\n" "$attempt"
+            if [ $attempt -eq $max_attempts ]; then
+                printf "${COLOR_RED}${LANG[NODE_NOT_CONNECTED]}${COLOR_RESET}\n" "$max_attempts"
+                echo -e "${COLOR_YELLOW}${LANG[CHECK_CONFIG]}${COLOR_RESET}"
+                exit 1
+            fi
+            sleep $delay
+        fi
+        ((attempt++))
+    done
+    
+    randomhtml
 }
 
 log_entry
@@ -1918,14 +2004,18 @@ check_root
 check_os
 update_remnawave_reverse
 
-show_language
-reading "Choose option (1-2):" LANG_OPTION
+if ! load_language; then
+    show_language
+    reading "Choose option (1-2):" LANG_OPTION
 
-case $LANG_OPTION in
-    1) set_language en ;;
-    2) set_language ru ;;
-    *) error "Invalid choice. Please select 1-2." ;;
-esac
+    case $LANG_OPTION in
+        1) set_language en; echo "1" > "$LANG_FILE" ;;
+        2) set_language ru; echo "2" > "$LANG_FILE" ;;
+        *) error "Invalid choice. Please select 1-2." ;;
+    esac
+fi
+
+clear
 
 show_menu
 reading "${LANG[PROMPT_ACTION]}" OPTION
@@ -1953,9 +2043,37 @@ case $OPTION in
         log_clear
         ;;
     4)
-        reinstall_remnawave
-        choose_reinstall_type
-        log_clear
+        show_reinstall_options
+        reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
+        case $REINSTALL_OPTION in
+            1|2|3)
+                echo -e "${COLOR_RED}${LANG[REINSTALL_WARNING]}${COLOR_RESET}"
+                read confirm
+                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                    reinstall_remnawave
+                    if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                        install_packages
+                    fi
+                    case $REINSTALL_OPTION in
+                        1) installation ;;
+                        2) installation_panel ;;
+                        3) installation_node ;;
+                    esac
+                    log_clear
+                else
+                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    exit 0
+                fi
+                ;;
+            4)
+                echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                exit 0
+                ;;
+            *)
+                echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
+                exit 1
+                ;;
+        esac
         ;;
     5)
         randomhtml
