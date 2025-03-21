@@ -1775,7 +1775,7 @@ installation_panel() {
         get_certificates $DOMAIN
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL]}${COLOR_RESET}"
     sleep 1
     cd /root/remnawave
     docker compose up -d > /dev/null 2>&1 &
