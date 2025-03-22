@@ -1395,7 +1395,7 @@ server {
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
         proxy_intercept_errors on;
-        error_page 400 404 500 @redirect;
+        error_page 400 404 500 502 @redirect;
     }
 
     location @redirect {
@@ -1851,7 +1851,7 @@ server {
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
         proxy_intercept_errors on;
-        error_page 400 404 500 @redirect;
+        error_page 400 404 500 502 @redirect;
     }
 
     location @redirect {
