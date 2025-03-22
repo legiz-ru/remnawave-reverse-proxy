@@ -48,13 +48,18 @@ set_language() {
                 [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
+                [ADD_NODE_TO_PANEL]="Add node to panel"
                 [MENU_3]="Installing only the node"
                 [MENU_4]="Reinstall panel/node"
                 [MENU_5]="Install random template for selfsteal node"
                 [MENU_6]="Disable IPv6"
-                [PROMPT_ACTION]="Select action (0-6):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-6."
+                [PROMPT_ACTION]="Select action (0-7):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-7."
                 [EXITING]="Exiting"
+                [WARNING_LABEL]="WARNING:"
+                [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
+                [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
+                [CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?"
                 #Remna
                 [INSTALL_PACKAGES]="Installing required packages..."
                 [INSTALLING]="Installing panel and node"
@@ -146,6 +151,36 @@ set_language() {
                 #IPv6
                 [DISABLING_IPV6]="Disabling IPv6..."
                 [IPV6_DISABLED]="IPv6 has been disabled."
+                # add_node_to_panel
+                [ADD_NODE_TO_PANEL]="Adding node to panel"
+                [EMPTY_SAVED_PANEL_DOMAIN]="Saved panel domain is empty. Requesting a new one..."
+                [USING_SAVED_PANEL_DOMAIN]="Using saved panel domain: %s"
+                [PANEL_DOMAIN_SAVED]="Panel domain saved"
+                [USING_SAVED_TOKEN]="Using saved token..."
+                [INVALID_SAVED_TOKEN]="Saved token is invalid. Requesting a new one..."
+                [ENTER_PANEL_USERNAME]="Enter panel username: "
+                [ENTER_PANEL_PASSWORD]="Enter panel password: "
+                [TOKEN_RECEIVED_AND_SAVED]="Token successfully received and saved"
+                [TOKEN_USED_SUCCESSFULLY]="Token successfully used"
+                [FAILED_TO_GET_XRAY_CONFIG]="Failed to get Xray configuration"
+                [GETTING_NEW_INBOUND_UUID]="Getting UUID of new inbound..."
+                [FAILED_TO_GET_INBOUND_UUID]="Failed to get UUID inbound for tag %s"
+                [INVALID_INBOUND_UUID_FORMAT]="Error: UUID of new inbound has an invalid format"
+                [GETTING_EXCLUDED_INBOUNDS]="Getting list of excluded inbounds..."
+                [EMPTY_EXCLUDED_INBOUNDS_WARNING]="Warning: excludedInbounds is empty. New node may use all inbounds!"
+                [EMPTY_EXCLUDED_INBOUNDS_ERROR]="Error: excludedInbounds is empty, although other inbounds exist!"
+                [INVALID_EXCLUDED_INBOUNDS_UUID]="Error: UUID in excludedInbounds has an invalid format"
+                [CHECKING_EXISTING_NODE]="Checking existing node with domain %s..."
+                [FAILED_TO_GET_NODES_LIST]="Failed to get list of nodes"
+                [NODE_NOT_FOUND]="Node with domain %s not found. Creating a new node..."
+                [EXISTING_NODE_FOUND]="Found existing node with UUID %s. Updating node..."
+                [NODE_UPDATED]="Node successfully updated"
+                [UPDATING_EXISTING_NODES]="Updating existing nodes..."
+                [FAILED_TO_GET_NODES_FOR_UPDATE]="Failed to get list of nodes for update"
+                [NO_NODES_TO_UPDATE]="No existing nodes to update"
+                [NODES_UPDATED_SUCCESS]="Existing nodes successfully updated"
+                [FAILED_TO_UPDATE_NODE]="Failed to update node %s"
+                [NODE_ADDED_SUCCESS]="Node successfully added!"
             )
             ;;
         ru)
@@ -158,13 +193,18 @@ set_language() {
                 [MENU_0]="Выход"
                 [MENU_1]="Установить панель и ноду на один сервер"
                 [MENU_2]="Установить только панель"
+                [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
                 [MENU_3]="Установить только ноду"
                 [MENU_4]="Переустановить панель/ноду"
                 [MENU_5]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_6]="Отключить IPv6"
-                [PROMPT_ACTION]="Выберите действие (0-6):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-6."
+                [PROMPT_ACTION]="Выберите действие (0-7):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-7."
                 [EXITING]="Выход"
+                [WARNING_LABEL]="ВНИМАНИЕ:"
+                [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
+                [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
+                [CONFIRM_SERVER_PANEL]="Вы уверены, что находитесь на сервере с установленной панелью?"
                 #Remna
                 [INSTALL_PACKAGES]="Установка необходимых пакетов..."
                 [INSTALLING]="Установка панели и ноды"
@@ -255,6 +295,36 @@ set_language() {
                 #IPv6
                 [DISABLING_IPV6]="Отключение IPv6..."
                 [IPV6_DISABLED]="IPv6 отключен."
+                # add_node_to_panel
+                [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
+                [EMPTY_SAVED_PANEL_DOMAIN]="Сохранённый домен панели пуст. Запрашиваем новый..."
+                [USING_SAVED_PANEL_DOMAIN]="Используем сохранённый домен панели: %s"
+                [PANEL_DOMAIN_SAVED]="Домен панели сохранён"
+                [USING_SAVED_TOKEN]="Используем сохранённый токен..."
+                [INVALID_SAVED_TOKEN]="Сохранённый токен недействителен. Запрашиваем новый..."
+                [ENTER_PANEL_USERNAME]="Введите логин панели: "
+                [ENTER_PANEL_PASSWORD]="Введите пароль панели: "
+                [TOKEN_RECEIVED_AND_SAVED]="Токен успешно получен и сохранён"
+                [TOKEN_USED_SUCCESSFULLY]="Токен успешно использован"
+                [FAILED_TO_GET_XRAY_CONFIG]="Не удалось получить конфигурацию Xray"
+                [GETTING_NEW_INBOUND_UUID]="Получение UUID нового inbound..."
+                [FAILED_TO_GET_INBOUND_UUID]="Не удалось получить UUID inbound для тега %s"
+                [INVALID_INBOUND_UUID_FORMAT]="Ошибка: UUID нового inbound имеет некорректный формат"
+                [GETTING_EXCLUDED_INBOUNDS]="Получение списка исключаемых inbound'ов..."
+                [EMPTY_EXCLUDED_INBOUNDS_WARNING]="Предупреждение: excludedInbounds пустой. Новая нода может использовать все inbound'ы!"
+                [EMPTY_EXCLUDED_INBOUNDS_ERROR]="Ошибка: excludedInbounds пустой, хотя есть другие inbound'ы!"
+                [INVALID_EXCLUDED_INBOUNDS_UUID]="Ошибка: UUID в excludedInbounds имеет некорректный формат"
+                [CHECKING_EXISTING_NODE]="Проверка существующей ноды с доменом %s..."
+                [FAILED_TO_GET_NODES_LIST]="Не удалось получить список нод"
+                [NODE_NOT_FOUND]="Нода с доменом %s не найдена. Создаём новую ноду..."
+                [EXISTING_NODE_FOUND]="Найдена существующая нода с UUID %s. Обновляем ноду..."
+                [NODE_UPDATED]="Нода успешно обновлена"
+                [UPDATING_EXISTING_NODES]="Обновление существующих нод..."
+                [FAILED_TO_GET_NODES_FOR_UPDATE]="Не удалось получить список нод для обновления"
+                [NO_NODES_TO_UPDATE]="Нет существующих нод для обновления"
+                [NODES_UPDATED_SUCCESS]="Существующие ноды успешно обновлены"
+                [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
+                [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
             )
             ;;
     esac
@@ -342,11 +412,12 @@ show_menu() {
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[ADD_NODE_TO_PANEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_3]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_4]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_5]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
@@ -704,6 +775,38 @@ generate_xray_keys() {
     local public_key=$(echo "$keys" | grep "Public key:" | awk '{print $3}')
 
     echo "$private_key $public_key"
+}
+
+get_xray_config() {
+    local domain_url=$1
+    local token=$2
+    local panel_domain=$3
+    local target_dir=$4
+
+    local config_file="$target_dir/config.json"
+
+    local response=$(curl -s -X GET "http://$domain_url/api/xray/get-config" \
+        -H "Authorization: Bearer $token" \
+        -H "Host: $panel_domain" \
+        -H "X-Forwarded-For: $domain_url" \
+        -H "X-Forwarded-Proto: https")
+
+    if [ -z "$response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
+        return 1
+    fi
+
+    if echo "$response" | jq -e '.response.config' > /dev/null 2>&1; then
+        echo "$response" | jq -r '.response.config' > "$config_file"
+        if [ ! -f "$config_file" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_SAVE_CONFIG]}${COLOR_RESET}"
+            return 1
+        fi
+    else
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_XRAY_CONFIG]}${COLOR_RESET}"
+        echo "Response: $response"
+        return 1
+    fi
 }
 
 update_xray_config() {
@@ -1120,6 +1223,8 @@ services:
       - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
       - REQUEST_REMNAWAVE_SCHEME=http
       - SUBSCRIPTION_PAGE_PORT=3010
+      - META_TITLE=Remnawave Subscription
+      - META_DESCRIPTION=page
     ports:
       - '127.0.0.1:3010:3010'
     networks:
@@ -1590,6 +1695,8 @@ services:
       - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
       - REQUEST_REMNAWAVE_SCHEME=http
       - SUBSCRIPTION_PAGE_PORT=3010
+      - META_TITLE=Remnawave Subscription
+      - META_DESCRIPTION=page
     ports:
       - '127.0.0.1:3010:3010'
     networks:
@@ -1983,7 +2090,7 @@ echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     printf "${COLOR_YELLOW}${LANG[NODE_CHECK]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
     local max_attempts=3
     local attempt=1
-    local delay=10
+    local delay=15
 
 while [ $attempt -le $max_attempts ]; do
         printf "${COLOR_YELLOW}${LANG[NODE_ATTEMPT]}${COLOR_RESET}\n" "$attempt" "$max_attempts"
@@ -2003,6 +2110,345 @@ while [ $attempt -le $max_attempts ]; do
     done
     
     randomhtml
+}
+
+
+generate_pretty_name() {
+    local adjectives=("Fast" "Silent" "Shadow" "Ghost" "Swift" "Hidden" "Clever" "Bright")
+    local nouns=("Node" "Wave" "Link" "Port" "Stream" "Hub" "Gate" "Core")
+    local rand_adj=${adjectives[$RANDOM % ${#adjectives[@]}]}
+    local rand_noun=${nouns[$RANDOM % ${#nouns[@]}]}
+    local rand_num=$(printf "%03d" $((RANDOM % 1000)))
+    echo "Steal-${rand_adj}${rand_noun}${rand_num}"
+}
+
+add_node_to_panel() {
+    TOKEN_FILE="${DIR_REMNAWAVE}token"
+    PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
+
+    echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+    echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[WARNING_NODE_PANEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[CONFIRM_SERVER_PANEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CONFIRM_PROMPT]}${COLOR_RESET}"
+    read confirm
+    echo
+
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+        exit 0
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[ADD_NODE_TO_PANEL]}${COLOR_RESET}"
+    sleep 1
+
+    reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
+    export SELFSTEAL_DOMAIN
+    local target_dir="/root/remnawave"
+    local domain_url="127.0.0.1:3000"
+
+    if [ -f "$PANEL_DOMAIN_FILE" ]; then
+        PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
+        if [ -z "$PANEL_DOMAIN" ]; then
+            echo -e "${COLOR_YELLOW}${LANG[EMPTY_SAVED_PANEL_DOMAIN]}${COLOR_RESET}"
+            PANEL_DOMAIN=""
+        else
+            printf "${COLOR_YELLOW}${LANG[USING_SAVED_PANEL_DOMAIN]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+        fi
+    fi
+
+    if [ -z "$PANEL_DOMAIN" ]; then
+        reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
+        echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
+    fi
+
+    if [ -f "$TOKEN_FILE" ]; then
+        token=$(cat "$TOKEN_FILE")
+        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(curl -s -X GET "http://$domain_url/api/inbounds" \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            -H "Host: $PANEL_DOMAIN" \
+            -H "X-Forwarded-For: $domain_url" \
+            -H "X-Forwarded-Proto: https")
+        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            token=""
+        fi
+    fi
+
+    if [ -z "$token" ]; then
+        reading "${LANG[ENTER_PANEL_USERNAME]}" username
+        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+
+        local login_response=$(curl -s -X POST "http://$domain_url/api/auth/login" \
+            -H "Host: $PANEL_DOMAIN" \
+            -H "X-Forwarded-For: $domain_url" \
+            -H "X-Forwarded-Proto: https" \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"$username\",\"password\":\"$password\"}")
+        
+        token=$(echo "$login_response" | jq -r '.response.accessToken')
+        if [ -z "$token" ] || [ "$token" == "null" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+            exit 1
+        fi
+
+        echo "$token" > "$TOKEN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
+    local keys=$(generate_xray_keys)
+    local private_key=$(echo "$keys" | awk '{print $1}')
+    local public_key=$(echo "$keys" | awk '{print $2}')
+    printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
+
+    echo -e "${COLOR_YELLOW}${LANG[UPDATING_XRAY_CONFIG]}${COLOR_RESET}"
+    get_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir"
+    local config_file="$target_dir/config.json"
+    if [ ! -f "$config_file" ]; then
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_XRAY_CONFIG]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    local short_id=$(openssl rand -hex 8)
+    local entity_name=$(generate_pretty_name)
+    local new_tag="$entity_name"
+    local new_inbound=$(jq -n --arg tag "$new_tag" \
+                              --arg short_id "$short_id" \
+                              --arg public_key "$public_key" \
+                              --arg private_key "$private_key" \
+                              --arg domain "$SELFSTEAL_DOMAIN" \
+                              '{
+                                  "tag": $tag,
+                                  "port": 443,
+                                  "protocol": "vless",
+                                  "settings": {
+                                      "clients": [],
+                                      "decryption": "none"
+                                  },
+                                  "sniffing": {
+                                      "enabled": true,
+                                      "destOverride": ["http", "tls", "quic"]
+                                  },
+                                  "streamSettings": {
+                                      "network": "tcp",
+                                      "security": "reality",
+                                      "realitySettings": {
+                                          "show": false,
+                                          "xver": 1,
+                                          "dest": "/dev/shm/nginx.sock",
+                                          "spiderX": "",
+                                          "shortIds": [$short_id],
+                                          "publicKey": $public_key,
+                                          "privateKey": $private_key,
+                                          "serverNames": [$domain]
+                                      }
+                                  }
+                              }')
+
+    jq --argjson new_inbound "$new_inbound" '.inbounds += [$new_inbound]' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
+
+    local new_config=$(cat "$config_file")
+    local update_response=$(curl -s -X POST "http://$domain_url/api/xray/update-config" \
+        -H "Authorization: Bearer $token" \
+        -H "Content-Type: application/json" \
+        -H "Host: $PANEL_DOMAIN" \
+        -H "X-Forwarded-For: $domain_url" \
+        -H "X-Forwarded-Proto: https" \
+        -d "$new_config")
+
+    rm -f "$config_file"
+
+    if [ -z "$update_response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if echo "$update_response" | jq -e '.response.config' > /dev/null; then
+        printf "${COLOR_GREEN}${LANG[XRAY_CONFIG_UPDATED]}${COLOR_RESET}\n"
+    else
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_XRAY_CONFIG]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[GETTING_NEW_INBOUND_UUID]}${COLOR_RESET}"
+    local inbound_response=$(curl -s -X GET "http://$domain_url/api/inbounds" \
+        -H "Authorization: Bearer $token" \
+        -H "Content-Type: application/json" \
+        -H "Host: $PANEL_DOMAIN" \
+        -H "X-Forwarded-For: $domain_url" \
+        -H "X-Forwarded-Proto: https")
+
+    local new_inbound_uuid=$(echo "$inbound_response" | jq -r --arg tag "$new_tag" '.response[] | select(.tag == $tag) | .uuid')
+    if [ -z "$new_inbound_uuid" ] || [ "$new_inbound_uuid" == "null" ]; then
+        printf "${COLOR_RED}${LANG[FAILED_TO_GET_INBOUND_UUID]}${COLOR_RESET}\n" "$new_tag"
+        exit 1
+    fi
+
+    if ! echo "$new_inbound_uuid" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+        echo -e "${COLOR_RED}${LANG[INVALID_INBOUND_UUID_FORMAT]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[GETTING_EXCLUDED_INBOUNDS]}${COLOR_RESET}"
+    excluded_inbounds=$(echo "$inbound_response" | jq -c --arg new_uuid "$new_inbound_uuid" '[.response[] | select(.uuid != $new_uuid) | .uuid]')
+
+    if [ "$excluded_inbounds" == "[]" ] || [ -z "$excluded_inbounds" ]; then
+        excluded_inbounds="[]"
+        echo -e "${COLOR_RED}${LANG[EMPTY_EXCLUDED_INBOUNDS_WARNING]}${COLOR_RESET}"
+    fi
+
+    if [ "$excluded_inbounds" == "[]" ] && [ "$(echo "$inbound_response" | jq '.response | length')" -gt 1 ]; then
+        echo -e "${COLOR_RED}${LANG[EMPTY_EXCLUDED_INBOUNDS_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    for uuid in $(echo "$excluded_inbounds" | jq -r '.[]'); do
+        if ! echo "$uuid" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+            echo -e "${COLOR_RED}${LANG[INVALID_EXCLUDED_INBOUNDS_UUID]}${COLOR_RESET}"
+            exit 1
+        fi
+    done
+
+    printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
+    local nodes_response=$(curl -s -X GET "http://$domain_url/api/nodes/get-all" \
+        -H "Authorization: Bearer $token" \
+        -H "Content-Type: application/json" \
+        -H "Host: $PANEL_DOMAIN" \
+        -H "X-Forwarded-For: $domain_url" \
+        -H "X-Forwarded-Proto: https")
+    
+    if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
+        create_new_node=true
+    else
+        local existing_node=$(echo "$nodes_response" | jq --arg domain "$SELFSTEAL_DOMAIN" '.response[] | select(.address == $domain)')
+        if [ -z "$existing_node" ]; then
+            printf "${COLOR_YELLOW}${LANG[NODE_NOT_FOUND]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
+            create_new_node=true
+        else
+            create_new_node=false
+            local node_uuid=$(echo "$existing_node" | jq -r '.uuid')
+            local node_name=$(echo "$existing_node" | jq -r '.name')
+            local node_address=$(echo "$existing_node" | jq -r '.address')
+            local node_port=$(echo "$existing_node" | jq -r '.port // 2222')
+            local node_traffic_tracking=$(echo "$existing_node" | jq -r '.isTrafficTrackingActive // false')
+            local node_traffic_limit=$(echo "$existing_node" | jq -r '.trafficLimitBytes // 0')
+            local node_notify_percent=$(echo "$existing_node" | jq -r '.notifyPercent // 0')
+            local node_traffic_reset_day=$(echo "$existing_node" | jq -r '.trafficResetDay // 31')
+            local node_country_code=$(echo "$existing_node" | jq -r '.countryCode // "XX"')
+            local node_consumption_multiplier=$(echo "$existing_node" | jq -r '.consumptionMultiplier // 1.0')
+
+            local current_excluded=$(echo "$existing_node" | jq -c '.excludedInbounds | if . then map(.uuid) else [] end')
+            if [ -z "$current_excluded" ] || [ "$current_excluded" == "[]" ]; then
+                current_excluded="[]"
+            fi
+            local updated_excluded="$current_excluded"
+
+            printf "${COLOR_YELLOW}${LANG[EXISTING_NODE_FOUND]}${COLOR_RESET}\n" "$node_uuid"
+            local update_node_response=$(curl -s -X POST "http://$domain_url/api/nodes/update" \
+                -H "Authorization: Bearer $token" \
+                -H "Content-Type: application/json" \
+                -H "Host: $PANEL_DOMAIN" \
+                -H "X-Forwarded-For: $domain_url" \
+                -H "X-Forwarded-Proto: https" \
+                -d "{\"uuid\": \"$node_uuid\", \"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": $node_port, \"isTrafficTrackingActive\": $node_traffic_tracking, \"trafficLimitBytes\": $node_traffic_limit, \"notifyPercent\": $node_notify_percent, \"trafficResetDay\": $node_traffic_reset_day, \"excludedInbounds\": $updated_excluded, \"countryCode\": \"$node_country_code\", \"consumptionMultiplier\": $node_consumption_multiplier}")
+
+            if [ -z "$update_node_response" ] || ! echo "$update_node_response" | jq -e '.response.uuid' > /dev/null; then
+                printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
+                exit 1
+            fi
+            echo -e "${COLOR_GREEN}${LANG[NODE_UPDATED]}${COLOR_RESET}"
+        fi
+    fi
+
+    if [ "$create_new_node" = true ]; then
+        local node_name="$entity_name"
+        local node_address="$SELFSTEAL_DOMAIN"
+        echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+        local node_response=$(curl -s -X POST "http://$domain_url/api/nodes/create" \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            -H "Host: $PANEL_DOMAIN" \
+            -H "X-Forwarded-For: $domain_url" \
+            -H "X-Forwarded-Proto: https" \
+            -d "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
+        
+        if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
+            exit 1
+        fi
+        local node_uuid=$(echo "$node_response" | jq -r '.response.uuid')
+        echo -e "${COLOR_GREEN}${LANG[NODE_CREATED]}${COLOR_RESET}"
+
+        echo -e "${COLOR_YELLOW}${LANG[UPDATING_EXISTING_NODES]}${COLOR_RESET}"
+        if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_FOR_UPDATE]}${COLOR_RESET}"
+        else
+            echo "$nodes_response" | jq -r --arg new_node_uuid "$node_uuid" '.response[] | select(.uuid != $new_node_uuid) | [.uuid, .name, .address, (.port // 2222), (.isTrafficTrackingActive // false), (.trafficLimitBytes // 0), (.notifyPercent // 0), (.trafficResetDay // 31), (.countryCode // "XX"), (.consumptionMultiplier // 1.0), (.excludedInbounds | if . then map(.uuid) else [] end | tojson)] | join("|")' | while IFS='|' read -r uuid name address port traffic_tracking traffic_limit notify_percent reset_day country_code multiplier excluded; do
+                if [ -z "$excluded" ] || [ "$excluded" = "[]" ]; then
+                    current_excluded="[]"
+                else
+                    current_excluded="$excluded"
+                fi
+
+                updated_excluded=$(echo "$current_excluded" | jq --arg new_inbound_uuid "$new_inbound_uuid" '. + [$new_inbound_uuid] | unique')
+
+                for uuid_to_check in $(echo "$updated_excluded" | jq -r '.[]'); do
+                    if ! echo "$uuid_to_check" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+                        echo -e "${COLOR_RED}${LANG[INVALID_EXCLUDED_INBOUNDS_UUID]}${COLOR_RESET}"
+                        exit 1
+                    fi
+                done
+
+                update_response=$(curl -s -X POST "http://$domain_url/api/nodes/update" \
+                    -H "Authorization: Bearer $token" \
+                    -H "Content-Type: application/json" \
+                    -H "Host: $PANEL_DOMAIN" \
+                    -H "X-Forwarded-For: $domain_url" \
+                    -H "X-Forwarded-Proto: https" \
+                    -d "{\"uuid\": \"$uuid\", \"name\": \"$name\", \"address\": \"$address\", \"port\": $port, \"isTrafficTrackingActive\": $traffic_tracking, \"trafficLimitBytes\": $traffic_limit, \"notifyPercent\": $notify_percent, \"trafficResetDay\": $reset_day, \"excludedInbounds\": $updated_excluded, \"countryCode\": \"$country_code\", \"consumptionMultiplier\": $multiplier}")
+
+                if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
+                    printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$uuid"
+                    exit 1
+                fi
+            done
+
+            if [ "$(echo "$nodes_response" | jq --arg new_node_uuid "$node_uuid" '[.response[] | select(.uuid != $new_node_uuid)] | length')" -eq 0 ]; then
+                echo -e "${COLOR_YELLOW}${LANG[NO_NODES_TO_UPDATE]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_GREEN}${LANG[NODES_UPDATED_SUCCESS]}${COLOR_RESET}"
+            fi
+        fi
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+    local host_remark="$entity_name"
+    local host_response=$(curl -s -X POST "http://$domain_url/api/hosts/create" \
+        -H "Authorization: Bearer $token" \
+        -H "Content-Type: application/json" \
+        -H "Host: $PANEL_DOMAIN" \
+        -H "X-Forwarded-For: $domain_url" \
+        -H "X-Forwarded-Proto: https" \
+        -d "{\"inboundUuid\": \"$new_inbound_uuid\", \"remark\": \"$host_remark\", \"address\": \"$SELFSTEAL_DOMAIN\", \"port\": 443, \"path\": \"\", \"sni\": \"$SELFSTEAL_DOMAIN\", \"host\": \"$SELFSTEAL_DOMAIN\", \"alpn\": \"h2\", \"fingerprint\": \"chrome\", \"allowInsecure\": false, \"isDisabled\": false, \"securityLayer\": \"DEFAULT\"}")
+    if [ -z "$host_response" ] || ! echo "$host_response" | jq -e '.response.uuid' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CREATE_HOST]}${COLOR_RESET}"
+        exit 1
+    fi
+    echo -e "${COLOR_GREEN}${LANG[HOST_CREATED]}${COLOR_RESET}"
+
+    echo -e "${COLOR_GREEN}${LANG[NODE_ADDED_SUCCESS]}${COLOR_RESET}"
+
+    echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
+    echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
+    echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
 }
 
 log_entry
@@ -2042,13 +2488,17 @@ case $OPTION in
         log_clear
         ;;
     3)
+        add_node_to_panel
+        log_clear
+        ;;
+    4)
         if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
             install_packages
         fi
         installation_node
         log_clear
         ;;
-    4)
+    5)
         show_reinstall_options
         reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
         case $REINSTALL_OPTION in
@@ -2081,11 +2531,11 @@ case $OPTION in
                 ;;
         esac
         ;;
-    5)
+    6)
         randomhtml
         log_clear
         ;;
-    6)
+    7)
         disable_ipv6
         log_clear
         ;;
