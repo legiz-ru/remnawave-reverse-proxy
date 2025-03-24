@@ -482,7 +482,13 @@ add_cron_rule() {
     local rule="$1"
     local logged_rule="${rule} >> ${DIR_REMNAWAVE}cron_jobs.log 2>&1"
 
-    ( crontab -l | grep -Fxq "$logged_rule" ) || ( crontab -l 2>/dev/null; echo "$logged_rule" ) | crontab -
+    if ! crontab -u root -l > /dev/null 2>&1; then
+        crontab -u root -l 2>/dev/null | crontab -u root -
+    fi
+
+    if ! crontab -u root -l | grep -Fxq "$logged_rule"; then
+        (crontab -u root -l 2>/dev/null; echo "$logged_rule") | crontab -u root -
+    fi
 }
 
 spinner() {
@@ -541,13 +547,16 @@ randomhtml() {
     
     echo "${LANG[SELECT_TEMPLATE]}" "${RandomHTML}"
 
-    if [[ -d "${RandomHTML}" && -d "/var/www/html/" ]]; then
-        rm -rf /var/www/html/*
-        cp -a "${RandomHTML}"/. "/var/www/html/"
-        echo "${LANG[TEMPLATE_COPY]}"
-    else
-        echo "${LANG[UNPACK_ERROR]}" && exit 0
+if [[ -d "${RandomHTML}" ]]; then
+    if [[ ! -d "/var/www/html/" ]]; then
+        mkdir -p "/var/www/html/" || { echo "Failed to create /var/www/html/"; exit 1; }
     fi
+    rm -rf /var/www/html/*
+    cp -a "${RandomHTML}"/. "/var/www/html/"
+    echo "${LANG[TEMPLATE_COPY]}"
+else
+    echo "${LANG[UNPACK_ERROR]}" && exit 1
+fi
 
     cd /root/
     rm -rf simple-web-templates-main/
@@ -702,19 +711,37 @@ EOL
     add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
 }
 
-### API ###
+### API Functions ###
+make_api_request() {
+    local method=$1
+    local url=$2
+    local token=$3
+    local panel_domain=$4
+    local data=$5
+
+    local headers=(
+        -H "Authorization: Bearer $token"
+        -H "Content-Type: application/json"
+        -H "Host: $panel_domain"
+        -H "X-Forwarded-For: ${url#http://}"
+        -H "X-Forwarded-Proto: https"
+    )
+
+    if [ -n "$data" ]; then
+        curl -s -X "$method" "$url" "${headers[@]}" -d "$data"
+    else
+        curl -s -X "$method" "$url" "${headers[@]}"
+    fi
+}
+
 register_remnawave() {
     local domain_url=$1
     local username=$2
     local password=$3
     local panel_domain=$4
 
-    local register_response=$(curl -s "http://$domain_url/api/auth/register" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -H "Content-Type: application/json" \
-        --data-raw '{"username":"'"$username"'","password":"'"$password"'"}')
+    local register_data='{"username":"'"$username"'","password":"'"$password"'"}'
+    local register_response=$(make_api_request "POST" "http://$domain_url/api/auth/register" "$token" "$panel_domain" "$register_data")
 
     if [ -z "$register_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_REGISTER]}${COLOR_RESET}"
@@ -731,12 +758,7 @@ get_public_key() {
     local panel_domain=$3
     local target_dir=$4
 
-    local api_response=$(curl -s -X GET "http://$domain_url/api/keygen/get" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https")
+    local api_response=$(make_api_request "GET" "http://$domain_url/api/keygen/get" "$token" "$panel_domain")
 
     if [ -z "$api_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_PUBLIC_KEY]}${COLOR_RESET}"
@@ -784,12 +806,7 @@ get_xray_config() {
     local target_dir=$4
 
     local config_file="$target_dir/config.json"
-
-    local response=$(curl -s -X GET "http://$domain_url/api/xray/get-config" \
-        -H "Authorization: Bearer $token" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https")
+    local response=$(make_api_request "GET" "http://$domain_url/api/xray/get-config" "$token" "$panel_domain")
 
     if [ -z "$response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
@@ -916,13 +933,7 @@ EOL
     echo -e "${COLOR_YELLOW}${LANG[CONFIG_CREATED]}${COLOR_RESET}"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(curl -s -X POST "http://$domain_url/api/xray/update-config" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -d "$new_config")
+    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$panel_domain" "$new_config")
 
     if [ -z "$update_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
@@ -957,13 +968,7 @@ create_node() {
 EOF
 )
 
-    local node_response=$(curl -s -X POST "http://$domain_url/api/nodes/create" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -d "$node_data")
+    local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$panel_domain" "$node_data")
 
     if [ -z "$node_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_NODE]}${COLOR_RESET}"
@@ -981,12 +986,7 @@ get_inbound_uuid() {
     local token=$2
     local panel_domain=$3
 
-    local inbounds_response=$(curl -s -X GET "http://$domain_url/api/inbounds" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https")
+    local inbounds_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$panel_domain")
 
     if [ -z "$inbounds_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_INBOUNDS]}${COLOR_RESET}"
@@ -1024,13 +1024,7 @@ create_host() {
 EOF
 )
 
-    local host_response=$(curl -s -X POST "http://$domain_url/api/hosts/create" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $panel_domain" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -d "$host_data")
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$panel_domain" "$host_data")
 
     if [ -z "$host_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
@@ -1042,6 +1036,66 @@ EOF
         echo -e "${COLOR_RED}${LANG[ERROR_CREATE_HOST]}${COLOR_RESET}"
     fi
 }
+
+get_inbounds() {
+    local domain_url=$1
+    local token=$2
+    local panel_domain=$3
+
+    local inbounds_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$panel_domain")
+
+    if [ -z "$inbounds_response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_INBOUNDS]}${COLOR_RESET}"
+        return 1
+    fi
+
+    echo "$inbounds_response"
+}
+
+update_node() {
+    local domain_url=$1
+    local token=$2
+    local panel_domain=$3
+    local node_uuid=$4
+    local node_name=$5
+    local node_address=$6
+    local node_port=$7
+    local traffic_tracking=$8
+    local traffic_limit=$9
+    local notify_percent=${10}
+    local reset_day=${11}
+    local excluded_inbounds=${12}
+    local country_code=${13}
+    local consumption_multiplier=${14}
+
+    local node_data=$(cat <<EOF
+{
+    "uuid": "$node_uuid",
+    "name": "$node_name",
+    "address": "$node_address",
+    "port": $node_port,
+    "isTrafficTrackingActive": $traffic_tracking,
+    "trafficLimitBytes": $traffic_limit,
+    "notifyPercent": $notify_percent,
+    "trafficResetDay": $reset_day,
+    "excludedInbounds": $excluded_inbounds,
+    "countryCode": "$country_code",
+    "consumptionMultiplier": $consumption_multiplier
+}
+EOF
+)
+
+    local update_response=$(make_api_request "POST" "http://$domain_url/api/nodes/update" "$token" "$panel_domain" "$node_data")
+
+    if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
+        printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
+        return 1
+    fi
+
+    echo -e "${COLOR_GREEN}${LANG[NODE_UPDATED]}${COLOR_RESET}"
+}
+
+### API Functions ###
 
 install_remnawave() {
     mkdir -p ~/remnawave && cd ~/remnawave
@@ -2027,8 +2081,7 @@ EOL
 }
 
 installation_node() {
-
-echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     sleep 1
 
     install_remnawave_node
@@ -2058,7 +2111,7 @@ echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     local attempt=1
     local delay=15
 
-while [ $attempt -le $max_attempts ]; do
+    while [ $attempt -le $max_attempts ]; do
         printf "${COLOR_YELLOW}${LANG[NODE_ATTEMPT]}${COLOR_RESET}\n" "$attempt" "$max_attempts"
         if curl -s --fail --max-time 10 "https://$SELFSTEAL_DOMAIN" | grep -q "html"; then
             echo -e "${COLOR_GREEN}${LANG[NODE_LAUNCHED]}${COLOR_RESET}"
@@ -2077,7 +2130,6 @@ while [ $attempt -le $max_attempts ]; do
     
     randomhtml
 }
-
 
 generate_pretty_name() {
     local adjectives=("Fast" "Silent" "Shadow" "Ghost" "Swift" "Hidden" "Clever" "Bright")
@@ -2133,12 +2185,7 @@ add_node_to_panel() {
     if [ -f "$TOKEN_FILE" ]; then
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(curl -s -X GET "http://$domain_url/api/inbounds" \
-            -H "Authorization: Bearer $token" \
-            -H "Content-Type: application/json" \
-            -H "Host: $PANEL_DOMAIN" \
-            -H "X-Forwarded-For: $domain_url" \
-            -H "X-Forwarded-Proto: https")
+        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
         if ! echo "$test_response" | jq -e '.response' > /dev/null; then
             echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
             token=""
@@ -2149,12 +2196,7 @@ add_node_to_panel() {
         reading "${LANG[ENTER_PANEL_USERNAME]}" username
         reading "${LANG[ENTER_PANEL_PASSWORD]}" password
 
-        local login_response=$(curl -s -X POST "http://$domain_url/api/auth/login" \
-            -H "Host: $PANEL_DOMAIN" \
-            -H "X-Forwarded-For: $domain_url" \
-            -H "X-Forwarded-Proto: https" \
-            -H "Content-Type: application/json" \
-            -d "{\"username\":\"$username\",\"password\":\"$password\"}")
+        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
         
         token=$(echo "$login_response" | jq -r '.response.accessToken')
         if [ -z "$token" ] || [ "$token" == "null" ]; then
@@ -2221,13 +2263,7 @@ add_node_to_panel() {
     jq --argjson new_inbound "$new_inbound" '.inbounds += [$new_inbound]' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(curl -s -X POST "http://$domain_url/api/xray/update-config" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $PANEL_DOMAIN" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -d "$new_config")
+    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$PANEL_DOMAIN" "$new_config")
 
     rm -f "$config_file"
 
@@ -2244,12 +2280,10 @@ add_node_to_panel() {
     fi
 
     echo -e "${COLOR_YELLOW}${LANG[GETTING_NEW_INBOUND_UUID]}${COLOR_RESET}"
-    local inbound_response=$(curl -s -X GET "http://$domain_url/api/inbounds" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $PANEL_DOMAIN" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https")
+    local inbound_response=$(get_inbounds "$domain_url" "$token" "$PANEL_DOMAIN")
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
 
     local new_inbound_uuid=$(echo "$inbound_response" | jq -r --arg tag "$new_tag" '.response[] | select(.tag == $tag) | .uuid')
     if [ -z "$new_inbound_uuid" ] || [ "$new_inbound_uuid" == "null" ]; then
@@ -2283,12 +2317,7 @@ add_node_to_panel() {
     done
 
     printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-    local nodes_response=$(curl -s -X GET "http://$domain_url/api/nodes/get-all" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $PANEL_DOMAIN" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https")
+    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes/get-all" "$token" "$PANEL_DOMAIN")
     
     if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
         echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
@@ -2318,19 +2347,7 @@ add_node_to_panel() {
             local updated_excluded="$current_excluded"
 
             printf "${COLOR_YELLOW}${LANG[EXISTING_NODE_FOUND]}${COLOR_RESET}\n" "$node_uuid"
-            local update_node_response=$(curl -s -X POST "http://$domain_url/api/nodes/update" \
-                -H "Authorization: Bearer $token" \
-                -H "Content-Type: application/json" \
-                -H "Host: $PANEL_DOMAIN" \
-                -H "X-Forwarded-For: $domain_url" \
-                -H "X-Forwarded-Proto: https" \
-                -d "{\"uuid\": \"$node_uuid\", \"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": $node_port, \"isTrafficTrackingActive\": $node_traffic_tracking, \"trafficLimitBytes\": $node_traffic_limit, \"notifyPercent\": $node_notify_percent, \"trafficResetDay\": $node_traffic_reset_day, \"excludedInbounds\": $updated_excluded, \"countryCode\": \"$node_country_code\", \"consumptionMultiplier\": $node_consumption_multiplier}")
-
-            if [ -z "$update_node_response" ] || ! echo "$update_node_response" | jq -e '.response.uuid' > /dev/null; then
-                printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
-                exit 1
-            fi
-            echo -e "${COLOR_GREEN}${LANG[NODE_UPDATED]}${COLOR_RESET}"
+            update_node "$domain_url" "$token" "$PANEL_DOMAIN" "$node_uuid" "$node_name" "$node_address" "$node_port" "$node_traffic_tracking" "$node_traffic_limit" "$node_notify_percent" "$node_traffic_reset_day" "$updated_excluded" "$node_country_code" "$node_consumption_multiplier" || exit 1
         fi
     fi
 
@@ -2338,13 +2355,7 @@ add_node_to_panel() {
         local node_name="$entity_name"
         local node_address="$SELFSTEAL_DOMAIN"
         echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
-        local node_response=$(curl -s -X POST "http://$domain_url/api/nodes/create" \
-            -H "Authorization: Bearer $token" \
-            -H "Content-Type: application/json" \
-            -H "Host: $PANEL_DOMAIN" \
-            -H "X-Forwarded-For: $domain_url" \
-            -H "X-Forwarded-Proto: https" \
-            -d "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
+        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
         
         if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
             echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
@@ -2373,18 +2384,7 @@ add_node_to_panel() {
                     fi
                 done
 
-                update_response=$(curl -s -X POST "http://$domain_url/api/nodes/update" \
-                    -H "Authorization: Bearer $token" \
-                    -H "Content-Type: application/json" \
-                    -H "Host: $PANEL_DOMAIN" \
-                    -H "X-Forwarded-For: $domain_url" \
-                    -H "X-Forwarded-Proto: https" \
-                    -d "{\"uuid\": \"$uuid\", \"name\": \"$name\", \"address\": \"$address\", \"port\": $port, \"isTrafficTrackingActive\": $traffic_tracking, \"trafficLimitBytes\": $traffic_limit, \"notifyPercent\": $notify_percent, \"trafficResetDay\": $reset_day, \"excludedInbounds\": $updated_excluded, \"countryCode\": \"$country_code\", \"consumptionMultiplier\": $multiplier}")
-
-                if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
-                    printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$uuid"
-                    exit 1
-                fi
+                update_node "$domain_url" "$token" "$PANEL_DOMAIN" "$uuid" "$name" "$address" "$port" "$traffic_tracking" "$traffic_limit" "$notify_percent" "$reset_day" "$updated_excluded" "$country_code" "$multiplier" || exit 1
             done
 
             if [ "$(echo "$nodes_response" | jq --arg new_node_uuid "$node_uuid" '[.response[] | select(.uuid != $new_node_uuid)] | length')" -eq 0 ]; then
@@ -2397,18 +2397,36 @@ add_node_to_panel() {
 
     echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
     local host_remark="$entity_name"
-    local host_response=$(curl -s -X POST "http://$domain_url/api/hosts/create" \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        -H "Host: $PANEL_DOMAIN" \
-        -H "X-Forwarded-For: $domain_url" \
-        -H "X-Forwarded-Proto: https" \
-        -d "{\"inboundUuid\": \"$new_inbound_uuid\", \"remark\": \"$host_remark\", \"address\": \"$SELFSTEAL_DOMAIN\", \"port\": 443, \"path\": \"\", \"sni\": \"$SELFSTEAL_DOMAIN\", \"host\": \"$SELFSTEAL_DOMAIN\", \"alpn\": \"h2\", \"fingerprint\": \"chrome\", \"allowInsecure\": false, \"isDisabled\": false, \"securityLayer\": \"DEFAULT\"}")
-    if [ -z "$host_response" ] || ! echo "$host_response" | jq -e '.response.uuid' > /dev/null; then
+    local host_data=$(cat <<EOF
+{
+    "inboundUuid": "$new_inbound_uuid",
+    "remark": "$host_remark",
+    "address": "$SELFSTEAL_DOMAIN",
+    "port": 443,
+    "path": "",
+    "sni": "$SELFSTEAL_DOMAIN",
+    "host": "$SELFSTEAL_DOMAIN",
+    "alpn": "h2",
+    "fingerprint": "chrome",
+    "allowInsecure": false,
+    "isDisabled": false
+}
+EOF
+)
+
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$PANEL_DOMAIN" "$host_data")
+
+    if [ -z "$host_response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if echo "$host_response" | jq -e '.response.uuid' > /dev/null; then
+        echo -e "${COLOR_GREEN}${LANG[HOST_CREATED]}${COLOR_RESET}"
+    else
         echo -e "${COLOR_RED}${LANG[ERROR_CREATE_HOST]}${COLOR_RESET}"
         exit 1
     fi
-    echo -e "${COLOR_GREEN}${LANG[HOST_CREATED]}${COLOR_RESET}"
 
     echo -e "${COLOR_GREEN}${LANG[NODE_ADDED_SUCCESS]}${COLOR_RESET}"
 
@@ -2432,8 +2450,6 @@ if ! load_language; then
         *) error "Invalid choice. Please select 1-2." ;;
     esac
 fi
-
-clear
 
 show_menu
 reading "${LANG[PROMPT_ACTION]}" OPTION
