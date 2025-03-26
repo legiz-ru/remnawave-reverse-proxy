@@ -181,6 +181,13 @@ set_language() {
                 [NODES_UPDATED_SUCCESS]="Existing nodes successfully updated"
                 [FAILED_TO_UPDATE_NODE]="Failed to update node %s"
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
+                #check
+                [CHECK_DOMAIN_IP_FAIL]="Failed to determine the domain or server IP address."
+                [CHECK_DOMAIN_IP_FAIL_INSTRUCTION]="Ensure that the domain %s is correctly configured and points to this server (%s)."
+                [CHECK_DOMAIN_CLOUDFLARE]="The domain %s points to a Cloudflare IP (%s)."
+                [CHECK_DOMAIN_CLOUDFLARE_INSTRUCTION]="Cloudflare proxying is not allowed for the selfsteal domain. Disable proxying (switch to 'DNS Only')."
+                [CHECK_DOMAIN_MISMATCH]="The domain %s points to IP address %s, which differs from this server's IP (%s)."
+                [CHECK_DOMAIN_MISMATCH_INSTRUCTION]="For proper operation, the domain must point to the current server."
             )
             ;;
         ru)
@@ -325,6 +332,13 @@ set_language() {
                 [NODES_UPDATED_SUCCESS]="Существующие ноды успешно обновлены"
                 [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
+                #check
+                [CHECK_DOMAIN_IP_FAIL]="Не удалось определить IP-адрес домена или сервера."
+                [CHECK_DOMAIN_IP_FAIL_INSTRUCTION]="Убедитесь, что домен %s правильно настроен и указывает на этот сервер (%s)."
+                [CHECK_DOMAIN_CLOUDFLARE]="Домен %s указывает на IP Cloudflare (%s)."
+                [CHECK_DOMAIN_CLOUDFLARE_INSTRUCTION]="Проксирование Cloudflare недопустимо для selfsteal домена. Отключите проксирование (переключите в режим 'DNS Only')."
+                [CHECK_DOMAIN_MISMATCH]="Домен %s указывает на IP-адрес %s, который отличается от IP этого сервера (%s)."
+                [CHECK_DOMAIN_MISMATCH_INSTRUCTION]="Для корректной работы домен должен указывать на текущий сервер."
             )
             ;;
     esac
@@ -565,7 +579,7 @@ fi
 install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
     apt-get update -y
-    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales
+    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk ipcalc
     
     locale-gen en_US.UTF-8
     update-locale LANG=en_US.UTF-8
@@ -634,6 +648,93 @@ extract_domain() {
     local SUBDOMAIN=$1
     echo "$SUBDOMAIN" | awk -F'.' '{if (NF > 2) {print $(NF-1)"."$NF} else {print $0}}'
 }
+
+check_domain() {
+    local domain="$1"
+    local show_warning="${2:-true}"
+    local allow_cf_proxy="${3:-true}"
+
+    local domain_ip=$(dig +short A "$domain" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+    local server_ip=$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)
+
+    if [ -z "$domain_ip" ] || [ -z "$server_ip" ]; then
+        if [ "$show_warning" = true ]; then
+            echo -e "${COLOR_YELLOW}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            echo -e "${COLOR_RED}${LANG[CHECK_DOMAIN_IP_FAIL]}${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CHECK_DOMAIN_IP_FAIL_INSTRUCTION]}${COLOR_RESET}\n" "$domain" "$server_ip"
+            reading "${LANG[CONFIRM_PROMPT]}" confirm
+            if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+                return 2
+            fi
+        fi
+        return 1
+    fi
+
+    local cf_ranges=$(curl -s https://www.cloudflare.com/ips-v4)
+    local cf_array=()
+    if [ -n "$cf_ranges" ]; then
+        IFS=$'\n' read -r -d '' -a cf_array <<<"$cf_ranges"
+    fi
+
+    local ip_in_cloudflare=false
+    if [ ${#cf_array[@]} -gt 0 ]; then
+        for cidr in "${cf_array[@]}"; do
+            if [[ -z "$cidr" ]]; then
+                continue
+            fi
+            if command -v ipcalc >/dev/null 2>&1; then
+                if ipcalc -c "$domain_ip" "$cidr" >/dev/null 2>&1; then
+                    ip_in_cloudflare=true
+                    break
+                fi
+            else
+                if [[ "$cidr" == "$domain_ip" ]]; then
+                    ip_in_cloudflare=true
+                    break
+                fi
+            fi
+        done
+    fi
+
+    if [ "$domain_ip" = "$server_ip" ]; then
+        return 0
+    fi
+
+    if [ "$ip_in_cloudflare" = true ]; then
+        if [ "$allow_cf_proxy" = true ]; then
+            return 0
+        else
+            if [ "$show_warning" = true ]; then
+                echo -e "${COLOR_YELLOW}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+                printf "${COLOR_RED}${LANG[CHECK_DOMAIN_CLOUDFLARE]}${COLOR_RESET}\n" "$domain" "$domain_ip"
+                echo -e "${COLOR_YELLOW}${LANG[CHECK_DOMAIN_CLOUDFLARE_INSTRUCTION]}${COLOR_RESET}"
+                reading "${LANG[CONFIRM_PROMPT]}" confirm
+                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                    return 1
+                else
+                    return 2
+                fi
+            fi
+            return 1
+        fi
+    else
+        if [ "$show_warning" = true ]; then
+            echo -e "${COLOR_YELLOW}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            printf "${COLOR_RED}${LANG[CHECK_DOMAIN_MISMATCH]}${COLOR_RESET}\n" "$domain" "$domain_ip" "$server_ip"
+            echo -e "${COLOR_YELLOW}${LANG[CHECK_DOMAIN_MISMATCH_INSTRUCTION]}${COLOR_RESET}"
+            reading "${LANG[CONFIRM_PROMPT]}" confirm
+            if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                return 1
+            else
+                return 2
+            fi
+        fi
+        return 1
+    fi
+
+    return 0
+}
+
 
 check_certificates() {
     local DOMAIN=$1
@@ -1101,9 +1202,36 @@ install_remnawave() {
     mkdir -p ~/remnawave && cd ~/remnawave
 
     reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
-    reading "${LANG[ENTER_SUB_DOMAIN]}" SUB_DOMAIN
+    check_domain "$PANEL_DOMAIN" true true
+    local panel_check_result=$?
+    if [ $panel_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
 
-    DOMAIN=$(extract_domain $PANEL_DOMAIN)
+    reading "${LANG[ENTER_SUB_DOMAIN]}" SUB_DOMAIN
+    check_domain "$SUB_DOMAIN" true true
+    local sub_check_result=$?
+    if [ $sub_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
+    check_domain "$SELFSTEAL_DOMAIN" true false
+    local node_check_result=$?
+    if [ $node_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+    
+    PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
+    SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
+    SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+
+    unique_domains["$PANEL_BASE_DOMAIN"]=1
+    unique_domains["$SUB_BASE_DOMAIN"]=1
+    unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 
     SUPERADMIN_USERNAME=$(generate_user)
     SUPERADMIN_PASSWORD=$(generate_password)
@@ -1255,8 +1383,14 @@ services:
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/$DOMAIN/fullchain.pem:/etc/nginx/ssl/$DOMAIN/fullchain.pem:ro
-      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/etc/nginx/ssl/$DOMAIN/privkey.pem:ro
+EOL
+
+for domain in "${!unique_domains[@]}"; do
+    echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> docker-compose.yml
+    echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> docker-compose.yml
+done
+
+cat >> docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
@@ -1365,15 +1499,15 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
 
     add_header Set-Cookie \$set_cookie_header;
 
     location = / {
         if (\$authorized = 0) {
-            return 302 https://$DOMAIN;
+            return 302 https://$SELFSTEAL_DOMAIN;
         }
         proxy_http_version 1.1;
         proxy_pass http://remnawave;
@@ -1391,7 +1525,7 @@ server {
 
     location / {
         if (\$authorized = 0) {
-            return 302 https://$DOMAIN;
+            return 302 https://$SELFSTEAL_DOMAIN;
         }
         proxy_http_version 1.1;
         proxy_pass http://remnawave;
@@ -1413,9 +1547,9 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$SUB_BASE_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
 
      location / {
         proxy_http_version 1.1;
@@ -1440,13 +1574,13 @@ server {
 }
 
 server {
-    server_name $DOMAIN;
+    server_name $SELFSTEAL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/fullchain.pem";
 
     root /var/www/html;
     index index.html;
@@ -1472,16 +1606,20 @@ installation() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
     sleep 1
 
+    declare -A unique_domains
     install_remnawave
 
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
-    if check_certificates $DOMAIN; then
-        echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-        get_certificates $DOMAIN
-    fi
+
+    for domain in "${!unique_domains[@]}"; do
+        if check_certificates "$domain"; then
+            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+        else
+            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+            get_certificates "$domain"
+        fi
+    done
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
@@ -1522,7 +1660,7 @@ installation() {
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}"
     
     # Create and update Xray configuration
-    update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$DOMAIN" "$public_key" "$private_key"
+    update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key"
     
     # Create node
     create_node "$domain_url" "$token" "$PANEL_DOMAIN"
@@ -1532,7 +1670,7 @@ installation() {
     echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}$inbound_uuid${COLOR_RESET}"
 
     # Create host
-    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$DOMAIN"
+    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
 
     # Stop and start Remnawave
     echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}${COLOR_RESET}"
@@ -1568,10 +1706,30 @@ install_remnawave_panel() {
     mkdir -p ~/remnawave && cd ~/remnawave
 
     reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
+    check_domain "$PANEL_DOMAIN" true true
+    local panel_check_result=$?
+    if [ $panel_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     reading "${LANG[ENTER_SUB_DOMAIN]}" SUB_DOMAIN
+    check_domain "$SUB_DOMAIN" true true
+    local sub_check_result=$?
+    if [ $sub_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
 
-    DOMAIN=$(extract_domain $PANEL_DOMAIN)
+    PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
+    SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
+    SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+
+    unique_domains["$PANEL_BASE_DOMAIN"]=1
+    unique_domains["$SUB_BASE_DOMAIN"]=1
+    unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 
     SUPERADMIN_USERNAME=$(generate_user)
     SUPERADMIN_PASSWORD=$(generate_password)
@@ -1715,8 +1873,14 @@ services:
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/$DOMAIN/fullchain.pem:/etc/nginx/ssl/$DOMAIN/fullchain.pem:ro
-      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/etc/nginx/ssl/$DOMAIN/privkey.pem:ro
+EOL
+
+for domain in "${!unique_domains[@]}"; do
+    echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> docker-compose.yml
+    echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> docker-compose.yml
+done
+
+cat >> docker-compose.yml <<EOL
     network_mode: host
     depends_on:
       - remnawave
@@ -1805,9 +1969,9 @@ server {
     listen 443 ssl;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
 
     add_header Set-Cookie \$set_cookie_header;
 
@@ -1853,9 +2017,9 @@ server {
     listen 443 ssl;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$SUB_BASE_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
 
      location / {
         proxy_http_version 1.1;
@@ -1891,16 +2055,20 @@ installation_panel() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALLING_PANEL]}${COLOR_RESET}"
     sleep 1
 
+    declare -A unique_domains
     install_remnawave_panel
 
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
-    if check_certificates $DOMAIN; then
-        echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-        get_certificates $DOMAIN
-    fi
+
+    for domain in "${!unique_domains[@]}"; do
+        if check_certificates "$domain"; then
+            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+        else
+            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+            get_certificates "$domain"
+        fi
+    done
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL]}${COLOR_RESET}"
     sleep 1
@@ -1966,7 +2134,14 @@ install_remnawave_node() {
     mkdir -p ~/remnawave && cd ~/remnawave
 
     reading "${LANG[SELFSTEAL]}" SELFSTEAL_DOMAIN
-    
+
+    check_domain "$SELFSTEAL_DOMAIN" true false
+    local domain_check_result=$?
+    if [ $domain_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     while true; do
         reading "${LANG[PANEL_IP_PROMPT]}" PANEL_IP
         if echo "$PANEL_IP" | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$' >/dev/null && \
@@ -2083,7 +2258,7 @@ EOL
 installation_node() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     sleep 1
-
+    
     install_remnawave_node
 
     ufw allow from $PANEL_IP to any port 2222 
@@ -2106,7 +2281,7 @@ installation_node() {
     spinner $! "${LANG[WAITING]}"
 
     randomhtml
-    
+
     printf "${COLOR_YELLOW}${LANG[NODE_CHECK]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
     local max_attempts=3
     local attempt=1
@@ -2128,7 +2303,7 @@ installation_node() {
         fi
         ((attempt++))
     done
-    
+
 }
 
 generate_pretty_name() {
@@ -2434,6 +2609,8 @@ EOF
     echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
 }
+
+
 
 log_entry
 check_root
