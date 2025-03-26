@@ -2105,7 +2105,8 @@ installation_node() {
     
     spinner $! "${LANG[WAITING]}"
 
-    sleep 5
+    randomhtml
+    
     printf "${COLOR_YELLOW}${LANG[NODE_CHECK]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
     local max_attempts=3
     local attempt=1
@@ -2128,7 +2129,6 @@ installation_node() {
         ((attempt++))
     done
     
-    randomhtml
 }
 
 generate_pretty_name() {
