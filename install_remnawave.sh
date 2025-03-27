@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.4"
+SCRIPT_VERSION="1.5.5"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -56,8 +56,9 @@ set_language() {
                 [MENU_4]="Reinstall panel/node"
                 [MENU_5]="Install random template for selfsteal node"
                 [MENU_6]="Disable IPv6"
-                [PROMPT_ACTION]="Select action (0-8):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-8."
+                [MENU_7_CLI]="Remnawave CLI"
+                [PROMPT_ACTION]="Select action (0-9):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-9."
                 [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
@@ -206,6 +207,11 @@ set_language() {
                 [BACKUP_CREATED]="Backup of the current script saved: %s"
                 [BACKUP_FAILED]="Could not create a backup. Proceeding without it."
                 [RESTART_REQUIRED]="Please restart the script to apply changes."
+                #CLI
+                [RUNNING_CLI]="Running Remnawave CLI..."
+                [CLI_SUCCESS]="Remnawave CLI executed successfully!"
+                [CLI_FAILED]="Failed to execute Remnawave CLI. Ensure the 'remnawave' container is running."
+                [CONTAINER_NOT_RUNNING]="Container 'remnawave' is not running. Please start it first."
             )
             ;;
         ru)
@@ -224,8 +230,9 @@ set_language() {
                 [MENU_4]="Переустановить панель/ноду"
                 [MENU_5]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_6]="Отключить IPv6"
-                [PROMPT_ACTION]="Выберите действие (0-8):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-8."
+                [MENU_7_CLI]="Remnawave CLI"
+                [PROMPT_ACTION]="Выберите действие (0-9):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-9."
                 [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
@@ -373,6 +380,11 @@ set_language() {
                 [BACKUP_CREATED]="Резервная копия текущего скрипта сохранена: %s"
                 [BACKUP_FAILED]="Не удалось создать резервную копию. Продолжаем без неё."
                 [RESTART_REQUIRED]="Пожалуйста, перезапустите скрипт для применения изменений."
+                #CLI
+                [RUNNING_CLI]="Запуск Remnawave CLI..."
+                [CLI_SUCCESS]="Remnawave CLI успешно выполнен!"
+                [CLI_FAILED]="Не удалось выполнить Remnawave CLI. Убедитесь, что контейнер 'remnawave' запущен."
+                [CONTAINER_NOT_RUNNING]="Контейнер 'remnawave' не запущен. Пожалуйста, запустите его сначала."
             )
             ;;
     esac
@@ -413,8 +425,29 @@ log_entry() {
   exec > >(tee -a "$LOGFILE") 2>&1
 }
 
+run_remnawave_cli() {
+    if ! docker ps --format '{{.Names}}' | grep -q '^remnawave$'; then
+        echo -e "${COLOR_RED}${LANG[CLI_FAILED]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
+        return 1
+    fi
+
+    exec 3>&1 4>&2
+    exec > /dev/tty 2>&1
+
+    echo -e "${COLOR_YELLOW}${LANG[RUNNING_CLI]}${COLOR_RESET}"
+    if docker exec -it -e TERM=xterm-256color remnawave remnawave; then
+        echo -e "${COLOR_GREEN}${LANG[CLI_SUCCESS]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_RED}${LANG[CLI_FAILED]}${COLOR_RESET}"
+        exec 1>&3 2>&4
+        return 1
+    fi
+
+    exec 1>&3 2>&4
+}
+
 update_remnawave_reverse() {
-    # Скачиваем заголовок удалённого скрипта, чтобы извлечь версию
     local remote_version=$(curl -s "$SCRIPT_URL" | grep -m 1 "SCRIPT_VERSION=" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
 
     if [ -z "$remote_version" ]; then
@@ -422,7 +455,6 @@ update_remnawave_reverse() {
         return 1
     fi
 
-    # Сравниваем версии
     if [ "$SCRIPT_VERSION" = "$remote_version" ]; then
         printf "${COLOR_GREEN}${LANG[LATEST_VERSION]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
         return 0
@@ -436,7 +468,6 @@ update_remnawave_reverse() {
         return 0
     fi
 
-    # Создаём резервную копию текущего скрипта
     local backup_file="${DIR_REMNAWAVE}remnawave_reverse_backup_$(date +%F_%H-%M-%S)"
     cp "${DIR_REMNAWAVE}remnawave_reverse" "$backup_file" 2>/dev/null
     if [ $? -eq 0 ]; then
@@ -445,7 +476,6 @@ update_remnawave_reverse() {
         echo -e "${COLOR_YELLOW}${LANG[BACKUP_FAILED]}${COLOR_RESET}"
     fi
 
-    # Скачиваем новую версию
     UPDATE_SCRIPT="${DIR_REMNAWAVE}remnawave_reverse"
     if wget -q -O "$UPDATE_SCRIPT" "$SCRIPT_URL"; then
         ln -sf "$UPDATE_SCRIPT" /usr/local/bin/remnawave_reverse
@@ -506,8 +536,9 @@ show_menu() {
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_4]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}6. ${LANG[MENU_5]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_7_CLI]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}8. ${LANG[CHECK_UPDATE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}9. ${LANG[CHECK_UPDATE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
@@ -2799,6 +2830,10 @@ case $OPTION in
         log_clear
         ;;
     8)
+        run_remnawave_cli
+        log_clear
+        ;;
+    9)
         update_remnawave_reverse
         log_clear
         ;;
