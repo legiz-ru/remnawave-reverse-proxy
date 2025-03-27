@@ -2743,6 +2743,19 @@ log_entry
 check_root
 check_os
 
+install_script_if_missing() {
+    if [ ! -f "${DIR_REMNAWAVE}remnawave_reverse" ] || [ ! -f "/usr/local/bin/remnawave_reverse" ]; then
+        mkdir -p "${DIR_REMNAWAVE}"
+        if ! wget -q -O "${DIR_REMNAWAVE}remnawave_reverse" "$SCRIPT_URL"; then
+            exit 1
+        fi
+        chmod +x "${DIR_REMNAWAVE}remnawave_reverse"
+        ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
+    fi
+}
+
+install_script_if_missing
+
 if ! load_language; then
     show_language
     reading "Choose option (1-2):" LANG_OPTION
