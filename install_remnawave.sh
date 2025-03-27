@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.3"
+SCRIPT_VERSION="1.5.4"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -753,30 +753,34 @@ check_domain() {
     fi
 
     local ip_in_cloudflare=false
+    local IFS='.'
+    read -r a b c d <<<"$domain_ip"
+    local domain_ip_int=$(( (a << 24) + (b << 16) + (c << 8) + d ))
+
     if [ ${#cf_array[@]} -gt 0 ]; then
         for cidr in "${cf_array[@]}"; do
             if [[ -z "$cidr" ]]; then
                 continue
             fi
-            if command -v ipcalc >/dev/null 2>&1; then
-                if ipcalc -c "$domain_ip" "$cidr" >/dev/null 2>&1; then
-                    ip_in_cloudflare=true
-                    break
-                fi
-            else
-                if [[ "$cidr" == "$domain_ip" ]]; then
-                    ip_in_cloudflare=true
-                    break
-                fi
+            local network=$(echo "$cidr" | cut -d'/' -f1)
+            local mask=$(echo "$cidr" | cut -d'/' -f2)
+            read -r a b c d <<<"$network"
+            local network_int=$(( (a << 24) + (b << 16) + (c << 8) + d ))
+            local mask_bits=$(( 32 - mask ))
+            local range_size=$(( 1 << mask_bits ))
+            local min_ip_int=$network_int
+            local max_ip_int=$(( network_int + range_size - 1 ))
+
+            if [ "$domain_ip_int" -ge "$min_ip_int" ] && [ "$domain_ip_int" -le "$max_ip_int" ]; then
+                ip_in_cloudflare=true
+                break
             fi
         done
     fi
 
     if [ "$domain_ip" = "$server_ip" ]; then
         return 0
-    fi
-
-    if [ "$ip_in_cloudflare" = true ]; then
+    elif [ "$ip_in_cloudflare" = true ]; then
         if [ "$allow_cf_proxy" = true ]; then
             return 0
         else
@@ -810,7 +814,6 @@ check_domain() {
 
     return 0
 }
-
 
 check_certificates() {
     local DOMAIN=$1
