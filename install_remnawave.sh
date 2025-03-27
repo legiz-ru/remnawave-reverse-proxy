@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_VERSION="1.5.0"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -182,12 +183,26 @@ set_language() {
                 [FAILED_TO_UPDATE_NODE]="Failed to update node %s"
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 #check
+                [GENERATING_CERTS]="Generating certificates for %s"
+                [REQUIRED_DOMAINS]="Required domains for certificates:"
+                [CHECKING_CERTS_FOR]="Checking certificates for %s"
                 [CHECK_DOMAIN_IP_FAIL]="Failed to determine the domain or server IP address."
                 [CHECK_DOMAIN_IP_FAIL_INSTRUCTION]="Ensure that the domain %s is correctly configured and points to this server (%s)."
                 [CHECK_DOMAIN_CLOUDFLARE]="The domain %s points to a Cloudflare IP (%s)."
                 [CHECK_DOMAIN_CLOUDFLARE_INSTRUCTION]="Cloudflare proxying is not allowed for the selfsteal domain. Disable proxying (switch to 'DNS Only')."
                 [CHECK_DOMAIN_MISMATCH]="The domain %s points to IP address %s, which differs from this server's IP (%s)."
                 [CHECK_DOMAIN_MISMATCH_INSTRUCTION]="For proper operation, the domain must point to the current server."
+                #update
+                [UPDATE_AVAILABLE]="A new version of the script is available: %s (current version: %s)."
+                [UPDATE_CONFIRM]="Update the script? (y/n):"
+                [UPDATE_CANCELLED]="Update cancelled by user."
+                [UPDATE_SUCCESS]="Script successfully updated to version %s!"
+                [UPDATE_FAILED]="Error downloading the new version of the script."
+                [VERSION_CHECK_FAILED]="Could not determine the version of the remote script. Skipping update."
+                [LATEST_VERSION]="You already have the latest version of the script (%s)."
+                [BACKUP_CREATED]="Backup of the current script saved: %s"
+                [BACKUP_FAILED]="Could not create a backup. Proceeding without it."
+                [RESTART_REQUIRED]="Please restart the script to apply changes."
             )
             ;;
         ru)
@@ -333,12 +348,26 @@ set_language() {
                 [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 #check
+                [GENERATING_CERTS]="Генерируем сертификаты для %s"
+                [REQUIRED_DOMAINS]="Требуемые домены для сертификатов:"
+                [CHECKING_CERTS_FOR]="Проверяем сертификаты для %s"
                 [CHECK_DOMAIN_IP_FAIL]="Не удалось определить IP-адрес домена или сервера."
                 [CHECK_DOMAIN_IP_FAIL_INSTRUCTION]="Убедитесь, что домен %s правильно настроен и указывает на этот сервер (%s)."
                 [CHECK_DOMAIN_CLOUDFLARE]="Домен %s указывает на IP Cloudflare (%s)."
                 [CHECK_DOMAIN_CLOUDFLARE_INSTRUCTION]="Проксирование Cloudflare недопустимо для selfsteal домена. Отключите проксирование (переключите в режим 'DNS Only')."
                 [CHECK_DOMAIN_MISMATCH]="Домен %s указывает на IP-адрес %s, который отличается от IP этого сервера (%s)."
                 [CHECK_DOMAIN_MISMATCH_INSTRUCTION]="Для корректной работы домен должен указывать на текущий сервер."
+                #update
+                [UPDATE_AVAILABLE]="Доступна новая версия скрипта: %s (текущая версия: %s)."
+                [UPDATE_CONFIRM]="Обновить скрипт? (y/n):"
+                [UPDATE_CANCELLED]="Обновление отменено пользователем."
+                [UPDATE_SUCCESS]="Скрипт успешно обновлён до версии %s!"
+                [UPDATE_FAILED]="Ошибка при скачивании новой версии скрипта."
+                [VERSION_CHECK_FAILED]="Не удалось определить версию удалённого скрипта. Пропускаем обновление."
+                [LATEST_VERSION]="У вас уже установлена последняя версия скрипта (%s)."
+                [BACKUP_CREATED]="Резервная копия текущего скрипта сохранена: %s"
+                [BACKUP_FAILED]="Не удалось создать резервную копию. Продолжаем без неё."
+                [RESTART_REQUIRED]="Пожалуйста, перезапустите скрипт для применения изменений."
             )
             ;;
     esac
@@ -380,10 +409,49 @@ log_entry() {
 }
 
 update_remnawave_reverse() {
-  UPDATE_SCRIPT="${DIR_REMNAWAVE}remnawave_reverse"
-  wget -q -O $UPDATE_SCRIPT $SCRIPT_URL
-  ln -sf $UPDATE_SCRIPT /usr/local/bin/remnawave_reverse
-  chmod +x "$UPDATE_SCRIPT"
+    # Скачиваем заголовок удалённого скрипта, чтобы извлечь версию
+    local remote_version=$(curl -s "$SCRIPT_URL" | grep -m 1 "SCRIPT_VERSION=" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
+
+    if [ -z "$remote_version" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[VERSION_CHECK_FAILED]}${COLOR_RESET}"
+        return 1
+    fi
+
+    # Сравниваем версии
+    if [ "$SCRIPT_VERSION" = "$remote_version" ]; then
+        printf "${COLOR_GREEN}${LANG[LATEST_VERSION]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+        return 0
+    fi
+
+    printf "${COLOR_YELLOW}${LANG[UPDATE_AVAILABLE]}${COLOR_RESET}\n" "$remote_version" "$SCRIPT_VERSION"
+    reading "${LANG[UPDATE_CONFIRM]}" confirm_update
+
+    if [[ "$confirm_update" != "y" && "$confirm_update" != "Y" ]]; then
+        echo -e "${COLOR_YELLOW}${LANG[UPDATE_CANCELLED]}${COLOR_RESET}"
+        return 0
+    fi
+
+    # Создаём резервную копию текущего скрипта
+    local backup_file="${DIR_REMNAWAVE}remnawave_reverse_backup_$(date +%F_%H-%M-%S)"
+    cp "${DIR_REMNAWAVE}remnawave_reverse" "$backup_file" 2>/dev/null
+    if [ $? -eq 0 ]; then
+        printf "${COLOR_GREEN}${LANG[BACKUP_CREATED]}${COLOR_RESET}\n" "$backup_file"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[BACKUP_FAILED]}${COLOR_RESET}"
+    fi
+
+    # Скачиваем новую версию
+    UPDATE_SCRIPT="${DIR_REMNAWAVE}remnawave_reverse"
+    if wget -q -O "$UPDATE_SCRIPT" "$SCRIPT_URL"; then
+        ln -sf "$UPDATE_SCRIPT" /usr/local/bin/remnawave_reverse
+        chmod +x "$UPDATE_SCRIPT"
+        printf "${COLOR_GREEN}${LANG[UPDATE_SUCCESS]}${COLOR_RESET}\n" "$remote_version"
+        echo -e "${COLOR_YELLOW}${LANG[RESTART_REQUIRED]}${COLOR_RESET}"
+        exit 0
+    else
+        echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
+        return 1
+    fi
 }
 
 generate_user() {
@@ -752,6 +820,7 @@ get_certificates() {
     local DOMAIN=$1
     local WILDCARD_DOMAIN="*.$DOMAIN"
 
+    printf "${COLOR_YELLOW}${LANG[GENERATING_CERTS]}${COLOR_RESET}\n" "$DOMAIN"
     reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
     reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
 
@@ -808,7 +877,7 @@ EOL
         --key-type ecdsa \
         --elliptic-curve secp384r1
 
-    echo "renew_hook = sh -c 'cd /root/remnawave && docker compose exec remnawave-nginx nginx -s reload'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+    echo "renew_hook = sh -c 'cd /root/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
     add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
 }
 
@@ -1609,10 +1678,21 @@ installation() {
     declare -A unique_domains
     install_remnawave
 
+    declare -A domains_to_check
+    domains_to_check["$PANEL_DOMAIN"]=1
+    domains_to_check["$SUB_DOMAIN"]=1
+    domains_to_check["$SELFSTEAL_DOMAIN"]=1
+
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
 
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
     for domain in "${!unique_domains[@]}"; do
+        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
         if check_certificates "$domain"; then
             echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
         else
@@ -2058,10 +2138,20 @@ installation_panel() {
     declare -A unique_domains
     install_remnawave_panel
 
+    declare -A domains_to_check
+    domains_to_check["$PANEL_DOMAIN"]=1
+    domains_to_check["$SUB_DOMAIN"]=1
+
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
 
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
     for domain in "${!unique_domains[@]}"; do
+        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
         if check_certificates "$domain"; then
             echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
         else
