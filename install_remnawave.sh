@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.1"
+SCRIPT_VERSION="1.5.3"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -56,8 +56,8 @@ set_language() {
                 [MENU_4]="Reinstall panel/node"
                 [MENU_5]="Install random template for selfsteal node"
                 [MENU_6]="Disable IPv6"
-                [PROMPT_ACTION]="Select action (0-7):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-7."
+                [PROMPT_ACTION]="Select action (0-8):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-8."
                 [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
@@ -185,6 +185,7 @@ set_language() {
                 [FAILED_TO_UPDATE_NODE]="Failed to update node %s"
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 #check
+                [CHECK_UPDATE]="Check for updates"
                 [GENERATING_CERTS]="Generating certificates for %s"
                 [REQUIRED_DOMAINS]="Required domains for certificates:"
                 [CHECKING_CERTS_FOR]="Checking certificates for %s"
@@ -223,8 +224,8 @@ set_language() {
                 [MENU_4]="Переустановить панель/ноду"
                 [MENU_5]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_6]="Отключить IPv6"
-                [PROMPT_ACTION]="Выберите действие (0-7):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-7."
+                [PROMPT_ACTION]="Выберите действие (0-8):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-8."
                 [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
@@ -351,6 +352,7 @@ set_language() {
                 [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 #check
+                [CHECK_UPDATE]="Проверить обновления"
                 [GENERATING_CERTS]="Генерируем сертификаты для %s"
                 [REQUIRED_DOMAINS]="Требуемые домены для сертификатов:"
                 [CHECKING_CERTS_FOR]="Проверяем сертификаты для %s"
@@ -504,6 +506,8 @@ show_menu() {
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_4]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}6. ${LANG[MENU_5]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}8. ${LANG[CHECK_UPDATE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
@@ -2721,7 +2725,6 @@ if ! load_language; then
     esac
 fi
 
-update_remnawave_reverse
 show_menu
 reading "${LANG[PROMPT_ACTION]}" OPTION
 
@@ -2790,6 +2793,10 @@ case $OPTION in
         ;;
     7)
         disable_ipv6
+        log_clear
+        ;;
+    8)
+        update_remnawave_reverse
         log_clear
         ;;
     0)
