@@ -2709,7 +2709,6 @@ EOF
 log_entry
 check_root
 check_os
-update_remnawave_reverse
 
 if ! load_language; then
     show_language
@@ -2722,6 +2721,7 @@ if ! load_language; then
     esac
 fi
 
+update_remnawave_reverse
 show_menu
 reading "${LANG[PROMPT_ACTION]}" OPTION
 
