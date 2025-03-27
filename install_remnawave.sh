@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.5"
+SCRIPT_VERSION="1.5.6"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -204,9 +204,8 @@ set_language() {
                 [UPDATE_FAILED]="Error downloading the new version of the script."
                 [VERSION_CHECK_FAILED]="Could not determine the version of the remote script. Skipping update."
                 [LATEST_VERSION]="You already have the latest version of the script (%s)."
-                [BACKUP_CREATED]="Backup of the current script saved: %s"
-                [BACKUP_FAILED]="Could not create a backup. Proceeding without it."
                 [RESTART_REQUIRED]="Please restart the script to apply changes."
+                [LOCAL_FILE_NOT_FOUND]="Local script file not found, downloading new version..."
                 #CLI
                 [RUNNING_CLI]="Running Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI executed successfully!"
@@ -377,9 +376,8 @@ set_language() {
                 [UPDATE_FAILED]="Ошибка при скачивании новой версии скрипта."
                 [VERSION_CHECK_FAILED]="Не удалось определить версию удалённого скрипта. Пропускаем обновление."
                 [LATEST_VERSION]="У вас уже установлена последняя версия скрипта (%s)."
-                [BACKUP_CREATED]="Резервная копия текущего скрипта сохранена: %s"
-                [BACKUP_FAILED]="Не удалось создать резервную копию. Продолжаем без неё."
                 [RESTART_REQUIRED]="Пожалуйста, перезапустите скрипт для применения изменений."
+                [LOCAL_FILE_NOT_FOUND]="Локальный файл скрипта не найден, загружаем новую версию..."
                 #CLI
                 [RUNNING_CLI]="Запуск Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI успешно выполнен!"
@@ -455,9 +453,13 @@ update_remnawave_reverse() {
         return 1
     fi
 
-    if [ "$SCRIPT_VERSION" = "$remote_version" ]; then
-        printf "${COLOR_GREEN}${LANG[LATEST_VERSION]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
-        return 0
+    if [ -f "${DIR_REMNAWAVE}remnawave_reverse" ]; then
+        if [ "$SCRIPT_VERSION" = "$remote_version" ]; then
+            printf "${COLOR_GREEN}${LANG[LATEST_VERSION]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+            return 0
+        fi
+    else
+        echo -e "${COLOR_YELLOW}${LANG[LOCAL_FILE_NOT_FOUND]}${COLOR_RESET}"
     fi
 
     printf "${COLOR_YELLOW}${LANG[UPDATE_AVAILABLE]}${COLOR_RESET}\n" "$remote_version" "$SCRIPT_VERSION"
@@ -468,15 +470,8 @@ update_remnawave_reverse() {
         return 0
     fi
 
-    local backup_file="${DIR_REMNAWAVE}remnawave_reverse_backup_$(date +%F_%H-%M-%S)"
-    cp "${DIR_REMNAWAVE}remnawave_reverse" "$backup_file" 2>/dev/null
-    if [ $? -eq 0 ]; then
-        printf "${COLOR_GREEN}${LANG[BACKUP_CREATED]}${COLOR_RESET}\n" "$backup_file"
-    else
-        echo -e "${COLOR_YELLOW}${LANG[BACKUP_FAILED]}${COLOR_RESET}"
-    fi
-
     UPDATE_SCRIPT="${DIR_REMNAWAVE}remnawave_reverse"
+    mkdir -p "${DIR_REMNAWAVE}"
     if wget -q -O "$UPDATE_SCRIPT" "$SCRIPT_URL"; then
         ln -sf "$UPDATE_SCRIPT" /usr/local/bin/remnawave_reverse
         chmod +x "$UPDATE_SCRIPT"
