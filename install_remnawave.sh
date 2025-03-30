@@ -1755,7 +1755,7 @@ installation() {
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
     until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
-        sleep 5
+        sleep 10
     done
 
     # Register Remnawave
