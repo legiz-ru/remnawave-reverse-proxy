@@ -571,14 +571,14 @@ show_reinstall_options() {
 }
 
 reinstall_remnawave() {
-    if [ -d "/root/remnawave" ]; then
-        cd /root/remnawave || return
+    if [ -d "/opt/remnawave" ]; then
+        cd /opt/remnawave || return
         docker compose down -v --rmi all --remove-orphans > /dev/null 2>&1 &
         spinner $! "${LANG[WAITING]}"
     fi
     docker system prune -a --volumes -f > /dev/null 2>&1 &
     spinner $! "${LANG[WAITING]}"
-    rm -rf /root/remnawave 2>/dev/null
+    rm -rf /opt/remnawave 2>/dev/null
 }
 
 choose_reinstall_type() {
@@ -654,7 +654,7 @@ spinner() {
 }
 
 randomhtml() {
-    cd /root/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
+    cd /opt/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
     
     rm -f main.zip 2>/dev/null
     rm -rf simple-web-templates-main/ 2>/dev/null
@@ -694,7 +694,7 @@ else
     echo "${LANG[UNPACK_ERROR]}" && exit 1
 fi
 
-    cd /root/
+    cd /opt/
     rm -rf simple-web-templates-main/
 }
 
@@ -966,7 +966,7 @@ EOL
     esac
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "renew_hook = sh -c 'cd /root/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
         add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
     else
         echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
@@ -1198,6 +1198,8 @@ EOL
     local new_config=$(cat "$config_file")
     local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$panel_domain" "$new_config")
 
+    rm -f "$config_file"
+
     if [ -z "$update_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
     fi
@@ -1361,7 +1363,7 @@ EOF
 ### API Functions ###
 
 install_remnawave() {
-    mkdir -p ~/remnawave && cd ~/remnawave
+    mkdir -p /opt/remnawave && cd /opt/remnawave
 
     reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
     check_domain "$PANEL_DOMAIN" true true
@@ -1604,8 +1606,8 @@ installation() {
                 echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                 get_certificates "$domain" "$CERT_METHOD" ""
             fi
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
         done
         PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
         SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
@@ -1620,13 +1622,13 @@ installation() {
                     echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                     get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
                 fi
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         else
             for domain in "${!domains_to_check[@]}"; do
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         fi
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
@@ -1637,7 +1639,7 @@ installation() {
         exit 1
     fi
 
-     cat >> /root/remnawave/docker-compose.yml <<EOL
+     cat >> /opt/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
@@ -1694,7 +1696,7 @@ volumes:
     name: remnawave-redis-data
 EOL
 
-    cat > /root/remnawave/nginx.conf <<EOL
+    cat > /opt/remnawave/nginx.conf <<EOL
 upstream remnawave {
     server remnawave:3000;
 }
@@ -1841,13 +1843,13 @@ EOL
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
-    cd /root/remnawave
+    cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
     
     spinner $! "${LANG[WAITING]}"
 	
     local domain_url="127.0.0.1:3000"
-    local target_dir="/root/remnawave"
+    local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
 
     echo -e "${COLOR_YELLOW}${LANG[REGISTERING_REMNAWAVE]}${COLOR_RESET}"
@@ -1921,7 +1923,7 @@ EOL
 }
 
 install_remnawave_panel() {
-    mkdir -p ~/remnawave && cd ~/remnawave
+    mkdir -p /opt/remnawave && cd /opt/remnawave
 
     reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
     check_domain "$PANEL_DOMAIN" true true
@@ -2147,8 +2149,8 @@ installation_panel() {
                 echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                 get_certificates "$domain" "$CERT_METHOD" ""
             fi
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
         done
         PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
         SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
@@ -2163,13 +2165,13 @@ installation_panel() {
                     echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                     get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
                 fi
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         else
             for domain in "${!domains_to_check[@]}"; do
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         fi
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
@@ -2180,7 +2182,7 @@ installation_panel() {
         exit 1
     fi
 
-    cat >> /root/remnawave/docker-compose.yml <<EOL
+    cat >> /opt/remnawave/docker-compose.yml <<EOL
     network_mode: host
     depends_on:
       - remnawave
@@ -2219,7 +2221,7 @@ volumes:
     name: remnawave-redis-data
 EOL
 
-    cat > /root/remnawave/nginx.conf <<EOL
+    cat > /opt/remnawave/nginx.conf <<EOL
 upstream remnawave {
     server 127.0.0.1:3000;
 }
@@ -2352,7 +2354,7 @@ EOL
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL]}${COLOR_RESET}"
     sleep 1
-    cd /root/remnawave
+    cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
     
     spinner $! "${LANG[WAITING]}"
@@ -2411,7 +2413,7 @@ EOL
 }
 
 install_remnawave_node() {
-    mkdir -p ~/remnawave && cd ~/remnawave
+    mkdir -p /opt/remnawave && cd /opt/remnawave
 
     reading "${LANG[SELFSTEAL]}" SELFSTEAL_DOMAIN
 
@@ -2533,8 +2535,8 @@ installation_node() {
                 echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                 get_certificates "$domain" "$CERT_METHOD" ""
             fi
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
         done
         PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
         SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
@@ -2549,13 +2551,13 @@ installation_node() {
                     echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                     get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
                 fi
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         else
             for domain in "${!domains_to_check[@]}"; do
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
             done
         fi
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
@@ -2566,7 +2568,7 @@ installation_node() {
         exit 1
     fi
 
-    cat >> /root/remnawave/docker-compose.yml <<EOL
+    cat >> /opt/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
@@ -2581,13 +2583,13 @@ installation_node() {
     restart: always
     network_mode: host
     env_file:
-      - path: /root/remnawave/.env-node
+      - path: /opt/remnawave/.env-node
         required: false
     volumes:
       - /dev/shm:/dev/shm
 EOL
 
-cat > /root/remnawave/nginx.conf <<EOL
+cat > /opt/remnawave/nginx.conf <<EOL
 map \$http_upgrade \$connection_upgrade {
     default upgrade;
     ""      close;
@@ -2630,7 +2632,7 @@ EOL
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_NODE]}${COLOR_RESET}"
     sleep 3
-    cd /root/remnawave
+    cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
     
     spinner $! "${LANG[WAITING]}"
@@ -2693,7 +2695,7 @@ add_node_to_panel() {
 
     reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
     export SELFSTEAL_DOMAIN
-    local target_dir="/root/remnawave"
+    local target_dir="/opt/remnawave"
     local domain_url="127.0.0.1:3000"
 
     if [ -f "$PANEL_DOMAIN_FILE" ]; then
