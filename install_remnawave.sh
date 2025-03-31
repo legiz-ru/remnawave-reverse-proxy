@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.6"
+SCRIPT_VERSION="1.5.7"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -211,6 +211,16 @@ set_language() {
                 [CLI_SUCCESS]="Remnawave CLI executed successfully!"
                 [CLI_FAILED]="Failed to execute Remnawave CLI. Ensure the 'remnawave' container is running."
                 [CONTAINER_NOT_RUNNING]="Container 'remnawave' is not running. Please start it first."
+                #Cert_choise
+                [CERT_METHOD_PROMPT]="Select certificate generation method for all domains:"
+                [CERT_METHOD_CF]="1. Cloudflare API (supports wildcard)"
+                [CERT_METHOD_ACME]="2. ACME HTTP-01 (single domain, no wildcard)"
+                [CERT_METHOD_CHOOSE]="Choose option (1-2):"
+                [EMAIL_PROMPT]="Enter your email for Let's Encrypt registration:"
+                [CERTS_SKIPPED]="All certificates already exist. Skipping generation."
+                [CF_API_CHECK]="Validating Cloudflare API credentials..."
+                [ACME_METHOD]="Using ACME (Let's Encrypt) with HTTP-01 challenge (no wildcard support)..."
+                [CERT_GENERATION_FAILED]="Certificate generation failed. Please check your input and DNS settings."
             )
             ;;
         ru)
@@ -383,6 +393,16 @@ set_language() {
                 [CLI_SUCCESS]="Remnawave CLI успешно выполнен!"
                 [CLI_FAILED]="Не удалось выполнить Remnawave CLI. Убедитесь, что контейнер 'remnawave' запущен."
                 [CONTAINER_NOT_RUNNING]="Контейнер 'remnawave' не запущен. Пожалуйста, запустите его сначала."
+                #Cert_choise
+                [CERT_METHOD_PROMPT]="Выберите метод генерации сертификатов для всех доменов:"
+                [CERT_METHOD_CF]="1. Cloudflare API (поддерживает wildcard)"
+                [CERT_METHOD_ACME]="2. ACME HTTP-01 (один домен, без wildcard)"
+                [CERT_METHOD_CHOOSE]="Выберите опцию (1-2):"
+                [EMAIL_PROMPT]="Введите ваш email для регистрации в Let's Encrypt:"
+                [CERTS_SKIPPED]="Все сертификаты уже существуют. Пропускаем генерацию."
+                [CF_API_CHECK]="Проверка учетных данных Cloudflare API..."
+                [ACME_METHOD]="Используем ACME (Let's Encrypt) с HTTP-01 вызовом (без поддержки wildcard)..."
+                [CERT_GENERATION_FAILED]="Не удалось сгенерировать сертификаты. Проверьте введенные данные и настройки DNS."
             )
             ;;
     esac
@@ -855,67 +875,103 @@ check_certificates() {
 
 get_certificates() {
     local DOMAIN=$1
-    local WILDCARD_DOMAIN="*.$DOMAIN"
+    local CERT_METHOD=$2
+    local LETSENCRYPT_EMAIL=$3
+    local BASE_DOMAIN=$(extract_domain "$DOMAIN")
+    local WILDCARD_DOMAIN="*.$BASE_DOMAIN"
 
     printf "${COLOR_YELLOW}${LANG[GENERATING_CERTS]}${COLOR_RESET}\n" "$DOMAIN"
-    reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
-    reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
+    
+    case $CERT_METHOD in
+        1)
+            # Cloudflare API (DNS-01 с поддержкой wildcard)
+            reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
+            reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
 
-    check_api() {
-        local attempts=3
-        local attempt=1
+            check_api() {
+                local attempts=3
+                local attempt=1
 
-        while [ $attempt -le $attempts ]; do
+                while [ $attempt -le $attempts ]; do
+                    if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
+                        api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "Authorization: Bearer ${CLOUDFLARE_API_KEY}" --header "Content-Type: application/json")
+                    else
+                        api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "X-Auth-Key: ${CLOUDFLARE_API_KEY}" --header "X-Auth-Email: ${CLOUDFLARE_EMAIL}" --header "Content-Type: application/json")
+                    fi
+
+                    if echo "$api_response" | grep -q '"success":true'; then
+                        echo -e "${COLOR_GREEN}${LANG[CF_VALIDATING]}${COLOR_RESET}"
+                        return 0
+                    else
+                        echo -e "${COLOR_RED}$(printf "${LANG[CF_INVALID_ATTEMPT]}" "$attempt" "$attempts")${COLOR_RESET}"
+                        if [ $attempt -lt $attempts ]; then
+                            reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
+                            reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
+                        fi
+                        attempt=$((attempt + 1))
+                    fi
+                done
+                error "$(printf "${LANG[CF_INVALID]}" "$attempts")"
+            }
+
+            check_api
+
+            mkdir -p ~/.secrets/certbot
             if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
-                api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "Authorization: Bearer ${CLOUDFLARE_API_KEY}" --header "Content-Type: application/json")
-            else
-                api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "X-Auth-Key: ${CLOUDFLARE_API_KEY}" --header "X-Auth-Email: ${CLOUDFLARE_EMAIL}" --header "Content-Type: application/json")
-            fi
-
-            if echo "$api_response" | grep -q '"success":true'; then
-                echo -e "${COLOR_GREEN}${LANG[CF_VALIDATING]}${COLOR_RESET}"
-                return 0
-            else
-                echo -e "${COLOR_RED}$(printf "${LANG[CF_INVALID_ATTEMPT]}" "$attempt" "$attempts")${COLOR_RESET}"
-            if [ $attempt -lt $attempts ]; then
-                reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
-                reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
-            fi
-                attempt=$((attempt + 1))
-            fi
-        done
-        error "$(printf "${LANG[CF_INVALID]}" "$attempts")"
-    }
-
-    check_api
-
-    mkdir -p ~/.secrets/certbot
-    if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
-        cat > ~/.secrets/certbot/cloudflare.ini <<EOL
+                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
 dns_cloudflare_api_token = $CLOUDFLARE_API_KEY
 EOL
-    else
-        cat > ~/.secrets/certbot/cloudflare.ini <<EOL
+            else
+                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
 dns_cloudflare_email = $CLOUDFLARE_EMAIL
 dns_cloudflare_api_key = $CLOUDFLARE_API_KEY
 EOL
+            fi
+            chmod 600 ~/.secrets/certbot/cloudflare.ini
+
+            certbot certonly \
+                --dns-cloudflare \
+                --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini \
+                --dns-cloudflare-propagation-seconds 60 \
+                -d "$BASE_DOMAIN" \
+                -d "$WILDCARD_DOMAIN" \
+                --email "$CLOUDFLARE_EMAIL" \
+                --agree-tos \
+                --non-interactive \
+                --key-type ecdsa \
+                --elliptic-curve secp384r1
+            ;;
+        2)
+            # ACME HTTP-01 (без wildcard)
+            echo -e "${COLOR_YELLOW}${LANG[ACME_METHOD]}${COLOR_RESET}"
+            ufw allow 80/tcp comment 'HTTP for ACME challenge' > /dev/null 2>&1
+
+            certbot certonly \
+                --standalone \
+                -d "$DOMAIN" \
+                --email "$LETSENCRYPT_EMAIL" \
+                --agree-tos \
+                --non-interactive \
+                --http-01-port 80 \
+                --key-type ecdsa \
+                --elliptic-curve secp384r1
+
+            ufw delete allow 80/tcp > /dev/null 2>&1
+            ufw reload > /dev/null 2>&1
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
+            exit 1
+            ;;
+    esac
+
+    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+        echo "renew_hook = sh -c 'cd /root/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+        add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
+    else
+        echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
+        exit 1
     fi
-    chmod 600 ~/.secrets/certbot/cloudflare.ini
-
-    certbot certonly \
-        --dns-cloudflare \
-        --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini \
-        --dns-cloudflare-propagation-seconds 60 \
-        -d $DOMAIN \
-        -d $WILDCARD_DOMAIN \
-        --email $CLOUDFLARE_EMAIL \
-        --agree-tos \
-        --non-interactive \
-        --key-type ecdsa \
-        --elliptic-curve secp384r1
-
-    echo "renew_hook = sh -c 'cd /root/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
-    add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
 }
 
 ### API Functions ###
@@ -1490,18 +1546,101 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 EOL
+}
 
-for domain in "${!unique_domains[@]}"; do
-    echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> docker-compose.yml
-    echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> docker-compose.yml
-done
+installation() {
+    echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
+    sleep 1
 
-cat >> docker-compose.yml <<EOL
+    declare -A unique_domains
+    install_remnawave
+
+    declare -A domains_to_check
+    domains_to_check["$PANEL_DOMAIN"]=1
+    domains_to_check["$SUB_DOMAIN"]=1
+    domains_to_check["$SELFSTEAL_DOMAIN"]=1
+
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
+    sleep 1
+
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
+    need_certificates=false
+    for domain in "${!domains_to_check[@]}"; do
+        if ! check_certificates "$domain"; then
+            need_certificates=true
+            break
+        fi
+    done
+
+    if [ "$need_certificates" = true ]; then
+        echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
+        reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
+
+        if [ "$CERT_METHOD" == "2" ]; then
+            reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
+        fi
+    else
+        echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
+        CERT_METHOD="2"
+    fi
+
+    if [ "$CERT_METHOD" == "1" ]; then
+        for domain in "${!domains_to_check[@]}"; do
+            local base_domain=$(extract_domain "$domain")
+            unique_domains["$base_domain"]="1"
+        done
+
+        for domain in "${!unique_domains[@]}"; do
+            printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+            if check_certificates "$domain"; then
+                echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                get_certificates "$domain" "$CERT_METHOD" ""
+            fi
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+        done
+        PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
+        SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
+        NODE_CERT_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+    elif [ "$CERT_METHOD" == "2" ]; then
+        if [ "$need_certificates" = true ]; then
+            for domain in "${!domains_to_check[@]}"; do
+                printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+                if check_certificates "$domain"; then
+                    echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+                else
+                    echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                    get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+                fi
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        else
+            for domain in "${!domains_to_check[@]}"; do
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        fi
+        PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
+        SUB_CERT_DOMAIN="$SUB_DOMAIN"
+        NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
+        exit 1
+    fi
+
+     cat >> /root/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
-    ports:
-      - '80:80'
     networks:
       - remnawave-network
     depends_on:
@@ -1555,7 +1694,7 @@ volumes:
     name: remnawave-redis-data
 EOL
 
-    cat > nginx.conf <<EOL
+    cat > /root/remnawave/nginx.conf <<EOL
 upstream remnawave {
     server remnawave:3000;
 }
@@ -1605,9 +1744,9 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
 
     add_header Set-Cookie \$set_cookie_header;
 
@@ -1653,11 +1792,11 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$SUB_BASE_DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$SUB_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$SUB_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_CERT_DOMAIN/fullchain.pem";
 
-     location / {
+    location / {
         proxy_http_version 1.1;
         proxy_pass http://json;
         proxy_set_header Host \$host;
@@ -1684,19 +1823,12 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$SELFSTEAL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$NODE_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$NODE_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$NODE_CERT_DOMAIN/fullchain.pem";
 
     root /var/www/html;
     index index.html;
-}
-
-server {
-    listen 80 default_server;
-    listen [::]:80;
-    server_name _;
-    return 301 https://\$host\$request_uri;
 }
 
 server {
@@ -1706,37 +1838,6 @@ server {
     return 444;
 }
 EOL
-}
-
-installation() {
-    echo -e "${COLOR_YELLOW}${LANG[INSTALLING]}${COLOR_RESET}"
-    sleep 1
-
-    declare -A unique_domains
-    install_remnawave
-
-    declare -A domains_to_check
-    domains_to_check["$PANEL_DOMAIN"]=1
-    domains_to_check["$SUB_DOMAIN"]=1
-    domains_to_check["$SELFSTEAL_DOMAIN"]=1
-
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
-
-    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
-    for domain in "${!domains_to_check[@]}"; do
-        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
-    done
-
-    for domain in "${!unique_domains[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            get_certificates "$domain"
-        fi
-    done
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
@@ -1842,11 +1943,9 @@ install_remnawave_panel() {
 
     PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
     SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
-    SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
 
     unique_domains["$PANEL_BASE_DOMAIN"]=1
     unique_domains["$SUB_BASE_DOMAIN"]=1
-    unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 
     SUPERADMIN_USERNAME=$(generate_user)
     SUPERADMIN_PASSWORD=$(generate_password)
@@ -1991,13 +2090,97 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 EOL
+}
 
-for domain in "${!unique_domains[@]}"; do
-    echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> docker-compose.yml
-    echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> docker-compose.yml
-done
+installation_panel() {
+    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_PANEL]}${COLOR_RESET}"
+    sleep 1
 
-cat >> docker-compose.yml <<EOL
+    declare -A unique_domains
+    install_remnawave_panel
+
+    declare -A domains_to_check
+    domains_to_check["$PANEL_DOMAIN"]=1
+    domains_to_check["$SUB_DOMAIN"]=1
+
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
+    sleep 1
+
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
+    need_certificates=false
+    for domain in "${!domains_to_check[@]}"; do
+        if ! check_certificates "$domain"; then
+            need_certificates=true
+            break
+        fi
+    done
+
+    if [ "$need_certificates" = true ]; then
+        echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
+        reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
+
+        if [ "$CERT_METHOD" == "2" ]; then
+            reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
+        fi
+    else
+        echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
+        CERT_METHOD="2"
+    fi
+
+    if [ "$CERT_METHOD" == "1" ]; then
+        for domain in "${!domains_to_check[@]}"; do
+            local base_domain=$(extract_domain "$domain")
+            unique_domains["$base_domain"]="1"
+        done
+
+        for domain in "${!unique_domains[@]}"; do
+            printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+            if check_certificates "$domain"; then
+                echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                get_certificates "$domain" "$CERT_METHOD" ""
+            fi
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+        done
+        PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
+        SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
+        NODE_CERT_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+    elif [ "$CERT_METHOD" == "2" ]; then
+        if [ "$need_certificates" = true ]; then
+            for domain in "${!domains_to_check[@]}"; do
+                printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+                if check_certificates "$domain"; then
+                    echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+                else
+                    echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                    get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+                fi
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        else
+            for domain in "${!domains_to_check[@]}"; do
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        fi
+        PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
+        SUB_CERT_DOMAIN="$SUB_DOMAIN"
+        NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cat >> /root/remnawave/docker-compose.yml <<EOL
     network_mode: host
     depends_on:
       - remnawave
@@ -2036,7 +2219,7 @@ volumes:
     name: remnawave-redis-data
 EOL
 
-    cat > nginx.conf <<EOL
+    cat > /root/remnawave/nginx.conf <<EOL
 upstream remnawave {
     server 127.0.0.1:3000;
 }
@@ -2086,9 +2269,9 @@ server {
     listen 443 ssl;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
 
     add_header Set-Cookie \$set_cookie_header;
 
@@ -2134,11 +2317,11 @@ server {
     listen 443 ssl;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$SUB_BASE_DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_BASE_DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$SUB_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$SUB_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$SUB_CERT_DOMAIN/fullchain.pem";
 
-     location / {
+    location / {
         proxy_http_version 1.1;
         proxy_pass http://json;
         proxy_set_header Host \$host;
@@ -2166,36 +2349,6 @@ server {
     ssl_reject_handshake on;
 }
 EOL
-}
-
-installation_panel() {
-    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_PANEL]}${COLOR_RESET}"
-    sleep 1
-
-    declare -A unique_domains
-    install_remnawave_panel
-
-    declare -A domains_to_check
-    domains_to_check["$PANEL_DOMAIN"]=1
-    domains_to_check["$SUB_DOMAIN"]=1
-
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
-
-    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
-    for domain in "${!domains_to_check[@]}"; do
-        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
-    done
-
-    for domain in "${!unique_domains[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            get_certificates "$domain"
-        fi
-    done
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL]}${COLOR_RESET}"
     sleep 1
@@ -2310,7 +2463,9 @@ APP_PORT=2222
 $(echo -e "$CERTIFICATE" | sed 's/\\n$//')
 EOL
 
-    DOMAIN=$(extract_domain $SELFSTEAL_DOMAIN)
+SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+
+unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 
 cat > docker-compose.yml <<EOL
 services:
@@ -2321,8 +2476,97 @@ services:
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/$DOMAIN/fullchain.pem:/etc/nginx/ssl/$DOMAIN/fullchain.pem:ro
-      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/etc/nginx/ssl/$DOMAIN/privkey.pem:ro
+EOL
+}
+
+installation_node() {
+    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
+    sleep 1
+    
+    declare -A unique_domains
+    install_remnawave_node
+
+    declare -A domains_to_check
+    domains_to_check["$SELFSTEAL_DOMAIN"]=1
+
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
+    sleep 1
+
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
+    need_certificates=false
+    for domain in "${!domains_to_check[@]}"; do
+        if ! check_certificates "$domain"; then
+            need_certificates=true
+            break
+        fi
+    done
+
+    if [ "$need_certificates" = true ]; then
+        echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
+        reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
+
+        if [ "$CERT_METHOD" == "2" ]; then
+            reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
+        fi
+    else
+        echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
+        CERT_METHOD="2"
+    fi
+
+    if [ "$CERT_METHOD" == "1" ]; then
+        for domain in "${!domains_to_check[@]}"; do
+            local base_domain=$(extract_domain "$domain")
+            unique_domains["$base_domain"]="1"
+        done
+
+        for domain in "${!unique_domains[@]}"; do
+            printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+            if check_certificates "$domain"; then
+                echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                get_certificates "$domain" "$CERT_METHOD" ""
+            fi
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+        done
+        PANEL_CERT_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
+        SUB_CERT_DOMAIN=$(extract_domain "$SUB_DOMAIN")
+        NODE_CERT_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
+    elif [ "$CERT_METHOD" == "2" ]; then
+        if [ "$need_certificates" = true ]; then
+            for domain in "${!domains_to_check[@]}"; do
+                printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+                if check_certificates "$domain"; then
+                    echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+                else
+                    echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                    get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+                fi
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        else
+            for domain in "${!domains_to_check[@]}"; do
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /root/remnawave/docker-compose.yml
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /root/remnawave/docker-compose.yml
+            done
+        fi
+        PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
+        SUB_CERT_DOMAIN="$SUB_DOMAIN"
+        NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cat >> /root/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
@@ -2343,7 +2587,7 @@ services:
       - /dev/shm:/dev/shm
 EOL
 
-    cat > nginx.conf <<EOL
+cat > /root/remnawave/nginx.conf <<EOL
 map \$http_upgrade \$connection_upgrade {
     default upgrade;
     ""      close;
@@ -2365,9 +2609,9 @@ server {
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
     http2 on;
 
-    ssl_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
-    ssl_certificate_key "/etc/nginx/ssl/$DOMAIN/privkey.pem";
-    ssl_trusted_certificate "/etc/nginx/ssl/$DOMAIN/fullchain.pem";
+    ssl_certificate "/etc/nginx/ssl/$NODE_CERT_DOMAIN/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/$NODE_CERT_DOMAIN/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/$NODE_CERT_DOMAIN/fullchain.pem";
 
     root /var/www/html;
     index index.html;
@@ -2380,25 +2624,9 @@ server {
     return 444;
 }
 EOL
-}
-
-installation_node() {
-    echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
-    sleep 1
-    
-    install_remnawave_node
 
     ufw allow from $PANEL_IP to any port 2222 
     ufw reload
-
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
-    if check_certificates $DOMAIN; then
-        echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-        get_certificates $DOMAIN
-    fi
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_NODE]}${COLOR_RESET}"
     sleep 3
