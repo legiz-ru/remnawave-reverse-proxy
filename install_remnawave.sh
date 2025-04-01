@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.7"
+SCRIPT_VERSION="1.5.8"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -51,14 +51,19 @@ set_language() {
                 [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
-                [ADD_NODE_TO_PANEL]="Add node to panel"
-                [MENU_3]="Installing only the node"
-                [MENU_4]="Reinstall panel/node"
-                [MENU_5]="Install random template for selfsteal node"
-                [MENU_6]="Disable IPv6"
-                [MENU_7_CLI]="Remnawave CLI"
-                [PROMPT_ACTION]="Select action (0-9):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-9."
+                [MENU_3]="Add node to panel"
+                [MENU_4]="Installing only the node"
+                [MENU_5]="Reinstall panel/node"
+                [MENU_6]="Start panel/node"
+                [MENU_7]="Stop panel/node"
+                [MENU_8]="Update panel/node"
+                [MENU_9]="Remnawave CLI"
+                [MENU_10]="Enable IPv6"
+                [MENU_11]="Disable IPv6"
+                [MENU_12]="Install random template for selfsteal node"
+                [MENU_13]="Check for updates script"
+                [PROMPT_ACTION]="Select action (0-13):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-13."
                 [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
@@ -97,10 +102,18 @@ set_language() {
                 [CREATE_HOST]="Creating host with UUID: "
                 [HOST_CREATED]="Host successfully created."
                 #Stop/Start
+                [CHANGE_DIR_FAILED]="Failed to change to directory %s"
+                [DIR_NOT_FOUND]="Directory /root/remnawave or /opt/remnawave not found"
+                [PANEL_RUNNING]="Panel/node already running"
+                [PANEL_STOPPED]="Panel/node already stopped"
+                [NO_UPDATE]="No updates available for panel/node"
+                [UPDATING]="Updating panel/node..."
+                [UPDATE_SUCCESS1]="Panel/node successfully updated"
                 [STARTING_PANEL_NODE]="Starting panel and node"
                 [STARTING_PANEL]="Starting panel"
                 [STARTING_NODE]="Starting node"
                 [STOPPING_REMNAWAVE]="Stopping panel and node"
+                [IMAGES_DETECTED]="Images detected, restarting containers..."
                 #Menu End
                 [INSTALL_COMPLETE]="               INSTALLATION COMPLETE!"
                 [PANEL_ACCESS]="Panel URL:"
@@ -153,6 +166,10 @@ set_language() {
                 [NODE_NOT_CONNECTED]="Node not connected after %d attempts!"
                 [CHECK_CONFIG]="Check the configuration or restart the panel."
                 #IPv6
+                [IPV6_ALREADY_ENABLED]="IPv6 already enabled"
+                [IPV6_ALREADY_DISABLED]="IPv6 already disabled"
+                [ENABLE_IPV6]="Enabling IPv6..."
+                [IPV6_ENABLED]="IPv6 has been enabled."
                 [DISABLING_IPV6]="Disabling IPv6..."
                 [IPV6_DISABLED]="IPv6 has been disabled."
                 # add_node_to_panel
@@ -234,14 +251,19 @@ set_language() {
                 [MENU_0]="Выход"
                 [MENU_1]="Установить панель и ноду на один сервер"
                 [MENU_2]="Установить только панель"
-                [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
-                [MENU_3]="Установить только ноду"
-                [MENU_4]="Переустановить панель/ноду"
-                [MENU_5]="Установить случайный шаблон для selfsteal ноды"
-                [MENU_6]="Отключить IPv6"
-                [MENU_7_CLI]="Remnawave CLI"
-                [PROMPT_ACTION]="Выберите действие (0-9):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-9."
+                [MENU_3]="Добавить ноду в панель"
+                [MENU_4]="Установить только ноду"
+                [MENU_5]="Переустановить панель/ноду"
+                [MENU_6]="Запустить панель/ноду"
+                [MENU_7]="Остановить панель/ноду"
+                [MENU_8]="Обновить панель/ноду"
+                [MENU_9]="Remnawave CLI"
+                [MENU_10]="Включить IPv6"
+                [MENU_11]="Отключить IPv6"
+                [MENU_12]="Установить случайный шаблон для selfsteal ноды"
+                [MENU_13]="Проверить обновления скрипта"
+                [PROMPT_ACTION]="Выберите действие (0-13):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-13."
                 [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
@@ -280,10 +302,18 @@ set_language() {
                 [CREATE_HOST]="Создаем хост с UUID: "
                 [HOST_CREATED]="Хост успешно создан."
                 #Stop/Start
+                [CHANGE_DIR_FAILED]="Не удалось перейти в директорию %s"
+                [DIR_NOT_FOUND]="Директория /root/remnawave или /opt/remnawave не найдена"
+                [PANEL_RUNNING]="Панель/нода уже запущена"
+                [PANEL_STOPPED]="Панель/нода уже остановлена"
+                [NO_UPDATE]="Нет доступных обновлений для панели/ноды"
+                [UPDATING]="Обновление панели/ноды..."
+                [UPDATE_SUCCESS1]="Панель/нода успешно обновлена"
                 [STARTING_PANEL_NODE]="Запуск панели и ноды"
                 [STARTING_PANEL]="Запуск панели"
                 [STARTING_NODE]="Запуск ноды"
                 [STOPPING_REMNAWAVE]="Остановка панели и ноды"
+                [IMAGES_DETECTED]="Обнаружены новые образы, перезапускаем контейнеры..."
                 #Menu End
                 [INSTALL_COMPLETE]="               УСТАНОВКА ЗАВЕРШЕНА!"
                 [PANEL_ACCESS]="Панель доступна по адресу:"
@@ -335,6 +365,10 @@ set_language() {
                 [NODE_NOT_CONNECTED]="Нода не подключена после %d попыток!"
                 [CHECK_CONFIG]="Проверьте конфигурацию или перезапустите панель."
                 #IPv6
+                [IPV6_ALREADY_ENABLED]="IPv6 уже включен"
+                [ENABLE_IPV6]="Включение IPv6..."
+                [IPV6_ENABLED]="IPv6 включен."
+                [IPV6_ALREADY_DISABLED]="IPv6 уже отключен"
                 [DISABLING_IPV6]="Отключение IPv6..."
                 [IPV6_DISABLED]="IPv6 отключен."
                 # add_node_to_panel
@@ -445,7 +479,7 @@ log_entry() {
 
 run_remnawave_cli() {
     if ! docker ps --format '{{.Names}}' | grep -q '^remnawave$'; then
-        echo -e "${COLOR_RED}${LANG[CLI_FAILED]}${COLOR_RESET}"
+        #echo -e "${COLOR_RED}${LANG[CLI_FAILED]}${COLOR_RESET}"
         echo -e "${COLOR_YELLOW}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
         return 1
     fi
@@ -463,6 +497,107 @@ run_remnawave_cli() {
     fi
 
     exec 1>&3 2>&4
+}
+
+start_panel_node() {
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+        echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
+        sleep 1
+        docker compose up -d > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
+    fi
+}
+
+stop_panel_node() {
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+        echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
+        sleep 1
+        docker compose down > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
+    fi
+}
+
+update_panel_node() {
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    echo -e "${COLOR_YELLOW}${LANG[UPDATING]}${COLOR_RESET}"
+    sleep 1
+
+    # Сохраняем хеши всех образов, связанных с compose
+    images_before=$(docker compose config --images | sort -u)
+    if [ -n "$images_before" ]; then
+        # Извлекаем ID образов через docker images -q для каждого образа
+        before=$(echo "$images_before" | xargs -I {} docker images -q {} | sort -u)
+    else
+        before=""
+    fi
+
+    # Выполняем pull с спиннером
+    tmpfile=$(mktemp)
+    docker compose pull > "$tmpfile" 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    pull_output=$(cat "$tmpfile")
+    rm -f "$tmpfile"
+    #echo "$pull_output"
+
+    # Сохраняем хеши после pull
+    images_after=$(docker compose config --images | sort -u)
+    if [ -n "$images_after" ]; then
+        # Извлекаем ID образов через docker images -q для каждого образа
+        after=$(echo "$images_after" | xargs -I {} docker images -q {} | sort -u)
+    else
+        after=""
+    fi
+
+    # Проверяем, было ли обновление: либо хеши изменились, либо есть признаки загрузки
+    if [ "$before" != "$after" ] || echo "$pull_output" | grep -q "Pull complete"; then
+        echo -e "${COLOR_YELLOW}${LANG[IMAGES_DETECTED]}${COLOR_RESET}"
+        docker compose down > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        sleep 5
+        docker compose up -d > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        echo -e "${COLOR_GREEN}${LANG[UPDATE_SUCCESS1]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[NO_UPDATE]}${COLOR_RESET}"
+    fi
 }
 
 update_remnawave_reverse() {
@@ -543,17 +678,21 @@ show_menu() {
     printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
-    echo -e ""
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. ${LANG[ADD_NODE_TO_PANEL]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_3]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_4]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_5]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_7_CLI]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}9. ${LANG[CHECK_UPDATE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}13. ${LANG[MENU_13]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
@@ -565,7 +704,7 @@ show_reinstall_options() {
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_4]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}4. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
 }
@@ -745,22 +884,47 @@ install_packages() {
     clear
 }
 
+enable_ipv6() {
+    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 0 ]; then
+        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_ENABLED]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[ENABLE_IPV6]}${COLOR_RESET}"
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
+
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
+
+    echo "net.ipv6.conf.all.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.lo.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 0" >> /etc/sysctl.conf
+
+    sysctl -p > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[IPV6_ENABLED]}${COLOR_RESET}"
+}
+
 disable_ipv6() {
+    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 1 ]; then
+        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_DISABLED]}${COLOR_RESET}"
+        return 0
+    fi
+
     echo -e "${COLOR_YELLOW}${LANG[DISABLING_IPV6]}${COLOR_RESET}"
     interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
-    
-    if ! grep -q "net.ipv6.conf.all.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.default.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.lo.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
-    if ! grep -q "net.ipv6.conf.$interface_name.disable_ipv6 = 1" /etc/sysctl.conf; then
-        echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
-    fi
+
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
+
+    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
 
     sysctl -p > /dev/null 2>&1
     echo -e "${COLOR_GREEN}${LANG[IPV6_DISABLED]}${COLOR_RESET}"
@@ -3060,19 +3224,49 @@ case $OPTION in
         esac
         ;;
     6)
-        randomhtml
+        start_panel_node
+        sleep 2
+        remnawave_reverse
         log_clear
         ;;
     7)
-        disable_ipv6
+        stop_panel_node
+        sleep 2
+        remnawave_reverse
         log_clear
         ;;
     8)
-        run_remnawave_cli
+        update_panel_node
+        sleep 2
+        remnawave_reverse
         log_clear
         ;;
     9)
+        run_remnawave_cli
+        log_clear
+        ;;
+    10)
+        enable_ipv6
+        sleep 2
+        remnawave_reverse
+        log_clear
+        ;;
+    11)
+        disable_ipv6
+        sleep 2
+        remnawave_reverse
+        log_clear
+        ;;
+    12)
+        randomhtml
+        sleep 2
+        remnawave_reverse
+        log_clear
+        ;;
+    13)
         update_remnawave_reverse
+        sleep 2
+        remnawave_reverse
         log_clear
         ;;
     0)
