@@ -250,6 +250,7 @@ set_language() {
                 [UPDATING_CRON]="Updating cron job to match certificate expiry."
                 [GENERATING_WILDCARD_CERT]="Generating wildcard certificate for"
                 [WILDCARD_CERT_FOUND]="Wildcard certificate found in /etc/letsencrypt/live"
+                [START_CRON_ERROR]="Not able to start cron. Please start it manually."
             )
             ;;
         ru)
@@ -461,6 +462,7 @@ set_language() {
                 [UPDATING_CRON]="Обновление задачи cron в соответствии со сроком действия сертификата."
                 [GENERATING_WILDCARD_CERT]="Генерация wildcard-сертификата для"
                 [WILDCARD_CERT_FOUND]="Wildcard-сертификат найден в /etc/letsencrypt/live"
+                [START_CRON_ERROR]="Не удалось запустить cron. Пожалуйста, запустите его вручную."
             )
             ;;
     esac
@@ -857,8 +859,24 @@ fi
 install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
     apt-get update -y
-    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk ipcalc
+    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk
     
+    if ! dpkg -l | grep -q '^ii.*cron '; then
+        apt-get install -y cron
+    fi
+
+    if ! systemctl is-active --quiet cron; then
+        systemctl start cron || {
+            echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
+        }
+    fi
+
+    if ! systemctl is-enabled --quiet cron; then
+        systemctl enable cron || {
+            echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
+        }
+    fi
+
     locale-gen en_US.UTF-8
     update-locale LANG=en_US.UTF-8
     
