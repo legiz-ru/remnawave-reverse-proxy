@@ -1764,7 +1764,7 @@ services:
         condition: service_healthy
 
   remnawave-redis:
-    image: valkey/valkey:8.0.2-alpine
+    image: valkey/valkey:8.1-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -2422,7 +2422,7 @@ services:
         condition: service_healthy
 
   remnawave-redis:
-    image: valkey/valkey:8.0.2-alpine
+    image: valkey/valkey:8.1-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
