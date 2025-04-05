@@ -607,7 +607,8 @@ update_panel_node() {
     fi
 
     if [ "$before" != "$after" ] || echo "$pull_output" | grep -q "Pull complete"; then
-        echo -e "${COLOR_YELLOW}${LANG[IMAGES_DETECTED]}${COLOR_RESET}"
+        echo -e ""
+	echo -e "${COLOR_YELLOW}${LANG[IMAGES_DETECTED]}${COLOR_RESET}"
         docker compose down > /dev/null 2>&1 &
         spinner $! "${LANG[WAITING]}"
         sleep 5
