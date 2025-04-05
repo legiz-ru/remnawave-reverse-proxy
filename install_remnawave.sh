@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.9"
+SCRIPT_VERSION="1.5.9a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -1204,7 +1204,7 @@ EOL
     esac
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
         add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
     else
         echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
@@ -1779,7 +1779,7 @@ services:
       retries: 3
 
   remnawave-nginx:
-    image: nginx:1.27
+    image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -1861,7 +1861,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1883,7 +1883,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1901,7 +1901,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1953,7 +1953,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
@@ -2104,24 +2104,6 @@ server {
 
     add_header Set-Cookie \$set_cookie_header;
 
-    location = / {
-        if (\$authorized = 0) {
-            return 302 https://$SELFSTEAL_DOMAIN;
-        }
-        proxy_http_version 1.1;
-        proxy_pass http://remnawave;
-        proxy_set_header Host \$host;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \$connection_upgrade;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header X-Forwarded-Host \$host;
-        proxy_set_header X-Forwarded-Port \$server_port;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
     location / {
         if (\$authorized = 0) {
             return 302 https://$SELFSTEAL_DOMAIN;
@@ -2258,7 +2240,7 @@ EOL
     clear
 
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[INSTALL_COMPLETE]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[INSTALL_COMPLETE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[PANEL_ACCESS]}${COLOR_RESET}"
     echo -e "${COLOR_WHITE}https://${PANEL_DOMAIN}/auth/login?${cookies_random1}=${cookies_random2}${COLOR_RESET}"
@@ -2437,7 +2419,7 @@ services:
       retries: 3
 
   remnawave-nginx:
-    image: nginx:1.27
+    image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -2518,7 +2500,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2540,7 +2522,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2558,7 +2540,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2610,7 +2592,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
@@ -2742,24 +2724,6 @@ server {
     ssl_trusted_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
 
     add_header Set-Cookie \$set_cookie_header;
-
-    location = / {
-        if (\$authorized = 0) {
-            return 404;
-        }
-        proxy_http_version 1.1;
-        proxy_pass http://remnawave;
-        proxy_set_header Host \$host;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \$connection_upgrade;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header X-Forwarded-Host \$host;
-        proxy_set_header X-Forwarded-Port \$server_port;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
 
     location / {
         if (\$authorized = 0) {
@@ -2938,7 +2902,7 @@ unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 cat > docker-compose.yml <<EOL
 services:
   remnawave-nginx:
-    image: nginx:1.27
+    image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -3018,7 +2982,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3040,7 +3004,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3058,7 +3022,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3110,7 +3074,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose stop remnawave-nginx && docker compose start remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
