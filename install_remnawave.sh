@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.9a"
+SCRIPT_VERSION="1.5.9b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -3607,20 +3607,20 @@ case $OPTION in
     6)
         start_panel_node
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     7)
         stop_panel_node
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     8)
         update_panel_node
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     9)
         run_remnawave_cli
@@ -3629,14 +3629,14 @@ case $OPTION in
     10)
         enable_ipv6
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     11)
         disable_ipv6
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     12)
         if [ ! -d "/opt/remnawave" ] && [ ! -d "/root/remnawave" ]; then
@@ -3645,15 +3645,15 @@ case $OPTION in
         else
             randomhtml
             sleep 2
+            log_clear
             remnawave_reverse
         fi
-        log_clear
         ;;
     13)
         update_remnawave_reverse
         sleep 2
-        remnawave_reverse
         log_clear
+        remnawave_reverse
         ;;
     0)
         echo -e "${COLOR_YELLOW}${LANG[MENU_0]}${COLOR_RESET}"
