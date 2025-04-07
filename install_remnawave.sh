@@ -47,7 +47,7 @@ set_language() {
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
-                [VERSION_LABEL]="Version stable: %s"
+                [VERSION_LABEL]="Version dev: %s"
                 [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
