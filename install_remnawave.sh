@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.5.9b"
+SCRIPT_VERSION="1.6.0"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
-SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
 
 COLOR_RESET="\033[0m"
 COLOR_GREEN="\033[1;32m"
@@ -1411,13 +1411,6 @@ update_xray_config() {
             },
             {
                 "type": "field",
-                "domain": [
-                    "geosite:private"
-                ],
-                "outboundTag": "BLOCK"
-            },
-            {
-                "type": "field",
                 "protocol": [
                     "bittorrent"
                 ],
@@ -1748,7 +1741,7 @@ services:
       retries: 3
 
   remnawave:
-    image: remnawave/backend:dev
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -2019,7 +2012,7 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - remnawave-network
 
   remnanode:
-    image: remnawave/node:dev
+    image: remnawave/node:latest
     container_name: remnanode
     hostname: remnanode
     restart: always
@@ -2388,7 +2381,7 @@ services:
       retries: 3
 
   remnawave:
-    image: remnawave/backend:dev
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -3122,7 +3115,7 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - remnanode
 
   remnanode:
-    image: remnawave/node:dev
+    image: remnawave/node:latest
     container_name: remnanode
     hostname: remnanode
     restart: always
