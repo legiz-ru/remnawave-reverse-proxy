@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.0"
+SCRIPT_VERSION="1.6.1"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -204,6 +204,8 @@ set_language() {
                 [NODES_UPDATED_SUCCESS]="Existing nodes successfully updated"
                 [FAILED_TO_UPDATE_NODE]="Failed to update node %s"
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
+                [CREATE_NEW_NODE]="Creating new node for %s..."
+                [UPDATE_NODE_UUID]="Updating node with UUID: %s"
                 #check
                 [CHECK_UPDATE]="Check for updates"
                 [GENERATING_CERTS]="Generating certificates for %s"
@@ -249,7 +251,8 @@ set_language() {
                 [DAYS]="days"
                 [UPDATING_CRON]="Updating cron job to match certificate expiry."
                 [GENERATING_WILDCARD_CERT]="Generating wildcard certificate for"
-                [WILDCARD_CERT_FOUND]="Wildcard certificate found in /etc/letsencrypt/live"
+                [WILDCARD_CERT_FOUND]="Wildcard certificate found in /etc/letsencrypt/live/"
+                [FOR_DOMAIN]="for"
                 [START_CRON_ERROR]="Not able to start cron. Please start it manually."
             )
             ;;
@@ -416,6 +419,8 @@ set_language() {
                 [NODES_UPDATED_SUCCESS]="Существующие ноды успешно обновлены"
                 [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
+                [CREATE_NEW_NODE]="Создаём новую ноду для %s..."
+                [UPDATE_NODE_UUID]="Обновление для ноды с UUID: %s"
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
                 [GENERATING_CERTS]="Генерируем сертификаты для %s"
@@ -461,7 +466,8 @@ set_language() {
                 [DAYS]="дней"
                 [UPDATING_CRON]="Обновление задачи cron в соответствии со сроком действия сертификата."
                 [GENERATING_WILDCARD_CERT]="Генерация wildcard-сертификата для"
-                [WILDCARD_CERT_FOUND]="Wildcard-сертификат найден в /etc/letsencrypt/live"
+                [WILDCARD_CERT_FOUND]="Wildcard-сертификат найден в /etc/letsencrypt/live/"
+                [FOR_DOMAIN]="для"
                 [START_CRON_ERROR]="Не удалось запустить cron. Пожалуйста, запустите его вручную."
             )
             ;;
@@ -1565,6 +1571,8 @@ update_node() {
     local country_code=${13}
     local consumption_multiplier=${14}
 
+    printf "${COLOR_YELLOW}${LANG[UPDATE_NODE_UUID]}${COLOR_RESET}\n" "$node_uuid"
+
     local node_data=$(cat <<EOF
 {
     "uuid": "$node_uuid",
@@ -1739,6 +1747,11 @@ services:
       interval: 3s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave:
     image: remnawave/backend:latest
@@ -1756,6 +1769,11 @@ services:
         condition: service_healthy
       remnawave-redis:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-redis:
     image: valkey/valkey:8.1-alpine
@@ -1771,6 +1789,11 @@ services:
       interval: 3s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-nginx:
     image: nginx:1.26
@@ -1814,7 +1837,7 @@ for domain in "${!domains_to_check[@]}"; do
     else
         base_domain=$(extract_domain "$domain")
         if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            echo -e "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]} $base_domain for $domain${COLOR_RESET}"
+            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
             days_left=$(check_cert_expiry "$base_domain")
             if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
                 min_days_left=$days_left
@@ -1994,6 +2017,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     depends_on:
       - remnawave
       - remnawave-subscription-page
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-subscription-page:
     image: remnawave/subscription-page:latest
@@ -2010,6 +2038,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - '127.0.0.1:3010:3010'
     networks:
       - remnawave-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnanode:
     image: remnawave/node:latest
@@ -2024,6 +2057,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - /dev/shm:/dev/shm
     networks:
       - remnawave-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
 networks:
   remnawave-network:
@@ -2379,6 +2417,11 @@ services:
       interval: 3s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave:
     image: remnawave/backend:latest
@@ -2396,6 +2439,11 @@ services:
         condition: service_healthy
       remnawave-redis:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-redis:
     image: valkey/valkey:8.1-alpine
@@ -2411,6 +2459,11 @@ services:
       interval: 3s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-nginx:
     image: nginx:1.26
@@ -2453,7 +2506,7 @@ for domain in "${!domains_to_check[@]}"; do
     else
         base_domain=$(extract_domain "$domain")
         if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            echo -e "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]} $base_domain for $domain${COLOR_RESET}"
+            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
             days_left=$(check_cert_expiry "$base_domain")
             if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
                 min_days_left=$days_left
@@ -2622,13 +2675,17 @@ fi
 
 PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
 SUB_CERT_DOMAIN="$SUB_DOMAIN"
-NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
     network_mode: host
     depends_on:
       - remnawave
       - remnawave-subscription-page
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnawave-subscription-page:
     image: remnawave/subscription-page:latest
@@ -2645,6 +2702,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - '127.0.0.1:3010:3010'
     networks:
       - remnawave-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
 networks:
   remnawave-network:
@@ -2935,7 +2997,7 @@ for domain in "${!domains_to_check[@]}"; do
     else
         base_domain=$(extract_domain "$domain")
         if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            echo -e "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]} $base_domain for $domain${COLOR_RESET}"
+            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
             days_left=$(check_cert_expiry "$base_domain")
             if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
                 min_days_left=$days_left
@@ -3102,8 +3164,6 @@ else
     done
 fi
 
-PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
-SUB_CERT_DOMAIN="$SUB_DOMAIN"
 NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
@@ -3113,6 +3173,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     network_mode: host
     depends_on:
       - remnanode
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 
   remnanode:
     image: remnawave/node:latest
@@ -3125,6 +3190,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
         required: false
     volumes:
       - /dev/shm:/dev/shm
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
 EOL
 
 cat > /opt/remnawave/nginx.conf <<EOL
@@ -3424,7 +3494,8 @@ add_node_to_panel() {
     if [ "$create_new_node" = true ]; then
         local node_name="$entity_name"
         local node_address="$SELFSTEAL_DOMAIN"
-        echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+
+        printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
         local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
         
         if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
@@ -3465,7 +3536,7 @@ add_node_to_panel() {
         fi
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+    printf "${COLOR_YELLOW}${LANG[CREATE_HOST]}%s${COLOR_RESET}\n" "$new_inbound_uuid"
     local host_remark="$entity_name"
     local host_data=$(cat <<EOF
 {
