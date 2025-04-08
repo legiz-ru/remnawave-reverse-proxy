@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.1"
+SCRIPT_VERSION="1.6.1a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -47,7 +47,7 @@ set_language() {
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
-                [VERSION_LABEL]="Version stable: %s"
+                [VERSION_LABEL]="Version: %s"
                 [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
@@ -254,6 +254,7 @@ set_language() {
                 [WILDCARD_CERT_FOUND]="Wildcard certificate found in /etc/letsencrypt/live/"
                 [FOR_DOMAIN]="for"
                 [START_CRON_ERROR]="Not able to start cron. Please start it manually."
+                [DOMAINS_MUST_BE_UNIQUE]="Error: All domains (panel, subscription, and node) must be unique."
             )
             ;;
         ru)
@@ -262,7 +263,7 @@ set_language() {
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
-                [VERSION_LABEL]="Версия стабильная: %s"
+                [VERSION_LABEL]="Версия: %s"
                 #Menu
                 [MENU_0]="Выход"
                 [MENU_1]="Установить панель и ноду на один сервер"
@@ -469,6 +470,7 @@ set_language() {
                 [WILDCARD_CERT_FOUND]="Wildcard-сертификат найден в /etc/letsencrypt/live/"
                 [FOR_DOMAIN]="для"
                 [START_CRON_ERROR]="Не удалось запустить cron. Пожалуйста, запустите его вручную."
+                [DOMAINS_MUST_BE_UNIQUE]="Ошибка: Все домены (панель, подписка, и нода) должны быть уникальными."
             )
             ;;
     esac
@@ -1629,6 +1631,11 @@ install_remnawave() {
         exit 1
     fi
     
+    if [ "$PANEL_DOMAIN" = "$SUB_DOMAIN" ] || [ "$PANEL_DOMAIN" = "$SELFSTEAL_DOMAIN" ] || [ "$SUB_DOMAIN" = "$SELFSTEAL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[DOMAINS_MUST_BE_UNIQUE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
     SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
     SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
@@ -2308,6 +2315,11 @@ install_remnawave_panel() {
     fi
 
     reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
+
+    if [ "$PANEL_DOMAIN" = "$SUB_DOMAIN" ] || [ "$PANEL_DOMAIN" = "$SELFSTEAL_DOMAIN" ] || [ "$SUB_DOMAIN" = "$SELFSTEAL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[DOMAINS_MUST_BE_UNIQUE]}${COLOR_RESET}"
+        exit 1
+    fi
 
     PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
     SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
