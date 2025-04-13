@@ -67,6 +67,7 @@ To set up the server, run this command on it:
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy_en.png" alt="Image"></a></p>
+
 -----
 
 > [!IMPORTANT]
@@ -79,4 +80,3 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 >Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.
 >
 >If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.
------
