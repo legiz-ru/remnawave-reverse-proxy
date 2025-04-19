@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.1a"
+SCRIPT_VERSION="1.6.2"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -545,7 +545,7 @@ start_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+    if docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
@@ -568,7 +568,7 @@ stop_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
@@ -1727,6 +1727,16 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
+
+### HWID DEVICE DETECTION AND LIMITATION ###
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -2402,6 +2412,16 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
+
+### HWID DEVICE DETECTION AND LIMITATION ###
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
