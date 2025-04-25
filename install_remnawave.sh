@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.2"
+SCRIPT_VERSION="1.6.3"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -228,7 +228,7 @@ set_language() {
                 [LATEST_VERSION]="You already have the latest version of the script (%s)."
                 [RESTART_REQUIRED]="Please restart the script to apply changes."
                 [LOCAL_FILE_NOT_FOUND]="Local script file not found, downloading new version..."
-                [UPDATED_RENEW_HOOK]="Updated renew_hook for "
+                [UPDATED_RENEW_HOOK]="Updated renew_hook"
                 #CLI
                 [RUNNING_CLI]="Running Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI executed successfully!"
@@ -255,6 +255,11 @@ set_language() {
                 [FOR_DOMAIN]="for"
                 [START_CRON_ERROR]="Not able to start cron. Please start it manually."
                 [DOMAINS_MUST_BE_UNIQUE]="Error: All domains (panel, subscription, and node) must be unique."
+                [CHOOSE_TEMPLATE_SOURCE]="Select template source:"
+                [SIMPLE_WEB_TEMPLATES]="Simple web templates"
+                [SNI_TEMPLATES]="Sni templates"
+                [CHOOSE_TEMPLATE_OPTION]="Choose option (0-2):"
+                [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
             )
             ;;
         ru)
@@ -444,7 +449,7 @@ set_language() {
                 [LATEST_VERSION]="У вас уже установлена последняя версия скрипта (%s)."
                 [RESTART_REQUIRED]="Пожалуйста, перезапустите скрипт для применения изменений."
                 [LOCAL_FILE_NOT_FOUND]="Локальный файл скрипта не найден, загружаем новую версию..."
-                [UPDATED_RENEW_HOOK]="Обновлен renew_hook для "
+                [UPDATED_RENEW_HOOK]="Обновлен renew_hook"
                 #CLI
                 [RUNNING_CLI]="Запуск Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI успешно выполнен!"
@@ -471,6 +476,11 @@ set_language() {
                 [FOR_DOMAIN]="для"
                 [START_CRON_ERROR]="Не удалось запустить cron. Пожалуйста, запустите его вручную."
                 [DOMAINS_MUST_BE_UNIQUE]="Ошибка: Все домены (панель, подписка, и нода) должны быть уникальными."
+                [CHOOSE_TEMPLATE_SOURCE]="Выберите источник шаблонов:"
+                [SIMPLE_WEB_TEMPLATES]="Simple web templates"
+                [SNI_TEMPLATES]="SNI templates"
+                [CHOOSE_TEMPLATE_OPTION]="Выберите опцию (0-2):"
+                [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
             )
             ;;
     esac
@@ -820,17 +830,45 @@ spinner() {
   printf "\r\033[K" > /dev/tty
 }
 
+show_template_source_options() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[CHOOSE_TEMPLATE_SOURCE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[SIMPLE_WEB_TEMPLATES]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[SNI_TEMPLATES]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
+}
+
 randomhtml() {
+    local template_source="$1"
+
     cd /opt/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
     
     rm -f main.zip 2>/dev/null
-    rm -rf simple-web-templates-main/ 2>/dev/null
+    rm -rf simple-web-templates-main/ sni-templates-main/ 2>/dev/null
     
     echo -e "${COLOR_YELLOW}${LANG[RANDOM_TEMPLATE]}${COLOR_RESET}"
     spinner $$ "${LANG[WAITING]}" &
     spinner_pid=$!
 
-    while ! wget -q --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"; do
+    template_urls=(
+        "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"
+        "https://github.com/SmallPoppa/sni-templates/archive/refs/heads/main.zip"
+    )
+
+    if [ -z "$template_source" ]; then
+        selected_url=${template_urls[$RANDOM % ${#template_urls[@]}]}
+    else
+        if [ "$template_source" = "simple" ]; then
+            selected_url=${template_urls[0]}  # Simple web templates
+        else
+            selected_url=${template_urls[1]}  # Sni templates
+        fi
+    fi
+    
+    while ! wget -q --timeout=30 --tries=10 --retry-connrefused "$selected_url"; do
         echo "${LANG[DOWNLOAD_FAIL]}"
         sleep 3
     done
@@ -838,11 +876,25 @@ randomhtml() {
     unzip -o main.zip &>/dev/null || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
     rm -f main.zip
 
-    cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+    if [[ "$selected_url" == *"cortez24rus"* ]]; then
+        cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        rm -rf assets ".gitattributes" "README.md" "_config.yml" 2>/dev/null
+    else
+        cd sni-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        rm -rf assets "README.md" "index.html" 2>/dev/null
+    fi
 
-    rm -rf assets ".gitattributes" "README.md" "_config.yml"
+    mapfile -t templates < <(find . -maxdepth 1 -type d -not -path . | sed 's|./||')
 
-    RandomHTML=$(for i in *; do echo "$i"; done | shuf -n1 2>&1)
+    RandomHTML="${templates[$RANDOM % ${#templates[@]}]}"
+    
+    if [[ "$selected_url" == *"SmallPoppa"* && "$RandomHTML" == "503 error pages" ]]; then
+        cd "$RandomHTML" || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        versions=("v1" "v2")
+        RandomVersion="${versions[$RANDOM % ${#versions[@]}]}"
+        RandomHTML="$RandomHTML/$RandomVersion"
+        cd ..
+    fi
     
     kill "$spinner_pid" 2>/dev/null
     wait "$spinner_pid" 2>/dev/null
@@ -850,19 +902,19 @@ randomhtml() {
     
     echo "${LANG[SELECT_TEMPLATE]}" "${RandomHTML}"
 
-if [[ -d "${RandomHTML}" ]]; then
-    if [[ ! -d "/var/www/html/" ]]; then
-        mkdir -p "/var/www/html/" || { echo "Failed to create /var/www/html/"; exit 1; }
+    if [[ -d "${RandomHTML}" ]]; then
+        if [[ ! -d "/var/www/html/" ]]; then
+            mkdir -p "/var/www/html/" || { echo "Failed to create /var/www/html/"; exit 1; }
+        fi
+        rm -rf /var/www/html/*
+        cp -a "${RandomHTML}"/. "/var/www/html/"
+        echo "${LANG[TEMPLATE_COPY]}"
+    else
+        echo "${LANG[UNPACK_ERROR]}" && exit 1
     fi
-    rm -rf /var/www/html/*
-    cp -a "${RandomHTML}"/. "/var/www/html/"
-    echo "${LANG[TEMPLATE_COPY]}"
-else
-    echo "${LANG[UNPACK_ERROR]}" && exit 1
-fi
 
     cd /opt/
-    rm -rf simple-web-templates-main/
+    rm -rf simple-web-templates-main/ sni-templates-main/
 }
 
 install_packages() {
@@ -3738,11 +3790,32 @@ case $OPTION in
         if [ ! -d "/opt/remnawave" ] && [ ! -d "/root/remnawave" ]; then
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[NO_PANEL_NODE_INSTALLED]}${COLOR_RESET}"
+            exit 1
         else
-            randomhtml
-            sleep 2
-            log_clear
-            remnawave_reverse
+            show_template_source_options
+            reading "${LANG[CHOOSE_TEMPLATE_OPTION]}" TEMPLATE_OPTION
+            case $TEMPLATE_OPTION in
+                1)
+                    randomhtml "simple"
+                    sleep 2
+                    log_clear
+                    remnawave_reverse
+                    ;;
+                2)
+                    randomhtml "sni"
+                    sleep 2
+                    log_clear
+                    remnawave_reverse
+                    ;;
+                0)
+                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    exit 0
+                    ;;
+                *)
+                    echo -e "${COLOR_YELLOW}${LANG[INVALID_TEMPLATE_CHOICE]}${COLOR_RESET}"
+                    exit 1
+                    ;;
+            esac
         fi
         ;;
     13)
