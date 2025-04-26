@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.3"
+SCRIPT_VERSION="1.6.3a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -850,6 +850,7 @@ randomhtml() {
     rm -rf simple-web-templates-main/ sni-templates-main/ 2>/dev/null
     
     echo -e "${COLOR_YELLOW}${LANG[RANDOM_TEMPLATE]}${COLOR_RESET}"
+    sleep 1
     spinner $$ "${LANG[WAITING]}" &
     spinner_pid=$!
 
@@ -938,7 +939,14 @@ install_packages() {
         }
     fi
 
-    locale-gen en_US.UTF-8
+    if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+        if grep -q "^# en_US.UTF-8 UTF-8" /etc/locale.gen; then
+            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+        else
+            echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+        fi
+    fi
+    locale-gen
     update-locale LANG=en_US.UTF-8
     
     if grep -q "Ubuntu" /etc/os-release; then
