@@ -21,6 +21,7 @@ The script supports two methods of domain configuration: via Cloudflare or using
 | A     | example.com       | your_server_ip   | DNS only      |
 | CNAME | panel.example.com | example.com      | DNS only      |
 | CNAME | sub.example.com   | example.com      | DNS only      |
+| CNAME | node.example.com  | example.com      | DNS only      |
 
 > [!IMPORTANT]
 > The node.example.com record is not mandatory for a selfsteal node — you can also use example.com for selfsteal.
