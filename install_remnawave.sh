@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.3a"
+SCRIPT_VERSION="1.6.3b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -1752,6 +1752,11 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_ADMIN_ID=
 NODES_NOTIFY_CHAT_ID=
 
+# Optional
+# Only set if you want to use topics
+TELEGRAM_ADMIN_THREAD_ID=
+NODES_NOTIFY_THREAD_ID=
+
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
@@ -2436,6 +2441,11 @@ IS_TELEGRAM_ENABLED=false
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_ADMIN_ID=
 NODES_NOTIFY_CHAT_ID=
+
+# Optional
+# Only set if you want to use topics
+TELEGRAM_ADMIN_THREAD_ID=
+NODES_NOTIFY_THREAD_ID=
 
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
