@@ -855,7 +855,7 @@ randomhtml() {
     spinner_pid=$!
 
     template_urls=(
-        "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"
+        "https://github.com/eGamesAPI/simple-web-templates/archive/refs/heads/main.zip"
         "https://github.com/SmallPoppa/sni-templates/archive/refs/heads/main.zip"
     )
 
@@ -877,7 +877,7 @@ randomhtml() {
     unzip -o main.zip &>/dev/null || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
     rm -f main.zip
 
-    if [[ "$selected_url" == *"cortez24rus"* ]]; then
+    if [[ "$selected_url" == *"eGamesAPI"* ]]; then
         cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
         rm -rf assets ".gitattributes" "README.md" "_config.yml" 2>/dev/null
     else
