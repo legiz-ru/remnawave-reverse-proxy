@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.1"
+SCRIPT_VERSION="1.6.3b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -47,7 +47,7 @@ set_language() {
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
-                [VERSION_LABEL]="Version stable: %s"
+                [VERSION_LABEL]="Version: %s"
                 [MENU_0]="Exit"
                 [MENU_1]="Install panel and node on one server"
                 [MENU_2]="Installing only the panel"
@@ -228,7 +228,7 @@ set_language() {
                 [LATEST_VERSION]="You already have the latest version of the script (%s)."
                 [RESTART_REQUIRED]="Please restart the script to apply changes."
                 [LOCAL_FILE_NOT_FOUND]="Local script file not found, downloading new version..."
-                [UPDATED_RENEW_HOOK]="Updated renew_hook for "
+                [UPDATED_RENEW_HOOK]="Updated renew_hook"
                 #CLI
                 [RUNNING_CLI]="Running Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI executed successfully!"
@@ -254,6 +254,12 @@ set_language() {
                 [WILDCARD_CERT_FOUND]="Wildcard certificate found in /etc/letsencrypt/live/"
                 [FOR_DOMAIN]="for"
                 [START_CRON_ERROR]="Not able to start cron. Please start it manually."
+                [DOMAINS_MUST_BE_UNIQUE]="Error: All domains (panel, subscription, and node) must be unique."
+                [CHOOSE_TEMPLATE_SOURCE]="Select template source:"
+                [SIMPLE_WEB_TEMPLATES]="Simple web templates"
+                [SNI_TEMPLATES]="Sni templates"
+                [CHOOSE_TEMPLATE_OPTION]="Choose option (0-2):"
+                [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
             )
             ;;
         ru)
@@ -262,7 +268,7 @@ set_language() {
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
-                [VERSION_LABEL]="Версия стабильная: %s"
+                [VERSION_LABEL]="Версия: %s"
                 #Menu
                 [MENU_0]="Выход"
                 [MENU_1]="Установить панель и ноду на один сервер"
@@ -443,7 +449,7 @@ set_language() {
                 [LATEST_VERSION]="У вас уже установлена последняя версия скрипта (%s)."
                 [RESTART_REQUIRED]="Пожалуйста, перезапустите скрипт для применения изменений."
                 [LOCAL_FILE_NOT_FOUND]="Локальный файл скрипта не найден, загружаем новую версию..."
-                [UPDATED_RENEW_HOOK]="Обновлен renew_hook для "
+                [UPDATED_RENEW_HOOK]="Обновлен renew_hook"
                 #CLI
                 [RUNNING_CLI]="Запуск Remnawave CLI..."
                 [CLI_SUCCESS]="Remnawave CLI успешно выполнен!"
@@ -469,6 +475,12 @@ set_language() {
                 [WILDCARD_CERT_FOUND]="Wildcard-сертификат найден в /etc/letsencrypt/live/"
                 [FOR_DOMAIN]="для"
                 [START_CRON_ERROR]="Не удалось запустить cron. Пожалуйста, запустите его вручную."
+                [DOMAINS_MUST_BE_UNIQUE]="Ошибка: Все домены (панель, подписка, и нода) должны быть уникальными."
+                [CHOOSE_TEMPLATE_SOURCE]="Выберите источник шаблонов:"
+                [SIMPLE_WEB_TEMPLATES]="Simple web templates"
+                [SNI_TEMPLATES]="SNI templates"
+                [CHOOSE_TEMPLATE_OPTION]="Выберите опцию (0-2):"
+                [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
             )
             ;;
     esac
@@ -543,7 +555,7 @@ start_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+    if docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
@@ -566,7 +578,7 @@ stop_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:dev" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
@@ -818,17 +830,46 @@ spinner() {
   printf "\r\033[K" > /dev/tty
 }
 
+show_template_source_options() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[CHOOSE_TEMPLATE_SOURCE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[SIMPLE_WEB_TEMPLATES]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[SNI_TEMPLATES]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
+}
+
 randomhtml() {
+    local template_source="$1"
+
     cd /opt/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
     
     rm -f main.zip 2>/dev/null
-    rm -rf simple-web-templates-main/ 2>/dev/null
+    rm -rf simple-web-templates-main/ sni-templates-main/ 2>/dev/null
     
     echo -e "${COLOR_YELLOW}${LANG[RANDOM_TEMPLATE]}${COLOR_RESET}"
+    sleep 1
     spinner $$ "${LANG[WAITING]}" &
     spinner_pid=$!
 
-    while ! wget -q --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"; do
+    template_urls=(
+        "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"
+        "https://github.com/SmallPoppa/sni-templates/archive/refs/heads/main.zip"
+    )
+
+    if [ -z "$template_source" ]; then
+        selected_url=${template_urls[$RANDOM % ${#template_urls[@]}]}
+    else
+        if [ "$template_source" = "simple" ]; then
+            selected_url=${template_urls[0]}  # Simple web templates
+        else
+            selected_url=${template_urls[1]}  # Sni templates
+        fi
+    fi
+    
+    while ! wget -q --timeout=30 --tries=10 --retry-connrefused "$selected_url"; do
         echo "${LANG[DOWNLOAD_FAIL]}"
         sleep 3
     done
@@ -836,11 +877,25 @@ randomhtml() {
     unzip -o main.zip &>/dev/null || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
     rm -f main.zip
 
-    cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+    if [[ "$selected_url" == *"cortez24rus"* ]]; then
+        cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        rm -rf assets ".gitattributes" "README.md" "_config.yml" 2>/dev/null
+    else
+        cd sni-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        rm -rf assets "README.md" "index.html" 2>/dev/null
+    fi
 
-    rm -rf assets ".gitattributes" "README.md" "_config.yml"
+    mapfile -t templates < <(find . -maxdepth 1 -type d -not -path . | sed 's|./||')
 
-    RandomHTML=$(for i in *; do echo "$i"; done | shuf -n1 2>&1)
+    RandomHTML="${templates[$RANDOM % ${#templates[@]}]}"
+    
+    if [[ "$selected_url" == *"SmallPoppa"* && "$RandomHTML" == "503 error pages" ]]; then
+        cd "$RandomHTML" || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
+        versions=("v1" "v2")
+        RandomVersion="${versions[$RANDOM % ${#versions[@]}]}"
+        RandomHTML="$RandomHTML/$RandomVersion"
+        cd ..
+    fi
     
     kill "$spinner_pid" 2>/dev/null
     wait "$spinner_pid" 2>/dev/null
@@ -848,19 +903,19 @@ randomhtml() {
     
     echo "${LANG[SELECT_TEMPLATE]}" "${RandomHTML}"
 
-if [[ -d "${RandomHTML}" ]]; then
-    if [[ ! -d "/var/www/html/" ]]; then
-        mkdir -p "/var/www/html/" || { echo "Failed to create /var/www/html/"; exit 1; }
+    if [[ -d "${RandomHTML}" ]]; then
+        if [[ ! -d "/var/www/html/" ]]; then
+            mkdir -p "/var/www/html/" || { echo "Failed to create /var/www/html/"; exit 1; }
+        fi
+        rm -rf /var/www/html/*
+        cp -a "${RandomHTML}"/. "/var/www/html/"
+        echo "${LANG[TEMPLATE_COPY]}"
+    else
+        echo "${LANG[UNPACK_ERROR]}" && exit 1
     fi
-    rm -rf /var/www/html/*
-    cp -a "${RandomHTML}"/. "/var/www/html/"
-    echo "${LANG[TEMPLATE_COPY]}"
-else
-    echo "${LANG[UNPACK_ERROR]}" && exit 1
-fi
 
     cd /opt/
-    rm -rf simple-web-templates-main/
+    rm -rf simple-web-templates-main/ sni-templates-main/
 }
 
 install_packages() {
@@ -884,7 +939,14 @@ install_packages() {
         }
     fi
 
-    locale-gen en_US.UTF-8
+    if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+        if grep -q "^# en_US.UTF-8 UTF-8" /etc/locale.gen; then
+            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+        else
+            echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+        fi
+    fi
+    locale-gen
     update-locale LANG=en_US.UTF-8
     
     if grep -q "Ubuntu" /etc/os-release; then
@@ -1211,7 +1273,7 @@ EOL
     esac
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
         add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
     else
         echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
@@ -1266,7 +1328,7 @@ get_public_key() {
     local panel_domain=$3
     local target_dir=$4
 
-    local api_response=$(make_api_request "GET" "http://$domain_url/api/keygen/get" "$token" "$panel_domain")
+    local api_response=$(make_api_request "GET" "http://$domain_url/api/keygen" "$token" "$panel_domain")
 
     if [ -z "$api_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_PUBLIC_KEY]}${COLOR_RESET}"
@@ -1314,7 +1376,7 @@ get_xray_config() {
     local target_dir=$4
 
     local config_file="$target_dir/config.json"
-    local response=$(make_api_request "GET" "http://$domain_url/api/xray/get-config" "$token" "$panel_domain")
+    local response=$(make_api_request "GET" "http://$domain_url/api/xray" "$token" "$panel_domain")
 
     if [ -z "$response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
@@ -1434,7 +1496,7 @@ EOL
     echo -e "${COLOR_YELLOW}${LANG[CONFIG_CREATED]}${COLOR_RESET}"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$panel_domain" "$new_config")
+    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$panel_domain" "$new_config")
 
     rm -f "$config_file"
 
@@ -1471,7 +1533,7 @@ create_node() {
 EOF
 )
 
-    local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$panel_domain" "$node_data")
+    local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$panel_domain" "$node_data")
 
     if [ -z "$node_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_NODE]}${COLOR_RESET}"
@@ -1527,7 +1589,7 @@ create_host() {
 EOF
 )
 
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$panel_domain" "$host_data")
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$panel_domain" "$host_data")
 
     if [ -z "$host_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
@@ -1590,7 +1652,7 @@ update_node() {
 EOF
 )
 
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/nodes/update" "$token" "$panel_domain" "$node_data")
+    local update_response=$(make_api_request "PATCH" "http://$domain_url/api/nodes" "$token" "$panel_domain" "$node_data")
 
     if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
         printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
@@ -1629,6 +1691,11 @@ install_remnawave() {
         exit 1
     fi
     
+    if [ "$PANEL_DOMAIN" = "$SUB_DOMAIN" ] || [ "$PANEL_DOMAIN" = "$SELFSTEAL_DOMAIN" ] || [ "$SUB_DOMAIN" = "$SELFSTEAL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[DOMAINS_MUST_BE_UNIQUE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
     SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
     SELFSTEAL_BASE_DOMAIN=$(extract_domain "$SELFSTEAL_DOMAIN")
@@ -1685,6 +1752,11 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_ADMIN_ID=
 NODES_NOTIFY_CHAT_ID=
 
+# Optional
+# Only set if you want to use topics
+TELEGRAM_ADMIN_THREAD_ID=
+NODES_NOTIFY_THREAD_ID=
+
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
@@ -1720,6 +1792,16 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
+
+### HWID DEVICE DETECTION AND LIMITATION ###
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -1878,7 +1960,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1900,7 +1982,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1918,7 +2000,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -1970,7 +2052,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
@@ -2309,6 +2391,11 @@ install_remnawave_panel() {
 
     reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
 
+    if [ "$PANEL_DOMAIN" = "$SUB_DOMAIN" ] || [ "$PANEL_DOMAIN" = "$SELFSTEAL_DOMAIN" ] || [ "$SUB_DOMAIN" = "$SELFSTEAL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[DOMAINS_MUST_BE_UNIQUE]}${COLOR_RESET}"
+        exit 1
+    fi
+
     PANEL_BASE_DOMAIN=$(extract_domain "$PANEL_DOMAIN")
     SUB_BASE_DOMAIN=$(extract_domain "$SUB_DOMAIN")
 
@@ -2355,6 +2442,11 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_ADMIN_ID=
 NODES_NOTIFY_CHAT_ID=
 
+# Optional
+# Only set if you want to use topics
+TELEGRAM_ADMIN_THREAD_ID=
+NODES_NOTIFY_THREAD_ID=
+
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
@@ -2390,6 +2482,16 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
+
+### HWID DEVICE DETECTION AND LIMITATION ###
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -2547,7 +2649,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2569,7 +2671,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2587,7 +2689,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -2639,7 +2741,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
@@ -3038,7 +3140,7 @@ else
                 cert_domain="$base_domain"
             fi
             if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3060,7 +3162,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3078,7 +3180,7 @@ else
                     cert_domain="$base_domain"
                 fi
                 if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                     if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
                         echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
                     elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
@@ -3130,7 +3232,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
         fi
         for domain in "${!unique_domains[@]}"; do
             if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up remnawave-nginx'"
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
                 if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
                     echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
                 elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
@@ -3403,7 +3505,7 @@ add_node_to_panel() {
     jq --argjson new_inbound "$new_inbound" '.inbounds += [$new_inbound]' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$PANEL_DOMAIN" "$new_config")
+    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$PANEL_DOMAIN" "$new_config")
 
     rm -f "$config_file"
 
@@ -3457,7 +3559,7 @@ add_node_to_panel() {
     done
 
     printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes/get-all" "$token" "$PANEL_DOMAIN")
+    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN")
     
     if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
         echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
@@ -3496,7 +3598,7 @@ add_node_to_panel() {
         local node_address="$SELFSTEAL_DOMAIN"
 
         printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
+        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
         
         if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
             echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
@@ -3555,7 +3657,7 @@ add_node_to_panel() {
 EOF
 )
 
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$PANEL_DOMAIN" "$host_data")
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$PANEL_DOMAIN" "$host_data")
 
     if [ -z "$host_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
@@ -3706,11 +3808,32 @@ case $OPTION in
         if [ ! -d "/opt/remnawave" ] && [ ! -d "/root/remnawave" ]; then
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[NO_PANEL_NODE_INSTALLED]}${COLOR_RESET}"
+            exit 1
         else
-            randomhtml
-            sleep 2
-            log_clear
-            remnawave_reverse
+            show_template_source_options
+            reading "${LANG[CHOOSE_TEMPLATE_OPTION]}" TEMPLATE_OPTION
+            case $TEMPLATE_OPTION in
+                1)
+                    randomhtml "simple"
+                    sleep 2
+                    log_clear
+                    remnawave_reverse
+                    ;;
+                2)
+                    randomhtml "sni"
+                    sleep 2
+                    log_clear
+                    remnawave_reverse
+                    ;;
+                0)
+                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    exit 0
+                    ;;
+                *)
+                    echo -e "${COLOR_YELLOW}${LANG[INVALID_TEMPLATE_CHOICE]}${COLOR_RESET}"
+                    exit 1
+                    ;;
+            esac
         fi
         ;;
     13)
