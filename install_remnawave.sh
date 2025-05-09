@@ -1746,24 +1746,33 @@ REDIS_PORT=6379
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
-### TELEGRAM ###
-IS_TELEGRAM_ENABLED=false
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_ID=
-NODES_NOTIFY_CHAT_ID=
+### TELEGRAM NOTIFICATIONS ###
+IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
+TELEGRAM_BOT_TOKEN=change_me
+TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
+TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
+
+### Telegram Oauth (Login with Telegram) 
+### true/false 
+TELEGRAM_OAUTH_ENABLED=false
+### Array of Admin Chat Ids. These ids will be allowed to login.
+TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 
 # Optional
 # Only set if you want to use topics
-TELEGRAM_ADMIN_THREAD_ID=
-NODES_NOTIFY_THREAD_ID=
+TELEGRAM_NOTIFY_USERS_THREAD_ID=
+TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
-### RAW DOMAIN, WITHOUT HTTP/HTTPS, DO NOT PLACE / to end of domain ###
-### Used in "profile-web-page-url" response header ###
+### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
+### Used in "profile-web-page-url" response header and in UI/API ###
+### Review documentation: https://remna.st/installation/env#subscription-public-domain
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
+
+### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
 
 ### SWAGGER ###
 SWAGGER_PATH=/docs
@@ -1771,6 +1780,7 @@ SCALAR_PATH=/scalar
 IS_DOCS_ENABLED=true
 
 ### PROMETHEUS ###
+### Metrics are available at /api/metrics
 METRICS_USER=$METRICS_USER
 METRICS_PASS=$METRICS_PASS
 
@@ -2436,24 +2446,33 @@ REDIS_PORT=6379
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
-### TELEGRAM ###
-IS_TELEGRAM_ENABLED=false
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_ID=
-NODES_NOTIFY_CHAT_ID=
+### TELEGRAM NOTIFICATIONS ###
+IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
+TELEGRAM_BOT_TOKEN=change_me
+TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
+TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
+
+### Telegram Oauth (Login with Telegram) 
+### true/false 
+TELEGRAM_OAUTH_ENABLED=false
+### Array of Admin Chat Ids. These ids will be allowed to login.
+TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 
 # Optional
 # Only set if you want to use topics
-TELEGRAM_ADMIN_THREAD_ID=
-NODES_NOTIFY_THREAD_ID=
+TELEGRAM_NOTIFY_USERS_THREAD_ID=
+TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
 ### FRONT_END ###
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
-### RAW DOMAIN, WITHOUT HTTP/HTTPS, DO NOT PLACE / to end of domain ###
-### Used in "profile-web-page-url" response header ###
+### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
+### Used in "profile-web-page-url" response header and in UI/API ###
+### Review documentation: https://remna.st/installation/env#subscription-public-domain
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
+
+### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
 
 ### SWAGGER ###
 SWAGGER_PATH=/docs
@@ -2461,6 +2480,7 @@ SCALAR_PATH=/scalar
 IS_DOCS_ENABLED=true
 
 ### PROMETHEUS ###
+### Metrics are available at /api/metrics
 METRICS_USER=$METRICS_USER
 METRICS_PASS=$METRICS_PASS
 
