@@ -1770,7 +1770,7 @@ FRONT_END_DOMAIN=$PANEL_DOMAIN
 ### SUBSCRIPTION PUBLIC DOMAIN ###
 ### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
 ### Used in "profile-web-page-url" response header and in UI/API ###
-### Review documentation: https://remna.st/installation/env#subscription-public-domain
+### Review documentation: https://remna.st/docs/install/environment-variables#domains
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
 
 ### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
@@ -2472,7 +2472,7 @@ FRONT_END_DOMAIN=$PANEL_DOMAIN
 ### SUBSCRIPTION PUBLIC DOMAIN ###
 ### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
 ### Used in "profile-web-page-url" response header and in UI/API ###
-### Review documentation: https://remna.st/installation/env#subscription-public-domain
+### Review documentation: https://remna.st/docs/install/environment-variables#domains
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
 
 ### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
