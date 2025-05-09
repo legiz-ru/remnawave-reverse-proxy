@@ -1718,14 +1718,6 @@ install_remnawave() {
 
     cat > .env-node <<EOL
 ### APP ###
-APP_PORT=2222
-
-### XRAY ###
-SSL_CERT="PUBLIC KEY FROM REMNAWAVE-PANEL"
-EOL
-
-    cat > .env <<EOL
-### APP ###
 APP_PORT=3000
 METRICS_PORT=3001
 
@@ -1753,6 +1745,7 @@ TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
 TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
 
 ### Telegram Oauth (Login with Telegram) 
+### Docs https://remna.st/docs/features/telegram-oauth
 ### true/false 
 TELEGRAM_OAUTH_ENABLED=false
 ### Array of Admin Chat Ids. These ids will be allowed to login.
@@ -1804,6 +1797,7 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
 
 ### HWID DEVICE DETECTION AND LIMITATION ###
+### Docs https://remna.st/docs/features/hwid-device-limit
 HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
@@ -2453,6 +2447,7 @@ TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
 TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
 
 ### Telegram Oauth (Login with Telegram) 
+### Docs https://remna.st/docs/features/telegram-oauth
 ### true/false 
 TELEGRAM_OAUTH_ENABLED=false
 ### Array of Admin Chat Ids. These ids will be allowed to login.
@@ -2504,6 +2499,7 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
 
 ### HWID DEVICE DETECTION AND LIMITATION ###
+### Docs https://remna.st/docs/features/hwid-device-limit
 HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
