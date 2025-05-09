@@ -1718,6 +1718,14 @@ install_remnawave() {
 
     cat > .env-node <<EOL
 ### APP ###
+APP_PORT=2222
+
+### XRAY ###
+SSL_CERT="PUBLIC KEY FROM REMNAWAVE-PANEL"
+EOL
+
+    cat > .env <<EOL
+### APP ###
 APP_PORT=3000
 METRICS_PORT=3001
 
