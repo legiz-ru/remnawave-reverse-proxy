@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.3b"
+SCRIPT_VERSION="1.6.4"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -855,7 +855,7 @@ randomhtml() {
     spinner_pid=$!
 
     template_urls=(
-        "https://github.com/cortez24rus/xui-rp-web/archive/refs/heads/main.zip"
+        "https://github.com/eGamesAPI/simple-web-templates/archive/refs/heads/main.zip"
         "https://github.com/SmallPoppa/sni-templates/archive/refs/heads/main.zip"
     )
 
@@ -877,7 +877,7 @@ randomhtml() {
     unzip -o main.zip &>/dev/null || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
     rm -f main.zip
 
-    if [[ "$selected_url" == *"cortez24rus"* ]]; then
+    if [[ "$selected_url" == *"eGamesAPI"* ]]; then
         cd simple-web-templates-main/ || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
         rm -rf assets ".gitattributes" "README.md" "_config.yml" 2>/dev/null
     else
@@ -1328,7 +1328,7 @@ get_public_key() {
     local panel_domain=$3
     local target_dir=$4
 
-    local api_response=$(make_api_request "GET" "http://$domain_url/api/keygen/get" "$token" "$panel_domain")
+    local api_response=$(make_api_request "GET" "http://$domain_url/api/keygen" "$token" "$panel_domain")
 
     if [ -z "$api_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_PUBLIC_KEY]}${COLOR_RESET}"
@@ -1376,7 +1376,7 @@ get_xray_config() {
     local target_dir=$4
 
     local config_file="$target_dir/config.json"
-    local response=$(make_api_request "GET" "http://$domain_url/api/xray/get-config" "$token" "$panel_domain")
+    local response=$(make_api_request "GET" "http://$domain_url/api/xray" "$token" "$panel_domain")
 
     if [ -z "$response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
@@ -1496,7 +1496,7 @@ EOL
     echo -e "${COLOR_YELLOW}${LANG[CONFIG_CREATED]}${COLOR_RESET}"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$panel_domain" "$new_config")
+    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$panel_domain" "$new_config")
 
     rm -f "$config_file"
 
@@ -1533,7 +1533,7 @@ create_node() {
 EOF
 )
 
-    local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$panel_domain" "$node_data")
+    local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$panel_domain" "$node_data")
 
     if [ -z "$node_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_NODE]}${COLOR_RESET}"
@@ -1589,7 +1589,7 @@ create_host() {
 EOF
 )
 
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$panel_domain" "$host_data")
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$panel_domain" "$host_data")
 
     if [ -z "$host_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
@@ -1652,7 +1652,7 @@ update_node() {
 EOF
 )
 
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/nodes/update" "$token" "$panel_domain" "$node_data")
+    local update_response=$(make_api_request "PATCH" "http://$domain_url/api/nodes" "$token" "$panel_domain" "$node_data")
 
     if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
         printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
@@ -1746,11 +1746,23 @@ REDIS_PORT=6379
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
-### TELEGRAM ###
-IS_TELEGRAM_ENABLED=false
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_ID=
-NODES_NOTIFY_CHAT_ID=
+### TELEGRAM NOTIFICATIONS ###
+IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
+TELEGRAM_BOT_TOKEN=change_me
+TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
+TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
+
+### Telegram Oauth (Login with Telegram) 
+### Docs https://remna.st/docs/features/telegram-oauth
+### true/false 
+TELEGRAM_OAUTH_ENABLED=false
+### Array of Admin Chat Ids. These ids will be allowed to login.
+TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
+
+# Optional
+# Only set if you want to use topics
+TELEGRAM_NOTIFY_USERS_THREAD_ID=
+TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
 # Optional
 # Only set if you want to use topics
@@ -1761,9 +1773,12 @@ NODES_NOTIFY_THREAD_ID=
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
-### RAW DOMAIN, WITHOUT HTTP/HTTPS, DO NOT PLACE / to end of domain ###
-### Used in "profile-web-page-url" response header ###
+### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
+### Used in "profile-web-page-url" response header and in UI/API ###
+### Review documentation: https://remna.st/docs/install/environment-variables#domains
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
+
+### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
 
 ### SWAGGER ###
 SWAGGER_PATH=/docs
@@ -1771,6 +1786,7 @@ SCALAR_PATH=/scalar
 IS_DOCS_ENABLED=true
 
 ### PROMETHEUS ###
+### Metrics are available at /api/metrics
 METRICS_USER=$METRICS_USER
 METRICS_PASS=$METRICS_PASS
 
@@ -1794,6 +1810,7 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
 
 ### HWID DEVICE DETECTION AND LIMITATION ###
+### Docs https://remna.st/docs/features/hwid-device-limit
 HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
@@ -2111,9 +2128,8 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     hostname: remnawave-subscription-page
     restart: always
     environment:
-      - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
-      - REQUEST_REMNAWAVE_SCHEME=http
-      - SUBSCRIPTION_PAGE_PORT=3010
+      - REMNAWAVE_PANEL_URL=http://remnawave:3000
+      - APP_PORT=3010
       - META_TITLE=Remnawave Subscription
       - META_DESCRIPTION=page
     ports:
@@ -2436,11 +2452,23 @@ REDIS_PORT=6379
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
-### TELEGRAM ###
-IS_TELEGRAM_ENABLED=false
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_ID=
-NODES_NOTIFY_CHAT_ID=
+### TELEGRAM NOTIFICATIONS ###
+IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
+TELEGRAM_BOT_TOKEN=change_me
+TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
+TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
+
+### Telegram Oauth (Login with Telegram) 
+### Docs https://remna.st/docs/features/telegram-oauth
+### true/false 
+TELEGRAM_OAUTH_ENABLED=false
+### Array of Admin Chat Ids. These ids will be allowed to login.
+TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
+
+# Optional
+# Only set if you want to use topics
+TELEGRAM_NOTIFY_USERS_THREAD_ID=
+TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
 # Optional
 # Only set if you want to use topics
@@ -2451,9 +2479,12 @@ NODES_NOTIFY_THREAD_ID=
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
-### RAW DOMAIN, WITHOUT HTTP/HTTPS, DO NOT PLACE / to end of domain ###
-### Used in "profile-web-page-url" response header ###
+### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
+### Used in "profile-web-page-url" response header and in UI/API ###
+### Review documentation: https://remna.st/docs/install/environment-variables#domains
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
+
+### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
 
 ### SWAGGER ###
 SWAGGER_PATH=/docs
@@ -2461,6 +2492,7 @@ SCALAR_PATH=/scalar
 IS_DOCS_ENABLED=true
 
 ### PROMETHEUS ###
+### Metrics are available at /api/metrics
 METRICS_USER=$METRICS_USER
 METRICS_PASS=$METRICS_PASS
 
@@ -2484,6 +2516,7 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
 
 ### HWID DEVICE DETECTION AND LIMITATION ###
+### Docs https://remna.st/docs/features/hwid-device-limit
 HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
@@ -2795,9 +2828,8 @@ SUB_CERT_DOMAIN="$SUB_DOMAIN"
     hostname: remnawave-subscription-page
     restart: always
     environment:
-      - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
-      - REQUEST_REMNAWAVE_SCHEME=http
-      - SUBSCRIPTION_PAGE_PORT=3010
+      - REMNAWAVE_PANEL_URL=http://remnawave:3000
+      - APP_PORT=3010
       - META_TITLE=Remnawave Subscription
       - META_DESCRIPTION=page
     ports:
@@ -3505,7 +3537,7 @@ add_node_to_panel() {
     jq --argjson new_inbound "$new_inbound" '.inbounds += [$new_inbound]' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
 
     local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "POST" "http://$domain_url/api/xray/update-config" "$token" "$PANEL_DOMAIN" "$new_config")
+    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$PANEL_DOMAIN" "$new_config")
 
     rm -f "$config_file"
 
@@ -3559,7 +3591,7 @@ add_node_to_panel() {
     done
 
     printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes/get-all" "$token" "$PANEL_DOMAIN")
+    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN")
     
     if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
         echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
@@ -3598,7 +3630,7 @@ add_node_to_panel() {
         local node_address="$SELFSTEAL_DOMAIN"
 
         printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes/create" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
+        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
         
         if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
             echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
@@ -3657,7 +3689,7 @@ add_node_to_panel() {
 EOF
 )
 
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts/create" "$token" "$PANEL_DOMAIN" "$host_data")
+    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$PANEL_DOMAIN" "$host_data")
 
     if [ -z "$host_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
