@@ -2320,7 +2320,10 @@ EOL
     sleep 20
 	
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
-    until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
+    until curl -s "http://$domain_url/api/auth/register" \
+        --header 'X-Forwarded-For: 127.0.0.1' \
+        --header 'X-Forwarded-Proto: https' \
+        > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
         sleep 10
     done
@@ -2984,7 +2987,10 @@ EOL
 	
     local domain_url="127.0.0.1:3000"
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
-    until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
+    until curl -s "http://$domain_url/api/auth/register" \
+        --header 'X-Forwarded-For: 127.0.0.1' \
+        --header 'X-Forwarded-Proto: https' \
+        > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
         sleep 5
     done
