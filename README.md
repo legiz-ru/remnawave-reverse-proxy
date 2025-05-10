@@ -2,7 +2,7 @@
 ### Server Using NGINX Reverse Proxy
 This script is designed to streamline the setup of a reverse proxy server using NGINX and Xray, as well as to automate the installation of the Remnawave control panel and node. In this configuration, Xray operates directly on port 443, forwarding traffic through a socket that NGINX listens to. This approach minimizes unnecessary TCP overhead, delivering improved performance and connection reliability.
 > [!IMPORTANT]
-> This script has been tested in a KVM virtualization environment. For proper operation, you will need your own domain, which must be linked to Cloudflare. It is recommended to run the script with root privileges on a freshly installed system.
+> Supports Debian and Ubuntu. The script has been tested in a KVM virtualization environment. For proper operation, you will need your own domain. It is recommended to run it with root privileges on a freshly installed system.
 
 The script supports deployment on either a single server (with both the panel and node together) or two separate servers, depending on your needs:
 
@@ -11,21 +11,30 @@ The script supports deployment on either a single server (with both the panel an
 - Node Server: Hosts the Xray node along with a Self Steal stub for VLESS REALITY.
 To ensure proper operation, you need to prepare three domains (or subdomains) in advance: the first will be used for the control panel, the second for handling subscriptions, and the third for the Self Steal stub site, which is hosted on the node server.
 -----
-### Cloudflare Configuration
-1. Configure Cloudflare:
-   - Link your domain to Cloudflare.
-   - Add the following DNS records:
+### Domain Configuration
+The script supports two methods of domain configuration: via Cloudflare or using ACME with your hosting provider.
+
+### DNS Records Setup for Panel + Node on the Same Server
 
 | Type  | Name              | Content          | Proxy status  |
 | ----- | ----------------- | ---------------- | ------------- |
 | A     | example.com       | your_server_ip   | DNS only      |
 | CNAME | panel.example.com | example.com      | DNS only      |
 | CNAME | sub.example.com   | example.com      | DNS only      |
+| CNAME | node.example.com  | example.com      | DNS only      |
 
-2. SSL/TLS settings in Cloudflare:
-   - Go to SSL/TLS > Overview and select Full for the Configure parameter.
-   - Set Minimum TLS Version to TLS 1.3.
-   - Enable TLS 1.3 (true) in the Edge Certificates section.
+> [!IMPORTANT]
+> The node.example.com record is not mandatory for a selfsteal node — you can also use example.com for selfsteal.
+
+### DNS Records Setup for Panel and Node on Separate Servers
+
+| Type  | Name              | Content                 | Proxy status  |
+| ----- | ----------------- | ----------------------- | ------------- |
+| A     | example.com       | your_server_ip          | DNS only      |
+| CNAME | panel.example.com | example.com             | DNS only      |
+| CNAME | sub.example.com   | example.com             | DNS only      |
+| A     | node.example.com  | your_server_ip_vps_node | DNS only      |
+
 -----
 ### Installation Guidelines
 ### 1. Single Server Setup:
@@ -53,7 +62,6 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
    - Support for automatic configuration updates via subscription and JSON subscription with the ability to convert to formats for popular applications.
 2. NGINX reverse proxy setup in combination with Xray.
 3. Security measures:
-   - Configuration of Cloudflare SSL certificates with automatic renewal to secure connections.
    - UFW (Uncomplicated Firewall) setup for access management.
    - Disabling IPv6 to prevent potential vulnerabilities.
    - Selecting a random website template from an array.
@@ -67,3 +75,15 @@ To set up the server, run this command on it:
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy_en.png" alt="Image"></a></p>
+
+-----
+> [!IMPORTANT]
+> This repository is intended solely for educational purposes and for studying the principles of reverse proxy servers and network security. The script demonstrates the setup of a proxy server using NGINX for reverse proxy, traffic management, and attack protection.
+>
+>We strongly remind you that using this tool to bypass network restrictions or censorship is illegal in certain countries that have laws regulating the use of technologies to circumvent internet restrictions.
+>
+>This project is not intended for use in ways that violate information protection laws or interfere with censorship mechanisms. We take no responsibility for any legal consequences arising from the use of this script.
+>
+>Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.
+>
+>If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.
