@@ -2833,8 +2833,8 @@ SUB_CERT_DOMAIN="$SUB_DOMAIN"
     environment:
       - REMNAWAVE_PANEL_URL=http://remnawave:3000
       - APP_PORT=3010
-      - META_TITLE=Remnawave Subscription
-      - META_DESCRIPTION=page
+      - META_TITLE="Remnawave Subscription"
+      - META_DESCRIPTION="page"
     ports:
       - '127.0.0.1:3010:3010'
     networks:
