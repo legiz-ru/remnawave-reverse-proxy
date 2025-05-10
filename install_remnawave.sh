@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.3b"
+SCRIPT_VERSION="1.6.4"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -2123,9 +2123,8 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     hostname: remnawave-subscription-page
     restart: always
     environment:
-      - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
-      - REQUEST_REMNAWAVE_SCHEME=http
-      - SUBSCRIPTION_PAGE_PORT=3010
+      - REMNAWAVE_PANEL_URL=http://remnawave:3000
+      - APP_PORT=3010
       - META_TITLE=Remnawave Subscription
       - META_DESCRIPTION=page
     ports:
@@ -2819,9 +2818,8 @@ SUB_CERT_DOMAIN="$SUB_DOMAIN"
     hostname: remnawave-subscription-page
     restart: always
     environment:
-      - REMNAWAVE_PLAIN_DOMAIN=remnawave:3000
-      - REQUEST_REMNAWAVE_SCHEME=http
-      - SUBSCRIPTION_PAGE_PORT=3010
+      - REMNAWAVE_PANEL_URL=http://remnawave:3000
+      - APP_PORT=3010
       - META_TITLE=Remnawave Subscription
       - META_DESCRIPTION=page
     ports:
