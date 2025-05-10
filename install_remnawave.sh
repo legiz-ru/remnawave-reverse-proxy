@@ -2150,7 +2150,7 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     env_file:
       - .env-node
     ports:
-      - '0.0.0.0443:443'
+      - '0.0.0.0:443:443'
     volumes:
       - /dev/shm:/dev/shm
     networks:
