@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.4"
+SCRIPT_VERSION="1.6.5"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -49,26 +49,39 @@ set_language() {
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Version: %s"
                 [MENU_0]="Exit"
-                [MENU_1]="Install panel and node on one server"
-                [MENU_2]="Installing only the panel"
-                [MENU_3]="Add node to panel"
-                [MENU_4]="Installing only the node"
-                [MENU_5]="Reinstall panel/node"
-                [MENU_6]="Start panel/node"
-                [MENU_7]="Stop panel/node"
-                [MENU_8]="Update panel/node"
-                [MENU_9]="Remnawave CLI"
-                [MENU_10]="Enable IPv6"
-                [MENU_11]="Disable IPv6"
-                [MENU_12]="Install random template for selfsteal node"
-                [MENU_13]="Check for updates script"
-                [PROMPT_ACTION]="Select action (0-13):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-13."
+                [MENU_1]="Install Remnawave Components"
+                [MENU_2]="Reinstall panel/node"
+                [MENU_3]="Start panel/node"
+                [MENU_4]="Stop panel/node"
+                [MENU_5]="Update panel/node"
+                [MENU_6]="Remnawave CLI"
+                [MENU_7]="Manage IPv6"
+                [MENU_8]="Install random template for selfsteal node"
+                [MENU_9]="Check for updates script"
+                [MENU_10]="Manage panel access (Only for panel + node)"
+                [PROMPT_ACTION]="Select action (0-10):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-10."
                 [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
                 [CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?"
+                #Install Submenu
+                [INSTALL_MENU_TITLE]="Install Remnawave Components"
+                [INSTALL_PANEL_NODE]="Install panel and node on one server"
+                [INSTALL_PANEL]="Install only the panel"
+                [INSTALL_ADD_NODE]="Add node to panel"
+                [INSTALL_NODE]="Install only the node"
+                [INSTALL_EXIT]="Exit"
+                [INSTALL_PROMPT]="Select action (0-3):"
+                [INSTALL_INVALID_CHOICE]="Invalid choice. Please select 0-3."
+                #IPv6 Submenu
+                [IPV6_MENU_TITLE]="Manage IPv6"
+                [IPV6_ENABLE]="Enable IPv6"
+                [IPV6_DISABLE]="Disable IPv6"
+                [IPV6_EXIT]="Exit"
+                [IPV6_PROMPT]="Select action (0-2):"
+                [IPV6_INVALID_CHOICE]="Invalid choice. Please select 0-2."
                 #Remna
                 [INSTALL_PACKAGES]="Installing required packages..."
                 [INSTALLING]="Installing panel and node"
@@ -148,8 +161,8 @@ set_language() {
                 #Reinstall
                 [REINSTALL_WARNING]="All data will be deleted from the server. Are you sure? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
-                [REINSTALL_PROMPT]="Select action (1-4):"
-                [INVALID_REINSTALL_CHOICE]="Invalid choice. Please select 1-4."
+                [REINSTALL_PROMPT]="Select action (0-3):"
+                [INVALID_REINSTALL_CHOICE]="Invalid choice. Please select 0-3."
                 [POST_PANEL_MESSAGE]="Panel successfully installed!"
                 [POST_PANEL_INSTRUCTION]="To install the node, follow these steps:\n1. Run this script on the server where the node will be installed.\n2. Select 'Install only the node'."
                 [SELFSTEAL_PROMPT]="Enter the selfsteal domain for the node (e.g. node.example.com):"
@@ -260,6 +273,13 @@ set_language() {
                 [SNI_TEMPLATES]="Sni templates"
                 [CHOOSE_TEMPLATE_OPTION]="Choose option (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
+                [PORT_8443_OPEN]="Open port 8443 for panel access"
+                [PORT_8443_CLOSE]="Close port 8443 for panel access"
+                [OPEN_PANEL_LINK]="Your panel access link:"
+                [PORT_8443_WARNING]="Don't forget, port 8443 is now open to the world. After fixing the panel, select the option to close port 8443."
+                [PORT_8443_CLOSED]="Port 8443 has been closed."
+                [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
+                [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
             )
             ;;
         ru)
@@ -271,26 +291,39 @@ set_language() {
                 [VERSION_LABEL]="Версия: %s"
                 #Menu
                 [MENU_0]="Выход"
-                [MENU_1]="Установить панель и ноду на один сервер"
-                [MENU_2]="Установить только панель"
-                [MENU_3]="Добавить ноду в панель"
-                [MENU_4]="Установить только ноду"
-                [MENU_5]="Переустановить панель/ноду"
-                [MENU_6]="Запустить панель/ноду"
-                [MENU_7]="Остановить панель/ноду"
-                [MENU_8]="Обновить панель/ноду"
-                [MENU_9]="Remnawave CLI"
-                [MENU_10]="Включить IPv6"
-                [MENU_11]="Отключить IPv6"
-                [MENU_12]="Установить случайный шаблон для selfsteal ноды"
-                [MENU_13]="Проверить обновления скрипта"
-                [PROMPT_ACTION]="Выберите действие (0-13):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-13."
+                [MENU_1]="Установка компонентов Remnawave"
+                [MENU_2]="Переустановить панель/ноду"
+                [MENU_3]="Запустить панель/ноду"
+                [MENU_4]="Остановить панель/ноду"
+                [MENU_5]="Обновить панель/ноду"
+                [MENU_6]="Remnawave CLI"
+                [MENU_7]="Управление IPv6"
+                [MENU_8]="Установить случайный шаблон для selfsteal ноды"
+                [MENU_9]="Проверить обновления скрипта"
+                [MENU_10]="Управление доступом к панели (Только для панели + нода)"
+                [PROMPT_ACTION]="Выберите действие (0-10):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-10."
                 [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
                 [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
                 [CONFIRM_SERVER_PANEL]="Вы уверены, что находитесь на сервере с установленной панелью?"
+                #Install Submenu
+                [INSTALL_MENU_TITLE]="Установка компонентов Remnawave"
+                [INSTALL_PANEL_NODE]="Установить панель и ноду на один сервер"
+                [INSTALL_PANEL]="Установить только панель"
+                [INSTALL_ADD_NODE]="Добавить ноду в панель"
+                [INSTALL_NODE]="Установить только ноду"
+                [INSTALL_EXIT]="Выход"
+                [INSTALL_PROMPT]="Выберите действие (0-4):"
+                [INSTALL_INVALID_CHOICE]="Неверный выбор. Выберите 0-4."
+                #IPv6 Submenu
+                [IPV6_MENU_TITLE]="Управление IPv6"
+                [IPV6_ENABLE]="Включить IPv6"
+                [IPV6_DISABLE]="Отключить IPv6"
+                [IPV6_EXIT]="Выход"
+                [IPV6_PROMPT]="Выберите действие (0-2):"
+                [IPV6_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
                 #Remna
                 [INSTALL_PACKAGES]="Установка необходимых пакетов..."
                 [INSTALLING]="Установка панели и ноды"
@@ -370,8 +403,8 @@ set_language() {
                 #Reinstall
                 [REINSTALL_WARNING]="Все данные будут удалены с сервера. Вы уверены? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
-                [REINSTALL_PROMPT]="Выберите действие (1-4):"
-                [INVALID_REINSTALL_CHOICE]="Неверный выбор. Выберите 1-4."
+                [REINSTALL_PROMPT]="Выберите действие (0-3):"
+                [INVALID_REINSTALL_CHOICE]="Неверный выбор. Выберите 0-3."
                 [POST_PANEL_MESSAGE]="Панель успешно установлена!"
                 [POST_PANEL_INSTRUCTION]="Для установки ноды выполните следующие шаги:\n1. Запустите этот скрипт на сервере, где будет установлена нода.\n2. Выберите 'Установить только ноду'."
                 [SELFSTEAL]="Введите selfsteal домен для ноды, который указали при установке панели:"
@@ -481,6 +514,13 @@ set_language() {
                 [SNI_TEMPLATES]="SNI templates"
                 [CHOOSE_TEMPLATE_OPTION]="Выберите опцию (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
+                [PORT_8443_OPEN]="Открыть доступ к панели на порту 8443"
+                [PORT_8443_CLOSE]="Закрыть доступ к панели на порту 8443"
+                [OPEN_PANEL_LINK]="Ваша ссылка для входа в панель:"
+                [PORT_8443_WARNING]="Не забудьте, что порт 8443 сейчас открыт для внешнего доступа. После восстановления панели выберите пункт закрытия порта 8443."
+                [PORT_8443_CLOSED]="Порт 8443 закрыт."
+                [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
+                [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
             )
             ;;
     esac
@@ -715,36 +755,180 @@ show_menu() {
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
     printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
     echo -e ""
-    echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}" # Install Remnawave Components
+    echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}" # Reinstall panel/node
     echo -e ""
-    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_3]}${COLOR_RESET}" # Start panel/node
+    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}" # Stop panel/node
+    echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}" # Update panel/node
+    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}" # Remnawave CLI
     echo -e ""
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Install random template
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_10]}${COLOR_RESET}" # Manage panel access
     echo -e ""
-    echo -e "${COLOR_YELLOW}13. ${LANG[MENU_13]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
+}
+
+show_install_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[INSTALL_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[INSTALL_PANEL_NODE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[INSTALL_PANEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[INSTALL_ADD_NODE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[INSTALL_NODE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[INSTALL_EXIT]}${COLOR_RESET}"
+    echo -e ""
+}
+
+manage_install() {
+    show_install_menu
+    reading "${LANG[INSTALL_PROMPT]}" INSTALL_OPTION
+    case $INSTALL_OPTION in
+        1)
+            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                install_packages
+            fi
+            installation
+            sleep 2
+            log_clear
+            ;;
+        2)
+            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                install_packages
+            fi
+            installation_panel
+            sleep 2
+            log_clear
+            ;;
+        3)
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET} ${COLOR_YELLOW}${LANG[WARNING_NODE_PANEL]}${COLOR_RESET}"
+            reading "${LANG[CONFIRM_SERVER_PANEL]}" confirm
+            if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                add_node_to_panel
+                sleep 2
+                log_clear
+            else
+                echo -e "${COLOR_YELLOW}${LANG[INSTALL_EXIT]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+            fi
+            ;;
+        4)
+            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                install_packages
+            fi
+            installation_node
+            sleep 2
+            log_clear
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[INSTALL_EXIT]}${COLOR_RESET}"
+            log_clear
+            remnawave_reverse
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[INSTALL_INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_install
+            ;;
+    esac
+}
+
+manage_panel_access() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACCESS_OPTION
+    case $ACCESS_OPTION in
+        1)
+            open_panel_access
+            sleep 2
+            log_clear
+            manage_panel_access
+            ;;
+        2)
+            close_panel_access
+            sleep 2
+            log_clear
+            manage_panel_access
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[MENU_0]}${COLOR_RESET}"
+            log_clear
+            remnawave_reverse
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[IPV6_INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_panel_access
+            ;;
+    esac
 }
 
 show_reinstall_options() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[REINSTALL_TYPE_TITLE]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. ${LANG[MENU_4]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}1. ${LANG[INSTALL_PANEL_NODE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[INSTALL_PANEL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[INSTALL_NODE]}${COLOR_RESET}"
     echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
+}
+
+show_ipv6_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[IPV6_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[IPV6_ENABLE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[IPV6_DISABLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[IPV6_EXIT]}${COLOR_RESET}"
+    echo -e ""
+}
+
+manage_ipv6() {
+    show_ipv6_menu
+    reading "${LANG[IPV6_PROMPT]}" IPV6_OPTION
+    case $IPV6_OPTION in
+        1)
+            enable_ipv6
+            sleep 2
+            log_clear
+            manage_ipv6
+            ;;
+        2)
+            disable_ipv6
+            sleep 2
+            log_clear
+            manage_ipv6
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[IPV6_EXIT]}${COLOR_RESET}"
+            log_clear
+            remnawave_reverse
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[IPV6_INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_ipv6
+            ;;
+    esac
 }
 
 reinstall_remnawave() {
@@ -762,33 +946,34 @@ choose_reinstall_type() {
     show_reinstall_options
     reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
     case $REINSTALL_OPTION in
-        1)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
-            fi
-            installation
-            ;;
-        2)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
-            fi
-            installation_panel
-            ;;
-        3)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
-            fi
-            installation_node
-            ;;
-        4)
-            echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
-            exit 0
-            ;;
-        *)
-            echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
-            exit 1
-            ;;
-    esac
+        1|2|3)
+                echo -e "${COLOR_RED}${LANG[REINSTALL_WARNING]}${COLOR_RESET}"
+                read confirm
+                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                    reinstall_remnawave
+                    if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                        install_packages
+                    fi
+                    case $REINSTALL_OPTION in
+                        1) installation ;;
+                        2) installation_panel ;;
+                        3) installation_node ;;
+                    esac
+                    log_clear
+                else
+                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    exit 0
+                fi
+                ;;
+            0)
+                echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                remnawave_reverse
+                ;;
+            *)
+                echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
+                exit 1
+                ;;
+        esac
 }
 
 add_cron_rule() {
@@ -1515,7 +1700,7 @@ create_node() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
-    local node_address=${4:-"remnanode"}
+    local node_address="${4:-$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)}"
 
     local node_data=$(cat <<EOF
 {
@@ -1898,6 +2083,7 @@ services:
     image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
+    network_mode: host
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -2111,8 +2297,6 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
-    networks:
-      - remnawave-network
     depends_on:
       - remnawave
       - remnawave-subscription-page
@@ -2147,14 +2331,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     container_name: remnanode
     hostname: remnanode
     restart: always
+    network_mode: host
     env_file:
       - .env-node
-    ports:
-      - '0.0.0.0:443:443'
     volumes:
       - /dev/shm:/dev/shm
-    networks:
-      - remnawave-network
     logging:
       driver: json-file
       options:
@@ -2180,11 +2361,11 @@ EOL
 
     cat > /opt/remnawave/nginx.conf <<EOL
 upstream remnawave {
-    server remnawave:3000;
+    server 127.0.0.1:3000;
 }
 
 upstream json {
-    server remnawave-subscription-page:3010;
+    server 127.0.0.1:3010;
 }
 
 map \$http_upgrade \$connection_upgrade {
@@ -2226,6 +2407,7 @@ resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
+    listen 8443 ssl;
     http2 on;
 
     ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
@@ -2312,6 +2494,9 @@ EOL
 
     spinner $! "${LANG[WAITING]}"
 
+    remnawave_network_subnet=$(docker network inspect remnawave-network | grep -oP '"Subnet": "\K[^"]+')
+    ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp
+     
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
@@ -2388,6 +2573,8 @@ EOL
 
     randomhtml
 }
+
+
 
 install_remnawave_panel() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
@@ -3716,7 +3903,57 @@ EOF
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
 }
 
+open_panel_access() {
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
 
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
+    if [ ! -f "nginx.conf" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
+        exit 1
+    fi
+
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+
+    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "$dir/nginx.conf" | grep "~*\w\+.*=")
+    cookies_random1=$(echo "$cookie_line" | grep -oP '~*\K\w+(?==)')
+    cookies_random2=$(echo "$cookie_line" | grep -oP '=\K\w+(?=")')
+
+    if [ -z "$PANEL_DOMAIN" ] || [ -z "$cookies_random1" ] || [ -z "$cookies_random2" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
+    ufw allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+    ufw reload > /dev/null 2>&1
+    sleep 1
+
+    local panel_link="https://${PANEL_DOMAIN}:8443/auth/login?${cookies_random1}=${cookies_random2}"
+    echo -e "${COLOR_YELLOW}${LANG[OPEN_PANEL_LINK]}${COLOR_RESET}"
+    echo -e "${COLOR_WHITE}${panel_link}${COLOR_RESET}"
+    echo -e "${COLOR_RED}${LANG[PORT_8443_WARNING]}${COLOR_RESET}"
+
+    sleep 2
+    log_clear
+}
+
+close_panel_access() {
+    echo -e "${COLOR_YELLOW}${LANG[CLOSE_PANEL_ACCESS]}${COLOR_RESET}"
+    ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+    ufw reload > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    sleep 2
+    log_clear
+}
 
 log_entry
 check_root
@@ -3751,98 +3988,40 @@ reading "${LANG[PROMPT_ACTION]}" OPTION
 
 case $OPTION in
     1)
-        if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-            install_packages
-        fi
-        installation
-        log_clear
+        manage_install
         ;;
     2)
-        if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-            install_packages
-        fi
-        installation_panel
-        log_clear
+        choose_reinstall_type
         ;;
     3)
-        add_node_to_panel
-        log_clear
-        ;;
-    4)
-        if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-            install_packages
-        fi
-        installation_node
-        log_clear
-        ;;
-    5)
-        show_reinstall_options
-        reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
-        case $REINSTALL_OPTION in
-            1|2|3)
-                echo -e "${COLOR_RED}${LANG[REINSTALL_WARNING]}${COLOR_RESET}"
-                read confirm
-                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-                    reinstall_remnawave
-                    if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                        install_packages
-                    fi
-                    case $REINSTALL_OPTION in
-                        1) installation ;;
-                        2) installation_panel ;;
-                        3) installation_node ;;
-                    esac
-                    log_clear
-                else
-                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
-                    exit 0
-                fi
-                ;;
-            4)
-                echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
-                exit 0
-                ;;
-            *)
-                echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
-                exit 1
-                ;;
-        esac
-        ;;
-    6)
         start_panel_node
         sleep 2
         log_clear
         remnawave_reverse
         ;;
-    7)
+    4)
         stop_panel_node
         sleep 2
         log_clear
         remnawave_reverse
         ;;
-    8)
+    5)
         update_panel_node
         sleep 2
         log_clear
         remnawave_reverse
         ;;
-    9)
+    6)
         run_remnawave_cli
         log_clear
         ;;
-    10)
-        enable_ipv6
+    7)
+        manage_ipv6
         sleep 2
         log_clear
         remnawave_reverse
         ;;
-    11)
-        disable_ipv6
-        sleep 2
-        log_clear
-        remnawave_reverse
-        ;;
-    12)
+    8)
         if [ ! -d "/opt/remnawave" ] && [ ! -d "/root/remnawave" ]; then
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[NO_PANEL_NODE_INSTALLED]}${COLOR_RESET}"
@@ -3865,7 +4044,7 @@ case $OPTION in
                     ;;
                 0)
                     echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
-                    exit 0
+                    remnawave_reverse
                     ;;
                 *)
                     echo -e "${COLOR_YELLOW}${LANG[INVALID_TEMPLATE_CHOICE]}${COLOR_RESET}"
@@ -3874,7 +4053,10 @@ case $OPTION in
             esac
         fi
         ;;
-    13)
+    9)
+        manage_panel_access
+        ;;
+    10)
         update_remnawave_reverse
         sleep 2
         log_clear
