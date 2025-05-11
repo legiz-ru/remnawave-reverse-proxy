@@ -18,7 +18,7 @@ load_language() {
         case $saved_lang in
             1) set_language en ;;
             2) set_language ru ;;
-            *) 
+            *)
                 rm -f "$LANG_FILE"
                 return 1 ;;
         esac
@@ -845,10 +845,10 @@ randomhtml() {
     local template_source="$1"
 
     cd /opt/ || { echo "${LANG[UNPACK_ERROR]}"; exit 1; }
-    
+
     rm -f main.zip 2>/dev/null
     rm -rf simple-web-templates-main/ sni-templates-main/ 2>/dev/null
-    
+
     echo -e "${COLOR_YELLOW}${LANG[RANDOM_TEMPLATE]}${COLOR_RESET}"
     sleep 1
     spinner $$ "${LANG[WAITING]}" &
@@ -868,7 +868,7 @@ randomhtml() {
             selected_url=${template_urls[1]}  # Sni templates
         fi
     fi
-    
+
     while ! wget -q --timeout=30 --tries=10 --retry-connrefused "$selected_url"; do
         echo "${LANG[DOWNLOAD_FAIL]}"
         sleep 3
@@ -888,7 +888,7 @@ randomhtml() {
     mapfile -t templates < <(find . -maxdepth 1 -type d -not -path . | sed 's|./||')
 
     RandomHTML="${templates[$RANDOM % ${#templates[@]}]}"
-    
+
     if [[ "$selected_url" == *"SmallPoppa"* && "$RandomHTML" == "503 error pages" ]]; then
         cd "$RandomHTML" || { echo "${LANG[UNPACK_ERROR]}"; exit 0; }
         versions=("v1" "v2")
@@ -896,11 +896,11 @@ randomhtml() {
         RandomHTML="$RandomHTML/$RandomVersion"
         cd ..
     fi
-    
+
     kill "$spinner_pid" 2>/dev/null
     wait "$spinner_pid" 2>/dev/null
     printf "\r\033[K" > /dev/tty
-    
+
     echo "${LANG[SELECT_TEMPLATE]}" "${RandomHTML}"
 
     if [[ -d "${RandomHTML}" ]]; then
@@ -922,7 +922,7 @@ install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
     apt-get update -y
     apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk
-    
+
     if ! dpkg -l | grep -q '^ii.*cron '; then
         apt-get install -y cron
     fi
@@ -948,7 +948,7 @@ install_packages() {
     fi
     locale-gen
     update-locale LANG=en_US.UTF-8
-    
+
     if grep -q "Ubuntu" /etc/os-release; then
         install -m 0755 -d /etc/apt/keyrings
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null
@@ -977,7 +977,7 @@ install_packages() {
     ufw allow 22/tcp comment 'SSH'
     ufw allow 443/tcp comment 'HTTPS'
     ufw --force enable
-    
+
     # Unattended-upgrade
     echo 'Unattended-Upgrade::Mail "root";' >> /etc/apt/apt.conf.d/50unattended-upgrades
     echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
@@ -1132,7 +1132,7 @@ check_domain() {
 is_wildcard_cert() {
     local domain=$1
     local cert_path="/etc/letsencrypt/live/$domain/fullchain.pem"
-    
+
     if [ ! -f "$cert_path" ]; then
         return 1
     fi
@@ -1147,7 +1147,7 @@ is_wildcard_cert() {
 check_cert_expiry() {
     local domain=$1
     local cert_path="/etc/letsencrypt/live/$domain/fullchain.pem"
-    
+
     if [ ! -f "$cert_path" ]; then
         echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}"
         return 1
@@ -1156,14 +1156,14 @@ check_cert_expiry() {
     local expiry_date=$(openssl x509 -enddate -noout -in "$cert_path" | cut -d= -f2)
     local expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null)
     local current_epoch=$(date +%s)
-    
+
     if [ -z "$expiry_epoch" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_PARSING_CERT]}${COLOR_RESET}"
         return 1
     fi
 
     local days_left=$(( (expiry_epoch - current_epoch) / 86400 ))
-    
+
     echo "$days_left"
     return 0
 }
@@ -1188,7 +1188,7 @@ get_certificates() {
     local WILDCARD_DOMAIN="*.$BASE_DOMAIN"
 
     printf "${COLOR_YELLOW}${LANG[GENERATING_CERTS]}${COLOR_RESET}\n" "$DOMAIN"
-    
+
     case $CERT_METHOD in
         1)
             # Cloudflare API (DNS-01 с поддержкой wildcard)
@@ -1355,7 +1355,7 @@ generate_xray_keys() {
     docker run --rm ghcr.io/xtls/xray-core x25519 > /tmp/xray_keys.txt 2>&1 &
     spinner $! "${LANG[WAITING]}"
     wait $!
-    
+
     local keys=$(cat /tmp/xray_keys.txt)
     rm -f /tmp/xray_keys.txt
 
@@ -1516,7 +1516,7 @@ create_node() {
     local token=$2
     local panel_domain=$3
     local node_address=${4:-"remnanode"}
-    
+
     local node_data=$(cat <<EOF
 {
     "name": "Steal",
@@ -1690,7 +1690,7 @@ install_remnawave() {
         echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
         exit 1
     fi
-    
+
     if [ "$PANEL_DOMAIN" = "$SUB_DOMAIN" ] || [ "$PANEL_DOMAIN" = "$SELFSTEAL_DOMAIN" ] || [ "$SUB_DOMAIN" = "$SELFSTEAL_DOMAIN" ]; then
         echo -e "${COLOR_RED}${LANG[DOMAINS_MUST_BE_UNIQUE]}${COLOR_RESET}"
         exit 1
@@ -1752,9 +1752,9 @@ TELEGRAM_BOT_TOKEN=change_me
 TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
 TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
 
-### Telegram Oauth (Login with Telegram) 
+### Telegram Oauth (Login with Telegram)
 ### Docs https://remna.st/docs/features/telegram-oauth
-### true/false 
+### true/false
 TELEGRAM_OAUTH_ENABLED=false
 ### Array of Admin Chat Ids. These ids will be allowed to login.
 TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
@@ -1960,7 +1960,7 @@ if [ "$need_certificates" = true ]; then
 else
     echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
     CERT_METHOD="2"
-    
+
     if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
         echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
         if [ "$min_days_left" -le 30 ]; then
@@ -1969,7 +1969,7 @@ else
         else
             add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
         fi
-        
+
         for domain in "${!domains_to_check[@]}"; do
             base_domain=$(extract_domain "$domain")
             cert_domain="$domain"
@@ -2130,8 +2130,8 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     environment:
       - REMNAWAVE_PANEL_URL=http://remnawave:3000
       - APP_PORT=3010
-      - META_TITLE=Remnawave Subscription
-      - META_DESCRIPTION=page
+      - META_TITLE="Remnawave Subscription"
+      - META_DESCRIPTION="page"
     ports:
       - '127.0.0.1:3010:3010'
     networks:
@@ -2150,7 +2150,7 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     env_file:
       - .env-node
     ports:
-      - '443:443'
+      - '0.0.0.0:443:443'
     volumes:
       - /dev/shm:/dev/shm
     networks:
@@ -2309,18 +2309,21 @@ EOL
     sleep 1
     cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
-    
+
     spinner $! "${LANG[WAITING]}"
-	
+
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
 
     echo -e "${COLOR_YELLOW}${LANG[REGISTERING_REMNAWAVE]}${COLOR_RESET}"
     sleep 20
-	
+
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
-    until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
+    until curl -s "http://$domain_url/api/auth/register" \
+        --header 'X-Forwarded-For: 127.0.0.1' \
+        --header 'X-Forwarded-Proto: https' \
+        > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
         sleep 10
     done
@@ -2328,7 +2331,7 @@ EOL
     # Register Remnawave
     local token=$(register_remnawave "$domain_url" "$SUPERADMIN_USERNAME" "$SUPERADMIN_PASSWORD" "$PANEL_DOMAIN")
     echo -e "${COLOR_GREEN}${LANG[REGISTRATION_SUCCESS]}${COLOR_RESET}"
-	
+
     # Get public key
     echo -e "${COLOR_YELLOW}${LANG[GET_PUBLIC_KEY]}${COLOR_RESET}"
     sleep 1
@@ -2342,10 +2345,10 @@ EOL
     local private_key=$(echo "$keys" | awk '{print $1}')
     local public_key=$(echo "$keys" | awk '{print $2}')
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}"
-    
+
     # Create and update Xray configuration
     update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key"
-    
+
     # Create node
     create_node "$domain_url" "$token" "$PANEL_DOMAIN"
 
@@ -2361,7 +2364,7 @@ EOL
     sleep 1
     docker compose down > /dev/null 2>&1 &
     spinner $! "${LANG[WAITING]}"
-	
+
     echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}${COLOR_RESET}"
     sleep 1
     docker compose up -d > /dev/null 2>&1 &
@@ -2458,9 +2461,9 @@ TELEGRAM_BOT_TOKEN=change_me
 TELEGRAM_NOTIFY_USERS_CHAT_ID=change_me
 TELEGRAM_NOTIFY_NODES_CHAT_ID=change_me
 
-### Telegram Oauth (Login with Telegram) 
+### Telegram Oauth (Login with Telegram)
 ### Docs https://remna.st/docs/features/telegram-oauth
-### true/false 
+### true/false
 TELEGRAM_OAUTH_ENABLED=false
 ### Array of Admin Chat Ids. These ids will be allowed to login.
 TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
@@ -2665,7 +2668,7 @@ if [ "$need_certificates" = true ]; then
 else
     echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
     CERT_METHOD="2"
-    
+
     if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
         echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
         if [ "$min_days_left" -le 30 ]; then
@@ -2674,7 +2677,7 @@ else
         else
             add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
         fi
-        
+
         for domain in "${!domains_to_check[@]}"; do
             base_domain=$(extract_domain "$domain")
             cert_domain="$domain"
@@ -2830,8 +2833,8 @@ SUB_CERT_DOMAIN="$SUB_DOMAIN"
     environment:
       - REMNAWAVE_PANEL_URL=http://remnawave:3000
       - APP_PORT=3010
-      - META_TITLE=Remnawave Subscription
-      - META_DESCRIPTION=page
+      - META_TITLE="Remnawave Subscription"
+      - META_DESCRIPTION="page"
     ports:
       - '127.0.0.1:3010:3010'
     networks:
@@ -2976,15 +2979,18 @@ EOL
     sleep 1
     cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
-    
+
     spinner $! "${LANG[WAITING]}"
 
     echo -e "${COLOR_YELLOW}${LANG[REGISTERING_REMNAWAVE]}${COLOR_RESET}"
     sleep 20
-	
+
     local domain_url="127.0.0.1:3000"
     echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
-    until curl -s "http://$domain_url/api/auth/register" > /dev/null; do
+    until curl -s "http://$domain_url/api/auth/register" \
+        --header 'X-Forwarded-For: 127.0.0.1' \
+        --header 'X-Forwarded-Proto: https' \
+        > /dev/null; do
         echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
         sleep 5
     done
@@ -2992,7 +2998,7 @@ EOL
     # Register Remnawave
     local token=$(register_remnawave "$domain_url" "$SUPERADMIN_USERNAME" "$SUPERADMIN_PASSWORD" "$PANEL_DOMAIN")
     echo -e "${COLOR_GREEN}${LANG[REGISTRATION_SUCCESS]}${COLOR_RESET}"
-	
+
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
@@ -3003,7 +3009,7 @@ EOL
 
     # Create and update Xray configuration
     update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key"
-    
+
     # Create node
     create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$SELFSTEAL_DOMAIN"
 
@@ -3104,7 +3110,7 @@ EOL
 installation_node() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALLING_NODE]}${COLOR_RESET}"
     sleep 1
-    
+
     declare -A unique_domains
     install_remnawave_node
 
@@ -3155,7 +3161,7 @@ if [ "$need_certificates" = true ]; then
 else
     echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
     CERT_METHOD="2"
-    
+
     if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
         echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
         if [ "$min_days_left" -le 30 ]; then
@@ -3164,7 +3170,7 @@ else
         else
             add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
         fi
-        
+
         for domain in "${!domains_to_check[@]}"; do
             base_domain=$(extract_domain "$domain")
             cert_domain="$domain"
@@ -3369,14 +3375,14 @@ server {
 }
 EOL
 
-    ufw allow from $PANEL_IP to any port 2222 
+    ufw allow from $PANEL_IP to any port 2222
     ufw reload
 
     echo -e "${COLOR_YELLOW}${LANG[STARTING_NODE]}${COLOR_RESET}"
     sleep 3
     cd /opt/remnawave
     docker compose up -d > /dev/null 2>&1 &
-    
+
     spinner $! "${LANG[WAITING]}"
 
     randomhtml
@@ -3471,7 +3477,7 @@ add_node_to_panel() {
         reading "${LANG[ENTER_PANEL_PASSWORD]}" password
 
         local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
-        
+
         token=$(echo "$login_response" | jq -r '.response.accessToken')
         if [ -z "$token" ] || [ "$token" == "null" ]; then
             echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
@@ -3592,7 +3598,7 @@ add_node_to_panel() {
 
     printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
     local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN")
-    
+
     if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
         echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
         create_new_node=true
@@ -3631,7 +3637,7 @@ add_node_to_panel() {
 
         printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
         local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
-        
+
         if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
             echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
             exit 1
