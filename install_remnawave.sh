@@ -3103,7 +3103,6 @@ services:
     image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
-    network_mode: host
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
