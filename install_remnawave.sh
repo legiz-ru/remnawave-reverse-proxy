@@ -1515,7 +1515,7 @@ create_node() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
-    local node_address=${4:-"remnanode"}
+    local node_address=$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)
 
     local node_data=$(cat <<EOF
 {
@@ -1898,6 +1898,7 @@ services:
     image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
+    network_mode: host
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -2111,8 +2112,6 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
       - /dev/shm:/dev/shm
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
-    networks:
-      - remnawave-network
     depends_on:
       - remnawave
       - remnawave-subscription-page
@@ -2147,14 +2146,11 @@ NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
     container_name: remnanode
     hostname: remnanode
     restart: always
+    network_mode: host
     env_file:
       - .env-node
-    ports:
-      - '0.0.0.0:443:443'
     volumes:
       - /dev/shm:/dev/shm
-    networks:
-      - remnawave-network
     logging:
       driver: json-file
       options:
@@ -2180,11 +2176,11 @@ EOL
 
     cat > /opt/remnawave/nginx.conf <<EOL
 upstream remnawave {
-    server remnawave:3000;
+    server 127.0.0.1:3000;
 }
 
 upstream json {
-    server remnawave-subscription-page:3010;
+    server 127.0.0.1:3010;
 }
 
 map \$http_upgrade \$connection_upgrade {
@@ -2226,6 +2222,7 @@ resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
+    listen 8443 ssl;
     http2 on;
 
     ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
@@ -2312,6 +2309,9 @@ EOL
 
     spinner $! "${LANG[WAITING]}"
 
+    remnawave_network_subnet=$(docker network inspect remnawave-network | grep -oP '"Subnet": "\K[^"]+')
+    ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp
+     
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
@@ -2388,6 +2388,8 @@ EOL
 
     randomhtml
 }
+
+
 
 install_remnawave_panel() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
@@ -3101,6 +3103,7 @@ services:
     image: nginx:1.26
     container_name: remnawave-nginx
     hostname: remnawave-nginx
+    network_mode: host
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
