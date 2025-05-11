@@ -1515,7 +1515,7 @@ create_node() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
-    local node_address=$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)
+    local node_address="${4:-$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)}"
 
     local node_data=$(cat <<EOF
 {
