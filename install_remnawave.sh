@@ -2311,7 +2311,7 @@ EOL
 
     remnawave_network_subnet=$(docker network inspect remnawave-network | grep -oP '"Subnet": "\K[^"]+')
     ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp
-
+     
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
