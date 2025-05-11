@@ -2222,7 +2222,7 @@ resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
-    listen 8443;
+    listen 8443 ssl;
     http2 on;
 
     ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
