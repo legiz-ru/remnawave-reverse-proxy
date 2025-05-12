@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.5a"
+SCRIPT_VERSION="1.6.5b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -164,7 +164,7 @@ set_language() {
                 [REINSTALL_PROMPT]="Select action (0-3):"
                 [INVALID_REINSTALL_CHOICE]="Invalid choice. Please select 0-3."
                 [POST_PANEL_MESSAGE]="Panel successfully installed!"
-                [POST_PANEL_INSTRUCTION]="To install the node, follow these steps:\n1. Run this script on the server where the node will be installed.\n2. Select 'Install only the node'."
+                [POST_PANEL_INSTRUCTION]="To install the node, follow these steps:\n1. Run this script on the server where the node will be installed.\n2. Select 'Install Remnawave Components', then 'Install only the node'."
                 [SELFSTEAL_PROMPT]="Enter the selfsteal domain for the node (e.g. node.example.com):"
                 [SELFSTEAL]="Enter the selfsteal domain for the node specified during panel installation:"
                 [PANEL_IP_PROMPT]="Enter the IP address of the panel to establish a connection between the panel and the node:"
@@ -406,7 +406,7 @@ set_language() {
                 [REINSTALL_PROMPT]="Выберите действие (0-3):"
                 [INVALID_REINSTALL_CHOICE]="Неверный выбор. Выберите 0-3."
                 [POST_PANEL_MESSAGE]="Панель успешно установлена!"
-                [POST_PANEL_INSTRUCTION]="Для установки ноды выполните следующие шаги:\n1. Запустите этот скрипт на сервере, где будет установлена нода.\n2. Выберите 'Установить только ноду'."
+                [POST_PANEL_INSTRUCTION]="Для установки ноды выполните следующие шаги:\n1. Запустите этот скрипт на сервере, где будет установлена нода.\n2. Выберите 'Установка компонентов Remnawave', а затем 'Установить только ноду'."
                 [SELFSTEAL]="Введите selfsteal домен для ноды, который указали при установке панели:"
                 [PANEL_IP_PROMPT]="Введите IP адрес панели, чтобы установить соединение между панелью и ноды:"
                 [IP_ERROR]="Введите корректный IP-адрес в формате X.X.X.X (например, 192.168.1.1)"
