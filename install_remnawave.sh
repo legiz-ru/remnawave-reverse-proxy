@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.5b"
+SCRIPT_VERSION="1.6.6"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -59,8 +59,9 @@ set_language() {
                 [MENU_8]="Install random template for selfsteal node"
                 [MENU_9]="Check for updates script"
                 [MENU_10]="Manage panel access (Only for panel + node)"
-                [PROMPT_ACTION]="Select action (0-10):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-10."
+                [MENU_11]="Custom rules template from legiz"
+                [PROMPT_ACTION]="Select action (0-11):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-11."
                 [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
@@ -280,6 +281,28 @@ set_language() {
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
                 [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
                 [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
+                # Template Upload
+                [UPLOADING_TEMPLATE]="Uploading custom rules template..."
+                [ERROR_FETCH_TEMPLATE]="Failed to fetch custom rules template."
+                [ERROR_EMPTY_RESPONSE_TEMPLATE]="Empty response from API when updating template."
+                [ERROR_UPDATE_TEMPLATE]="Failed to update custom rules template"
+                [TEMPLATE_UPDATED_SUCCESS]="Custom rules template successfully updated."
+                [SELECT_TEMPLATE_CUSTOM]="Select Custom rules Template"
+                [SELECT_TEMPLATE_CUSTOM1]="Select Custom rules Template\nOnly run on panel server"
+                [TEMPLATE_SELECT_CHOICE]="Invalid choice. Please select 0-8."
+                [DOWNLOADING_CONFIG_SEED]="Downloading config.seed.ts from GitHub..."
+                [EXTRACT_FAILED]="Failed to extract configuration for %s"
+                [RESTORING_DEFAULT_TEMPLATES]="Restoring default custom rules templates from GitHub..."
+                [DEFAULT_TEMPLATES_COMPLETED]="Default custom rules templates restoration completed"
+                [RESTORING_TEMPLATE]="Restoring default custom rules template for %s..."
+                [TEMPLATE_RESTORED_SUCCESS]="Default custom rules template for %s restored successfully"
+                [URL_NOT_ACCESSIBLE]="URL %s is not accessible (HTTP status: %s)"
+                [FAILED_TO_DOWNLOAD_TEMPLATE]="Failed to download custom rules template %s"
+                [TEMPLATE_EMPTY]="Downloaded custom rules template %s is empty"
+                [INVALID_YAML_TEMPLATE]="Invalid YAML custom rules template for %s"
+                [INVALID_JSON_TEMPLATE]="Invalid JSON custom rules template for %s"
+                [EMPTY_TEMPLATE_VALUE]="Empty custom rules template value for %s"
+                [RESTORE_TEMPLATES]="Restore default custom rules templates"
             )
             ;;
         ru)
@@ -301,8 +324,9 @@ set_language() {
                 [MENU_8]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_9]="Проверить обновления скрипта"
                 [MENU_10]="Управление доступом к панели (Только для панели + нода)"
-                [PROMPT_ACTION]="Выберите действие (0-10):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-10."
+                [MENU_11]="Кастомные шаблоны правил от legiz"
+                [PROMPT_ACTION]="Выберите действие (0-11):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-11."
                 [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
@@ -521,6 +545,26 @@ set_language() {
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
                 [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
                 [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
+                # Template Upload
+                [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
+                [ERROR_FETCH_TEMPLATE]="Не удалось загрузить шаблон правил."
+                [ERROR_EMPTY_RESPONSE_TEMPLATE]="Пустой ответ от API при обновлении шаблона правил."
+                [ERROR_UPDATE_TEMPLATE]="Не удалось обновить шаблон правил"
+                [TEMPLATE_UPDATED_SUCCESS]="Шаблон правил успешно обновлён."
+                [SELECT_TEMPLATE_CUSTOM]="Выберите шаблон правил"
+                [SELECT_TEMPLATE_CUSTOM1]="Выберите шаблон правил\nЗапускать только на сервере с панелью"
+                [TEMPLATE_SELECT_CHOICE]="Неверный выбор. Выберите 0-8."
+                [RESTORING_DEFAULT_TEMPLATES]="Восстановление шаблонов правил по умолчанию из GitHub..."
+                [DEFAULT_TEMPLATES_COMPLETED]="Восстановление шаблонов правил по умолчанию завершено"
+                [RESTORING_TEMPLATE]="Восстановление шаблона по умолчанию для %s..."
+                [TEMPLATE_RESTORED_SUCCESS]="Шаблон по умолчанию для %s успешно восстановлен"
+                [URL_NOT_ACCESSIBLE]="URL %s недоступен (HTTP статус: %s)"
+                [FAILED_TO_DOWNLOAD_TEMPLATE]="Не удалось загрузить шаблон %s"
+                [TEMPLATE_EMPTY]="Загруженный шаблон %s пуст"
+                [INVALID_YAML_TEMPLATE]="Недопустимый YAML-шаблон для %s"
+                [INVALID_JSON_TEMPLATE]="Недопустимый JSON-шаблон для %s"
+                [EMPTY_TEMPLATE_VALUE]="Пустое значение шаблона для %s"
+                [RESTORE_TEMPLATES]="Восстановить шаблоны правил по умолчанию"
             )
             ;;
     esac
@@ -766,8 +810,9 @@ show_menu() {
     echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
     echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}9. ${LANG[MENU_10]}${COLOR_RESET}" # Manage panel access
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_11]}${COLOR_RESET}" # Upload custom template from legiz
     echo -e ""
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
     echo -e ""
@@ -920,6 +965,234 @@ manage_ipv6() {
             manage_ipv6
             ;;
     esac
+}
+
+show_template_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[SELECT_TEMPLATE_CUSTOM1]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. Xray json | without RU${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. Xray json | RU-BUNDLE${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. Xray json | RU-BUNDLE + CATEGORY-ADS-ALL BLOCK (not work on iOS)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. Mihomo    | RU-BUNDLE + RE-FILTER + OISD BIG (ADBLOCK)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. Mihomo    | full proxy without RU${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}6. Singbox   | RU-BUNDLE${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}7. Singbox   | RU-BUNDLE + OISD BIG (ADBLOCK)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}8. ${LANG[RESTORE_TEMPLATES]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e ""
+}
+
+manage_template_upload() {
+    show_template_menu
+    reading "${LANG[SELECT_TEMPLATE_CUSTOM]} (0-8):" TEMPLATE_OPTION
+    case $TEMPLATE_OPTION in
+        1)
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/marz-sub/refs/heads/main/v2ray/default.json" "false"
+            ;;
+        2)
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle.json" "false"
+            ;;
+        3)
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all-block.json" "false"
+            ;;
+        4)
+            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_rubundle.yaml" "true"
+            ;;
+        5)
+            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_fullproxy_without_ru.yaml" "true"
+            ;;
+        6)
+            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/legiz-ru/sb-rule-sets/refs/heads/main/.github/sub2sing-box/ru-bundle.json" "false"
+            ;;
+        7)
+            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/legiz-ru/sb-rule-sets/main/.github/sub2sing-box/ru-bundle-oisd-big.json" "false"
+            ;;
+        8)
+            restore_default_templates
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[TEMPLATE_SELECT_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_template_upload
+            ;;
+    esac
+}
+
+restore_default_templates() {
+    echo -e "${COLOR_YELLOW}${LANG[RESTORING_DEFAULT_TEMPLATES]}${COLOR_RESET}"
+    sleep 1
+
+    local domain_url="127.0.0.1:3000"
+    TOKEN_FILE="${DIR_REMNAWAVE}token"
+    PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
+    TEMP_DIR="/tmp/remnawave_templates"
+
+    mkdir -p "$TEMP_DIR"
+
+    if [ -f "$PANEL_DOMAIN_FILE" ]; then
+        PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
+        if [ -z "$PANEL_DOMAIN" ]; then
+            echo -e "${COLOR_YELLOW}${LANG[EMPTY_SAVED_PANEL_DOMAIN]}${COLOR_RESET}"
+            PANEL_DOMAIN=""
+        else
+            printf "${COLOR_YELLOW}${LANG[USING_SAVED_PANEL_DOMAIN]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+        fi
+    fi
+
+    if [ -z "$PANEL_DOMAIN" ]; then
+        reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
+        echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
+    fi
+
+    if [ -f "$TOKEN_FILE" ]; then
+        token=$(cat "$TOKEN_FILE")
+        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
+        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            token=""
+        fi
+    fi
+
+    if [ -z "$token" ]; then
+        reading "${LANG[ENTER_PANEL_USERNAME]}" username
+        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+
+        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+
+        token=$(echo "$login_response" | jq -r '.response.accessToken')
+        if [ -z "$token" ] || [ "$token" == "null" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+            return 1
+        fi
+
+        echo "$token" > "$TOKEN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+
+    local template_configs=(
+        "CLASH|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/clash.yaml|yaml"
+        "MIHOMO|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/mihomo.yaml|yaml"
+        "STASH|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/stash.yaml|yaml"
+        "SINGBOX|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/singbox.json|json"
+        "SINGBOX_LEGACY|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/singbox_legacy.json|json"
+        "XRAY_JSON|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/xray.json|json"
+    )
+
+    for template_entry in "${template_configs[@]}"; do
+        IFS='|' read -r template_type template_url template_format <<< "$template_entry"
+        printf "${COLOR_YELLOW}${LANG[RESTORING_TEMPLATE]}${COLOR_RESET}\n" "$template_type"
+
+        local http_status=$(curl -s -L --write-out "%{http_code}" --output /dev/null "$template_url")
+        if [ "$http_status" != "200" ]; then
+            printf "${COLOR_RED}${LANG[URL_NOT_ACCESSIBLE]}${COLOR_RESET}\n" "$template_url" "$http_status"
+            continue
+        fi
+
+        local temp_file="$TEMP_DIR/$template_type.$template_format"
+        if ! curl -s -L -o "$temp_file" "$template_url"; then
+            printf "${COLOR_RED}${LANG[FAILED_TO_DOWNLOAD_TEMPLATE]}${COLOR_RESET}\n" "$template_type"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        if [ ! -s "$temp_file" ]; then
+            printf "${COLOR_RED}${LANG[TEMPLATE_EMPTY]}${COLOR_RESET}\n" "$template_type"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        local template_content
+        template_content=$(cat "$temp_file")
+
+        local template_field template_value
+        if [ "$template_format" = "yaml" ]; then
+            if command -v yq >/dev/null 2>&1; then
+                if ! echo "$template_content" | yq e '.' - >/dev/null 2>&1; then
+                    printf "${COLOR_RED}${LANG[INVALID_YAML_TEMPLATE]}${COLOR_RESET}\n" "$template_type"
+                    rm -f "$temp_file"
+                    continue
+                fi
+            fi
+            template_field="encodedTemplateYaml"
+            template_value=$(echo "$template_content" | base64 -w 0)
+        else
+            if ! echo "$template_content" | jq . >/dev/null 2>&1; then
+                printf "${COLOR_RED}${LANG[INVALID_JSON_TEMPLATE]}${COLOR_RESET}\n" "$template_type"
+                rm -f "$temp_file"
+                continue
+            fi
+            template_field="templateJson"
+            template_value=$(echo "$template_content" | jq -c .)
+        fi
+
+        if [ -z "$template_value" ]; then
+            printf "${COLOR_RED}${LANG[EMPTY_TEMPLATE_VALUE]}${COLOR_RESET}\n" "$template_type"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token" "$PANEL_DOMAIN")
+        if [ -z "$get_response" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        if ! echo "$get_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: $get_response${COLOR_RESET}"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        local uuid=$(echo "$get_response" | jq -r '.response.uuid // null')
+        if [ -z "$uuid" ] || [ "$uuid" == "null" ]; then
+            echo -e "${COLOR_RED}Не удалось извлечь UUID для шаблона $template_type${COLOR_RESET}"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        if [ "$template_format" = "yaml" ]; then
+            local request_body=$(jq -n --arg template "$template_value" \
+                                      --arg type "$template_type" \
+                                      --arg uuid "$uuid" \
+                                      '{encodedTemplateYaml: $template, templateType: $type, templateJson: {}, uuid: $uuid}')
+        else
+            local request_body=$(jq -n --argjson template "$template_value" \
+                                      --arg type "$template_type" \
+                                      --arg uuid "$uuid" \
+                                      '{templateJson: $template, templateType: $type, encodedTemplateYaml: "", uuid: $uuid}')
+        fi
+
+        local response=$(make_api_request "PUT" "http://$domain_url/api/subscription-templates" "$token" "$PANEL_DOMAIN" "$request_body")
+        if [ -z "$response" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+            rm -f "$temp_file"
+            continue
+        fi
+
+        if echo "$response" | jq -e '.response | select(.uuid != null)' > /dev/null; then
+            printf "${COLOR_GREEN}${LANG[TEMPLATE_RESTORED_SUCCESS]}${COLOR_RESET}\n" "$template_type"
+        else
+            echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: Шаблон для $template_type не применён${COLOR_RESET}"
+        fi
+
+        rm -f "$temp_file"
+    done
+
+    rm -rf "$TEMP_DIR"
+    echo -e "${COLOR_GREEN}${LANG[DEFAULT_TEMPLATES_COMPLETED]}${COLOR_RESET}"
+    return 0
 }
 
 reinstall_remnawave() {
@@ -1472,6 +1745,10 @@ make_api_request() {
         -H "X-Forwarded-For: ${url#http://}"
         -H "X-Forwarded-Proto: https"
     )
+
+    # Отладка: записываем метод, URL и тело запроса
+    echo "DEBUG: $method $url" >> /tmp/remnawave_debug.log
+    echo "DEBUG: Data: $data" >> /tmp/remnawave_debug.log
 
     if [ -n "$data" ]; then
         curl -s -X "$method" "$url" "${headers[@]}" -d "$data"
@@ -3946,6 +4223,151 @@ close_panel_access() {
     log_clear
 }
 
+update_subscription_template() {
+    local template_type="$1"
+    local template_url="$2"
+    local is_yaml_template="$3" # Новый параметр: "true" для YAML, "false" для JSON
+    local domain_url="127.0.0.1:3000"
+    TOKEN_FILE="${DIR_REMNAWAVE}token"
+    PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
+
+    echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
+    sleep 1
+
+    # Проверка сохранённого домена панели
+    if [ -f "$PANEL_DOMAIN_FILE" ]; then
+        PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
+        if [ -z "$PANEL_DOMAIN" ]; then
+            echo -e "${COLOR_YELLOW}${LANG[EMPTY_SAVED_PANEL_DOMAIN]}${COLOR_RESET}"
+            PANEL_DOMAIN=""
+        else
+            printf "${COLOR_YELLOW}${LANG[USING_SAVED_PANEL_DOMAIN]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+        fi
+    fi
+
+    # Запрос домена, если он отсутствует
+    if [ -z "$PANEL_DOMAIN" ]; then
+        reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
+        echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
+    fi
+
+    # Проверка сохранённого токена
+    if [ -f "$TOKEN_FILE" ]; then
+        token=$(cat "$TOKEN_FILE")
+        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
+        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            token=""
+        fi
+    fi
+
+    # Запрос логина и пароля, если токен отсутствует или недействителен
+    if [ -z "$token" ]; then
+        reading "${LANG[ENTER_PANEL_USERNAME]}" username
+        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+
+        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+
+        token=$(echo "$login_response" | jq -r '.response.accessToken')
+        if [ -z "$token" ] || [ "$token" == "null" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+            return 1
+        fi
+
+        echo "$token" > "$TOKEN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+
+    # Загружаем содержимое шаблона из URL
+    local template_content=$(curl -s "$template_url")
+    if [ -z "$template_content" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    # Проверяем валидность шаблона в зависимости от формата
+    if [ "$is_yaml_template" = "true" ]; then
+        # Для YAML-шаблонов проверяем валидность (если есть yq или python)
+        if command -v yq >/dev/null 2>&1; then
+            if ! echo "$template_content" | yq e '.' - >/dev/null 2>&1; then
+                echo -e "${COLOR_RED}Invalid YAML template from $template_url${COLOR_RESET}"
+                return 1
+            fi
+        else
+            # Если yq недоступен, просто проверяем, что содержимое не пустое
+            if [ -z "$template_content" ]; then
+                echo -e "${COLOR_RED}Invalid YAML template: empty content from $template_url${COLOR_RESET}"
+                return 1
+            fi
+        fi
+        template_field="encodedTemplateYaml"
+        template_value=$(echo "$template_content" | base64 -w 0) # Кодируем YAML в base64, если API требует
+    else
+        # Для JSON-шаблонов проверяем валидность
+        if ! echo "$template_content" | jq . >/dev/null 2>&1; then
+            echo -e "${COLOR_RED}Invalid JSON template from $template_url${COLOR_RESET}"
+            return 1
+        fi
+        template_field="templateJson"
+        template_value="$template_content"
+    fi
+
+    # Получаем текущий шаблон для указанного типа
+    local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token" "$PANEL_DOMAIN")
+    if [ -z "$get_response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    # Проверяем, успешен ли ответ
+    if ! echo "$get_response" | jq -e '.response' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: $get_response${COLOR_RESET}"
+        return 1
+    fi
+
+    # Извлекаем UUID шаблона
+    local uuid=$(echo "$get_response" | jq -r '.response.uuid // null')
+    if [ -z "$uuid" ] || [ "$uuid" == "null" ]; then
+        echo -e "${COLOR_RED}Failed to extract UUID from subscription template${COLOR_RESET}"
+        return 1
+    fi
+
+    # Формируем тело запроса
+    if [ "$is_yaml_template" = "true" ]; then
+        local request_body=$(jq -n --arg template "$template_value" \
+                                  --arg type "$template_type" \
+                                  --arg uuid "$uuid" \
+                                  '{encodedTemplateYaml: $template, templateType: $type, templateJson: {}, uuid: $uuid}')
+    else
+        local request_body=$(jq -n --argjson template "$template_value" \
+                                  --arg type "$template_type" \
+                                  --arg uuid "$uuid" \
+                                  '{templateJson: $template, templateType: $type, encodedTemplateYaml: "", uuid: $uuid}')
+    fi
+
+    # Выполняем PUT-запрос к API
+    local response=$(make_api_request "PUT" "http://$domain_url/api/subscription-templates" "$token" "$PANEL_DOMAIN" "$request_body")
+
+    # Проверяем ответ
+    if [ -z "$response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    # Проверяем успешность обновления шаблона
+    if echo "$response" | jq -e '.response | select(.uuid != null)' > /dev/null; then
+        echo -e "${COLOR_GREEN}${LANG[TEMPLATE_UPDATED_SUCCESS]}${COLOR_RESET}"
+        return 0
+    else
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: Template not applied${COLOR_RESET}"
+        return 1
+    fi
+}
+
 log_entry
 check_root
 check_os
@@ -4047,8 +4469,14 @@ case $OPTION in
     9)
         manage_panel_access
         ;;
-    10)
+    11)
         update_remnawave_reverse
+        sleep 2
+        log_clear
+        remnawave_reverse
+        ;;
+    10)
+        manage_template_upload
         sleep 2
         log_clear
         remnawave_reverse
