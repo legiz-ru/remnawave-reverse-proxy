@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.5"
+SCRIPT_VERSION="1.6.5a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -807,17 +807,8 @@ manage_install() {
             log_clear
             ;;
         3)
-            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET} ${COLOR_YELLOW}${LANG[WARNING_NODE_PANEL]}${COLOR_RESET}"
-            reading "${LANG[CONFIRM_SERVER_PANEL]}" confirm
-            if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-                add_node_to_panel
-                sleep 2
-                log_clear
-            else
-                echo -e "${COLOR_YELLOW}${LANG[INSTALL_EXIT]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-            fi
+            add_node_to_panel
+            log_clear
             ;;
         4)
             if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
