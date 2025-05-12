@@ -1,4 +1,15 @@
-# REMNAWAVE-REVERSE-PROXY ([Russian](/README-RU.md))
+<div align="center">
+  <a href="https://remna.st">
+    <img src="https://cdn.remna.st/logos/logo.svg" alt="Logo" width="160" height="160">
+  </a>
+     <h1 align="center">REMNAWAVE REVERSE-PROXY</h3>
+</div>
+
+English | [Русский](/README-RU.md)
+
+> [!CAUTION]
+> **THIS REPOSITORY IS AN EDUCATIONAL EXAMPLE FOR LEARNING NGINX, REVERSE PROXY AND NETWORK SECURITY BASICS. THIS SCRIPT DEMONSTRATES NGINX CONFIGURATION AS A REVERSE PROXY. NOT FOR PROD AND NOT FOR PRODUCTION USE! IF YOU DON'T UNDERSTAND HOW THE CONTROL PANEL WORKS - THAT'S YOUR PROBLEM, NOT THE SCRIPT AUTHOR'S. USE AT YOUR OWN RISK!**
+
 ### Server Using NGINX Reverse Proxy
 This script is designed to streamline the setup of a reverse proxy server using NGINX and Xray, as well as to automate the installation of the Remnawave control panel and node. In this configuration, Xray operates directly on port 443, forwarding traffic through a socket that NGINX listens to. This approach minimizes unnecessary TCP overhead, delivering improved performance and connection reliability.
 > [!IMPORTANT]
@@ -23,7 +34,7 @@ The script supports two methods of domain configuration: via Cloudflare or using
 | CNAME | sub.example.com   | example.com      | DNS only      |
 | CNAME | node.example.com  | example.com      | DNS only      |
 
-> [!IMPORTANT]
+> [!TIP]
 > The node.example.com record is not mandatory for a selfsteal node — you can also use example.com for selfsteal.
 
 ### DNS Records Setup for Panel and Node on Separate Servers
@@ -38,10 +49,10 @@ The script supports two methods of domain configuration: via Cloudflare or using
 -----
 ### Installation Guidelines
 ### 1. Single Server Setup:
-   - Select the option to install both the panel and node on the same machine. Once the process is complete, the script will automatically restart the panel and provide all necessary login credentials.
+   - Select the option "Install Remnawave components", then choose "Install panel and node on one server". Once the process is complete, the script will automatically restart the panel and provide all the necessary login details.
 ### 2. Dual Server Setup
-   - Start by installing the panel on the first server. Wait for the script to finish the setup and provide the login credentials for the panel.
-   - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the Important button. In the pop-up window, you’ll see an icon to copy the certificate — copy it.
+   - Start with the first server and select the option "Install Remnawave components," then choose "Install panel only." Wait for the script to complete the setup and provide the login details for the panel.
+   - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the "Important Information". In the pop-up window, you’ll see an icon to copy the certificate — click on it.
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
 -----
@@ -62,10 +73,11 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
    - Support for automatic configuration updates via subscription and JSON subscription with the ability to convert to formats for popular applications.
 2. NGINX reverse proxy setup in combination with Xray.
 3. Security measures:
-   - UFW (Uncomplicated Firewall) setup for access management.
-   - Disabling IPv6 to prevent potential vulnerabilities.
+   - UFW setup for access management.
+   - Cloudflare/ACME SSL certificates with automatic renewal
+   - Manage IPv6 to prevent potential vulnerabilities.
+   - BBR optimization for TCP connections.
    - Selecting a random website template from an array.
-4. Enabling BBR — improving TCP connection performance.
 -----
 ### Server Setup:
 
@@ -78,12 +90,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 
 -----
 > [!IMPORTANT]
-> This repository is intended solely for educational purposes and for studying the principles of reverse proxy servers and network security. The script demonstrates the setup of a proxy server using NGINX for reverse proxy, traffic management, and attack protection.
+> **This repository is intended solely for educational purposes and for studying the principles of reverse proxy servers and network security. The script demonstrates the setup of a proxy server using NGINX for reverse proxy, traffic management, and attack protection.**
 >
->We strongly remind you that using this tool to bypass network restrictions or censorship is illegal in certain countries that have laws regulating the use of technologies to circumvent internet restrictions.
+>**We strongly remind you that using this tool to bypass network restrictions or censorship is illegal in certain countries that have laws regulating the use of technologies to circumvent internet restrictions.**
 >
->This project is not intended for use in ways that violate information protection laws or interfere with censorship mechanisms. We take no responsibility for any legal consequences arising from the use of this script.
+>**This project is not intended for use in ways that violate information protection laws or interfere with censorship mechanisms. We take no responsibility for any legal consequences arising from the use of this script.**
 >
->Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.
+>**Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.**
 >
->If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.
+>**If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.**
