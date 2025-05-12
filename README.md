@@ -6,6 +6,10 @@
 </div>
 
 English | [Русский](/README-RU.md)
+
+> [!CAUTION]
+> THIS REPOSITORY IS AN EDUCATIONAL EXAMPLE FOR LEARNING NGINX, REVERSE PROXY AND NETWORK SECURITY BASICS. THIS SCRIPT DEMONSTRATES NGINX CONFIGURATION AS A REVERSE PROXY. NOT FOR PROD AND NOT FOR PRODUCTION USE! IF YOU DON'T UNDERSTAND HOW THE CONTROL PANEL WORKS - THAT'S YOUR PROBLEM, NOT THE SCRIPT AUTHOR'S. USE AT YOUR OWN RISK!
+
 ### Server Using NGINX Reverse Proxy
 This script is designed to streamline the setup of a reverse proxy server using NGINX and Xray, as well as to automate the installation of the Remnawave control panel and node. In this configuration, Xray operates directly on port 443, forwarding traffic through a socket that NGINX listens to. This approach minimizes unnecessary TCP overhead, delivering improved performance and connection reliability.
 > [!IMPORTANT]
