@@ -73,10 +73,11 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
    - Support for automatic configuration updates via subscription and JSON subscription with the ability to convert to formats for popular applications.
 2. NGINX reverse proxy setup in combination with Xray.
 3. Security measures:
-   - UFW (Uncomplicated Firewall) setup for access management.
-   - Disabling IPv6 to prevent potential vulnerabilities.
+   - UFW setup for access management.
+   - Cloudflare/ACME SSL certificates with automatic renewal
+   - Manage IPv6 to prevent potential vulnerabilities.
+   - BBR optimization for TCP connections.
    - Selecting a random website template from an array.
-4. Enabling BBR — improving TCP connection performance.
 -----
 ### Server Setup:
 
