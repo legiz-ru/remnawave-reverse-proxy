@@ -49,9 +49,9 @@ The script supports two methods of domain configuration: via Cloudflare or using
 -----
 ### Installation Guidelines
 ### 1. Single Server Setup:
-   - Select the option to install both the panel and node on the same machine. Once the process is complete, the script will automatically restart the panel and provide all necessary login credentials.
+   - Select the option "Install Remnawave components", then choose "Install panel and node on one server". Once the process is complete, the script will automatically restart the panel and provide all the necessary login details.
 ### 2. Dual Server Setup
-   - Start by installing the panel on the first server. Wait for the script to finish the setup and provide the login credentials for the panel.
+   - Start with the first server and select the option "Install Remnawave components," then choose "Install panel only." Wait for the script to complete the setup and provide the login details for the panel.
    - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the "Important Information". In the pop-up window, you’ll see an icon to copy the certificate — click on it.
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
