@@ -34,7 +34,7 @@ The script supports two methods of domain configuration: via Cloudflare or using
 | CNAME | sub.example.com   | example.com      | DNS only      |
 | CNAME | node.example.com  | example.com      | DNS only      |
 
-> [!IMPORTANT]
+> [!TIP]
 > The node.example.com record is not mandatory for a selfsteal node — you can also use example.com for selfsteal.
 
 ### DNS Records Setup for Panel and Node on Separate Servers
