@@ -303,6 +303,7 @@ set_language() {
                 [INVALID_JSON_TEMPLATE]="Invalid JSON custom rules template for %s"
                 [EMPTY_TEMPLATE_VALUE]="Empty custom rules template value for %s"
                 [RESTORE_TEMPLATES]="Restore default custom rules templates"
+                [FAILED_TO_EXTRACT_UUID]="Failed to extract UUID from subscription template"
             )
             ;;
         ru)
@@ -565,6 +566,7 @@ set_language() {
                 [INVALID_JSON_TEMPLATE]="Недопустимый JSON-шаблон для %s"
                 [EMPTY_TEMPLATE_VALUE]="Пустое значение шаблона для %s"
                 [RESTORE_TEMPLATES]="Восстановить шаблоны правил по умолчанию"
+                [FAILED_TO_EXTRACT_UUID]="Не удалось извлечь UUID шаблона подписки"
             )
             ;;
     esac
@@ -1745,10 +1747,6 @@ make_api_request() {
         -H "X-Forwarded-For: ${url#http://}"
         -H "X-Forwarded-Proto: https"
     )
-
-    # Отладка: записываем метод, URL и тело запроса
-    echo "DEBUG: $method $url" >> /tmp/remnawave_debug.log
-    echo "DEBUG: Data: $data" >> /tmp/remnawave_debug.log
 
     if [ -n "$data" ]; then
         curl -s -X "$method" "$url" "${headers[@]}" -d "$data"
@@ -4226,7 +4224,7 @@ close_panel_access() {
 update_subscription_template() {
     local template_type="$1"
     local template_url="$2"
-    local is_yaml_template="$3" # Новый параметр: "true" для YAML, "false" для JSON
+    local is_yaml_template="$3" # "true" for YAML, "false" for JSON
     local domain_url="127.0.0.1:3000"
     TOKEN_FILE="${DIR_REMNAWAVE}token"
     PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
@@ -4234,7 +4232,6 @@ update_subscription_template() {
     echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
     sleep 1
 
-    # Проверка сохранённого домена панели
     if [ -f "$PANEL_DOMAIN_FILE" ]; then
         PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
         if [ -z "$PANEL_DOMAIN" ]; then
@@ -4245,14 +4242,12 @@ update_subscription_template() {
         fi
     fi
 
-    # Запрос домена, если он отсутствует
     if [ -z "$PANEL_DOMAIN" ]; then
         reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
         echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
         echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
     fi
 
-    # Проверка сохранённого токена
     if [ -f "$TOKEN_FILE" ]; then
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
@@ -4263,7 +4258,6 @@ update_subscription_template() {
         fi
     fi
 
-    # Запрос логина и пароля, если токен отсутствует или недействителен
     if [ -z "$token" ]; then
         reading "${LANG[ENTER_PANEL_USERNAME]}" username
         reading "${LANG[ENTER_PANEL_PASSWORD]}" password
@@ -4282,32 +4276,27 @@ update_subscription_template() {
         echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
     fi
 
-    # Загружаем содержимое шаблона из URL
     local template_content=$(curl -s "$template_url")
     if [ -z "$template_content" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
         return 1
     fi
 
-    # Проверяем валидность шаблона в зависимости от формата
     if [ "$is_yaml_template" = "true" ]; then
-        # Для YAML-шаблонов проверяем валидность (если есть yq или python)
         if command -v yq >/dev/null 2>&1; then
             if ! echo "$template_content" | yq e '.' - >/dev/null 2>&1; then
                 echo -e "${COLOR_RED}Invalid YAML template from $template_url${COLOR_RESET}"
                 return 1
             fi
         else
-            # Если yq недоступен, просто проверяем, что содержимое не пустое
             if [ -z "$template_content" ]; then
                 echo -e "${COLOR_RED}Invalid YAML template: empty content from $template_url${COLOR_RESET}"
                 return 1
             fi
         fi
         template_field="encodedTemplateYaml"
-        template_value=$(echo "$template_content" | base64 -w 0) # Кодируем YAML в base64, если API требует
+        template_value=$(echo "$template_content" | base64 -w 0)
     else
-        # Для JSON-шаблонов проверяем валидность
         if ! echo "$template_content" | jq . >/dev/null 2>&1; then
             echo -e "${COLOR_RED}Invalid JSON template from $template_url${COLOR_RESET}"
             return 1
@@ -4316,27 +4305,22 @@ update_subscription_template() {
         template_value="$template_content"
     fi
 
-    # Получаем текущий шаблон для указанного типа
     local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token" "$PANEL_DOMAIN")
     if [ -z "$get_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
         return 1
     fi
 
-    # Проверяем, успешен ли ответ
     if ! echo "$get_response" | jq -e '.response' > /dev/null; then
         echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: $get_response${COLOR_RESET}"
         return 1
     fi
-
-    # Извлекаем UUID шаблона
     local uuid=$(echo "$get_response" | jq -r '.response.uuid // null')
     if [ -z "$uuid" ] || [ "$uuid" == "null" ]; then
-        echo -e "${COLOR_RED}Failed to extract UUID from subscription template${COLOR_RESET}"
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_EXTRACT_UUID]}${COLOR_RESET}"
         return 1
     fi
 
-    # Формируем тело запроса
     if [ "$is_yaml_template" = "true" ]; then
         local request_body=$(jq -n --arg template "$template_value" \
                                   --arg type "$template_type" \
@@ -4349,16 +4333,13 @@ update_subscription_template() {
                                   '{templateJson: $template, templateType: $type, encodedTemplateYaml: "", uuid: $uuid}')
     fi
 
-    # Выполняем PUT-запрос к API
     local response=$(make_api_request "PUT" "http://$domain_url/api/subscription-templates" "$token" "$PANEL_DOMAIN" "$request_body")
 
-    # Проверяем ответ
     if [ -z "$response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
         return 1
     fi
 
-    # Проверяем успешность обновления шаблона
     if echo "$response" | jq -e '.response | select(.uuid != null)' > /dev/null; then
         echo -e "${COLOR_GREEN}${LANG[TEMPLATE_UPDATED_SUCCESS]}${COLOR_RESET}"
         return 0
