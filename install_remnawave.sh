@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.6"
+SCRIPT_VERSION="1.6.6a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -997,7 +997,7 @@ manage_template_upload() {
             update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle.json" "false"
             ;;
         3)
-            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all-block.json" "false"
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all.json" "false"
             ;;
         4)
             update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_rubundle.yaml" "true"
