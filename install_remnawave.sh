@@ -284,7 +284,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Empty response from API when updating template."
                 [ERROR_UPDATE_TEMPLATE]="Failed to update custom rules template"
                 [TEMPLATE_UPDATED_SUCCESS]="Custom rules template successfully updated."
-                [SELECT_TEMPLATE_CUSTOM]="Select Custom rules Template"
+                [SELECT_TEMPLATE_CUSTOM]="Select action (0-8):"
                 [SELECT_TEMPLATE_CUSTOM1]="Select Custom rules Template\nOnly run on panel server"
                 [TEMPLATE_SELECT_CHOICE]="Invalid choice. Please select 0-8."
                 [DOWNLOADING_CONFIG_SEED]="Downloading config.seed.ts from GitHub..."
@@ -546,7 +546,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Пустой ответ от API при обновлении шаблона правил."
                 [ERROR_UPDATE_TEMPLATE]="Не удалось обновить шаблон правил"
                 [TEMPLATE_UPDATED_SUCCESS]="Шаблон правил успешно обновлён."
-                [SELECT_TEMPLATE_CUSTOM]="Выберите шаблон правил"
+                [SELECT_TEMPLATE_CUSTOM]="Выберите действие (0-8):"
                 [SELECT_TEMPLATE_CUSTOM1]="Выберите шаблон правил\nЗапускать только на сервере с панелью"
                 [TEMPLATE_SELECT_CHOICE]="Неверный выбор. Выберите 0-8."
                 [RESTORING_DEFAULT_TEMPLATES]="Восстановление шаблонов правил по умолчанию из GitHub..."
@@ -981,7 +981,7 @@ show_template_menu() {
 
 manage_template_upload() {
     show_template_menu
-    reading "${LANG[SELECT_TEMPLATE_CUSTOM]} (0-8):" TEMPLATE_OPTION
+    reading "${LANG[SELECT_TEMPLATE_CUSTOM]}" TEMPLATE_OPTION
     case $TEMPLATE_OPTION in
         1)
             update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/marz-sub/refs/heads/main/v2ray/default.json" "false"
