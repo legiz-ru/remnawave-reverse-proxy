@@ -99,3 +99,11 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 >**Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.**
 >
 >**If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.**
+
+## Donations
+
+If you enjoy this project and want to support its ongoing development, please consider making a donation. Your contribution helps fund future updates and enhancements!
+
+**Donation Methods:**
+
+- **TON USDT:** `UQAxyZDwKUPQ5Bp09JOFcaDVakjYQT46rf3iP3lnl_qc9xVS`
