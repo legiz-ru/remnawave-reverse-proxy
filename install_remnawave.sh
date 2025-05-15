@@ -57,9 +57,9 @@ set_language() {
                 [MENU_6]="Remnawave CLI"
                 [MENU_7]="Manage IPv6"
                 [MENU_8]="Install random template for selfsteal node"
-                [MENU_9]="Check for updates script"
-                [MENU_10]="Manage panel access (Only for panel + node)"
-                [MENU_11]="Custom rules template from legiz"
+                [MENU_9]="Manage panel access (Only for panel + node)"
+                [MENU_10]="Custom rules template from legiz"
+                [MENU_11]="Check for updates script"
                 [PROMPT_ACTION]="Select action (0-11):"
                 [INVALID_CHOICE]="Invalid choice. Please select 0-11."
                 [WARNING_LABEL]="WARNING:"
@@ -301,6 +301,10 @@ set_language() {
                 [EMPTY_TEMPLATE_VALUE]="Empty custom rules template value for %s"
                 [RESTORE_TEMPLATES]="Restore default custom rules templates"
                 [FAILED_TO_EXTRACT_UUID]="Failed to extract UUID from subscription template"
+                [ARCHIVE_DIR_NOT_FOUND]="Archive directory for certificates not found."
+                [RENEWAL_CONF_NOT_FOUND]="Renewal configuration file not found."
+                [ARCHIVE_DIR_MISMATCH]="Archive directory mismatch in configuration."
+                [CERT_VERSION_NOT_FOUND]="Failed to determine certificate version."
             )
             ;;
         ru)
@@ -320,9 +324,9 @@ set_language() {
                 [MENU_6]="Remnawave CLI"
                 [MENU_7]="Управление IPv6"
                 [MENU_8]="Установить случайный шаблон для selfsteal ноды"
-                [MENU_9]="Проверить обновления скрипта"
-                [MENU_10]="Управление доступом к панели (Только для панели + нода)"
-                [MENU_11]="Кастомные шаблоны правил от legiz"
+                [MENU_9]="Управление доступом к панели (Только для панели + нода)"
+                [MENU_10]="Кастомные шаблоны правил от legiz"
+                [MENU_11]="Проверить обновления скрипта"
                 [PROMPT_ACTION]="Выберите действие (0-11):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 0-11."
                 [WARNING_LABEL]="ВНИМАНИЕ:"
@@ -561,6 +565,10 @@ set_language() {
                 [EMPTY_TEMPLATE_VALUE]="Пустое значение шаблона для %s"
                 [RESTORE_TEMPLATES]="Восстановить шаблоны правил по умолчанию"
                 [FAILED_TO_EXTRACT_UUID]="Не удалось извлечь UUID шаблона подписки"
+                [ARCHIVE_DIR_NOT_FOUND]="Директория архива сертификатов не найдена."
+                [RENEWAL_CONF_NOT_FOUND]="Файл конфигурации обновления сертификатов не найден."
+                [ARCHIVE_DIR_MISMATCH]="Несоответствие директории архива в конфигурации."
+                [CERT_VERSION_NOT_FOUND]="Не удалось определить версию сертификатов."
             )
             ;;
     esac
@@ -804,10 +812,9 @@ show_menu() {
     echo -e ""
     echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
     echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Install random template
-    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_10]}${COLOR_RESET}" # Manage panel access
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_11]}${COLOR_RESET}" # Upload custom template from legiz
-    echo -e ""
-    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Manage panel access
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Upload custom template from legiz
+    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
@@ -984,25 +991,25 @@ manage_template_upload() {
     reading "${LANG[SELECT_TEMPLATE_CUSTOM]}" TEMPLATE_OPTION
     case $TEMPLATE_OPTION in
         1)
-            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/marz-sub/refs/heads/main/v2ray/default.json" "false"
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/xray-json-simple-without-ru.json" "false"
             ;;
         2)
-            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle.json" "false"
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/xray-json-ru-bundle.json" "false"
             ;;
         3)
-            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all.json" "false"
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/xray-json-ru-bundle-category-ads-all.json" "false"
             ;;
         4)
-            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_rubundle.yaml" "true"
+            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/mihomo-ru-bundle.yaml" "true"
             ;;
         5)
-            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_fullproxy_without_ru.yaml" "true"
+            update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/mihomo-simple-without-ru.yaml" "true"
             ;;
         6)
-            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/legiz-ru/sb-rule-sets/refs/heads/main/.github/sub2sing-box/ru-bundle.json" "false"
+            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/singbox-ru-bundle.json" "false"
             ;;
         7)
-            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/legiz-ru/sb-rule-sets/main/.github/sub2sing-box/ru-bundle-oisd-big.json" "false"
+            update_subscription_template "SINGBOX" "https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/by-legiz/subscription-templates/singbox-ru-bundle-oisd-big.json" "false"
             ;;
         8)
             restore_default_templates
@@ -1612,16 +1619,74 @@ check_cert_expiry() {
     return 0
 }
 
+fix_letsencrypt_structure() {
+    local domain="$1"
+    local live_dir="/etc/letsencrypt/live/$domain"
+    local archive_dir="/etc/letsencrypt/archive/$domain"
+    local renewal_conf="/etc/letsencrypt/renewal/$domain.conf"
+
+    [ ! -d "$live_dir" ] && echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}" && return 1
+
+    [ ! -d "$archive_dir" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_DIR_NOT_FOUND]}${COLOR_RESET}" && return 1
+
+    [ ! -f "$renewal_conf" ] && echo -e "${COLOR_RED}${LANG[RENEWAL_CONF_NOT_FOUND]}${COLOR_RESET}" && return 1
+
+    local conf_archive_dir=$(grep "^archive_dir" "$renewal_conf" | awk '{print $3}')
+    [ "$conf_archive_dir" != "$archive_dir" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_DIR_MISMATCH]}${COLOR_RESET}" && return 1
+    local latest_version=$(ls -v "$archive_dir"/cert*.pem 2>/dev/null | tail -n 1 | grep -o '[0-9]\+' | tail -n 1)
+    [ -z "$latest_version" ] && echo -e "${COLOR_RED}${LANG[CERT_VERSION_NOT_FOUND]}${COLOR_RESET}" && return 1
+
+    local files=("cert" "chain" "fullchain" "privkey")
+    for file in "${files[@]}"; do
+        local archive_file="$archive_dir/${file}${latest_version}.pem"
+        local live_file="$live_dir/${file}.pem"
+
+        [ ! -f "$archive_file" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_FILE_NOT_FOUND]}${COLOR_RESET}" && return 1
+
+        if [ -e "$live_file" ] && [ ! -L "$live_file" ]; then
+            rm -f "$live_file"
+        fi
+        ln -sf "$archive_file" "$live_file"
+
+        local conf_path=$(grep "^$file =" "$renewal_conf" | awk '{print $3}')
+        [ "$conf_path" != "$live_file" ] && sed -i "s|^$file =.*|$file = $live_file|" "$renewal_conf"
+    done
+    local expected_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
+    if ! grep -Fx "$expected_hook" "$renewal_conf" > /dev/null; then
+        sed -i "s|^renew_hook =.*|$expected_hook|" "$renewal_conf" 2>/dev/null || echo "$expected_hook" >> "$renewal_conf"
+    fi
+
+    chmod 644 "$live_dir/cert.pem" "$live_dir/chain.pem" "$live_dir/fullchain.pem"
+    chmod 600 "$live_dir/privkey.pem"
+
+    return 0
+}
+
 check_certificates() {
     local DOMAIN=$1
+    local live_dir="/etc/letsencrypt/live/$DOMAIN"
 
-    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ]; then
-            echo -e "${COLOR_GREEN}${LANG[CERT_FOUND]}${COLOR_RESET}""$DOMAIN"
-            return 0
-        fi
+    if [ ! -d "$live_dir" ]; then
+        return 1
     fi
-    return 1
+
+    local files=("cert.pem" "chain.pem" "fullchain.pem" "privkey.pem")
+    for file in "${files[@]}"; do
+        local file_path="$live_dir/$file"
+        if [ ! -f "$file_path" ]; then
+            return 1
+        fi
+        if [ ! -L "$file_path" ]; then
+            echo -e "${COLOR_YELLOW}Файл $file_path не является символической ссылкой. Исправляем...${COLOR_RESET}"
+            fix_letsencrypt_structure "$DOMAIN"
+            if [ $? -ne 0 ]; then
+                return 1
+            fi
+        fi
+    done
+
+    echo -e "${COLOR_GREEN}${LANG[CERT_FOUND]}$DOMAIN${COLOR_RESET}"
+    return 0
 }
 
 get_certificates() {
@@ -2484,6 +2549,7 @@ if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
     min_days_left=9999
     for domain in "${!unique_domains[@]}"; do
         printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+
         if check_certificates "$domain"; then
             echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
             days_left=$(check_cert_expiry "$domain")
