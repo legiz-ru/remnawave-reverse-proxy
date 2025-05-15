@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.6"
+SCRIPT_VERSION="1.6.6b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -48,7 +48,7 @@ set_language() {
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Version: %s"
-                [MENU_0]="Exit"
+                [EXIT]="Exit"
                 [MENU_1]="Install Remnawave Components"
                 [MENU_2]="Reinstall panel/node"
                 [MENU_3]="Start panel/node"
@@ -62,7 +62,6 @@ set_language() {
                 [MENU_11]="Custom rules template from legiz"
                 [PROMPT_ACTION]="Select action (0-11):"
                 [INVALID_CHOICE]="Invalid choice. Please select 0-11."
-                [EXITING]="Exiting"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
@@ -73,14 +72,12 @@ set_language() {
                 [INSTALL_PANEL]="Install only the panel"
                 [INSTALL_ADD_NODE]="Add node to panel"
                 [INSTALL_NODE]="Install only the node"
-                [INSTALL_EXIT]="Exit"
                 [INSTALL_PROMPT]="Select action (0-3):"
                 [INSTALL_INVALID_CHOICE]="Invalid choice. Please select 0-3."
                 #IPv6 Submenu
                 [IPV6_MENU_TITLE]="Manage IPv6"
                 [IPV6_ENABLE]="Enable IPv6"
                 [IPV6_DISABLE]="Disable IPv6"
-                [IPV6_EXIT]="Exit"
                 [IPV6_PROMPT]="Select action (0-2):"
                 [IPV6_INVALID_CHOICE]="Invalid choice. Please select 0-2."
                 #Remna
@@ -94,7 +91,7 @@ set_language() {
                 [ENTER_CF_TOKEN]="Enter your Cloudflare API token or global API key:"
                 [ENTER_CF_EMAIL]="Enter your Cloudflare registered email:"
                 [CHECK_CERTS]="Checking certificates..."
-                [CERT_EXIST1]="Certificates found in /etc/letsencrypt/live/"
+                [CERT_FOUND]="Certificates found in /etc/letsencrypt/live/"
                 [CERT_EXIST]="Using existing certificates"
                 [CF_VALIDATING]="Cloudflare API key and email are valid"
                 [CF_INVALID]="Invalid Cloudflare API token or email after %d attempts."
@@ -102,9 +99,9 @@ set_language() {
                 [CERT_MISSING]="Certificates not found. Obtaining new ones..."
                 [WAITING]="Please wait..."
                 #API
-                [REGISTERING_REMNAWAVE]="Registering in Remnawave"
-                [CHECK_SERVER]="Checking server availability..."
-                [SERVER_NOT_READY]="Server is not ready, waiting..."
+                [REGISTERING_REMNAWAVE]="Registration in Remnawave"
+                [CHECK_CONTAINERS]="Checking containers availability..."
+                [CONTAINERS_NOT_READY]="Containers are not ready, waiting..."
                 [REGISTRATION_SUCCESS]="Registration completed successfully!"
                 [GET_PUBLIC_KEY]="Getting public key..."
                 [PUBLIC_KEY_SUCCESS]="Public key successfully obtained."
@@ -160,7 +157,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Registration error - empty server response"
                 [ERROR_REGISTER]="Registration error"
                 #Reinstall
-                [REINSTALL_WARNING]="All data will be deleted from the server. Are you sure? (y/n):"
+                [REINSTALL_WARNING]="All data panel/node will be deleted from the server. Are you sure? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
                 [REINSTALL_PROMPT]="Select action (0-3):"
                 [INVALID_REINSTALL_CHOICE]="Invalid choice. Please select 0-3."
@@ -252,7 +249,7 @@ set_language() {
                 [CERT_METHOD_PROMPT]="Select certificate generation method for all domains:"
                 [CERT_METHOD_CF]="1. Cloudflare API (supports wildcard)"
                 [CERT_METHOD_ACME]="2. ACME HTTP-01 (single domain, no wildcard)"
-                [CERT_METHOD_CHOOSE]="Choose option (1-2):"
+                [CERT_METHOD_CHOOSE]="Select option (1-2):"
                 [EMAIL_PROMPT]="Enter your email for Let's Encrypt registration:"
                 [CERTS_SKIPPED]="All certificates already exist. Skipping generation."
                 [ACME_METHOD]="Using ACME (Let's Encrypt) with HTTP-01 challenge (no wildcard support)..."
@@ -272,7 +269,7 @@ set_language() {
                 [CHOOSE_TEMPLATE_SOURCE]="Select template source:"
                 [SIMPLE_WEB_TEMPLATES]="Simple web templates"
                 [SNI_TEMPLATES]="Sni templates"
-                [CHOOSE_TEMPLATE_OPTION]="Choose option (0-2):"
+                [CHOOSE_TEMPLATE_OPTION]="Select option (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
                 [PORT_8443_OPEN]="Open port 8443 for panel access"
                 [PORT_8443_CLOSE]="Close port 8443 for panel access"
@@ -287,7 +284,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Empty response from API when updating template."
                 [ERROR_UPDATE_TEMPLATE]="Failed to update custom rules template"
                 [TEMPLATE_UPDATED_SUCCESS]="Custom rules template successfully updated."
-                [SELECT_TEMPLATE_CUSTOM]="Select Custom rules Template"
+                [SELECT_TEMPLATE_CUSTOM]="Select action (0-8):"
                 [SELECT_TEMPLATE_CUSTOM1]="Select Custom rules Template\nOnly run on panel server"
                 [TEMPLATE_SELECT_CHOICE]="Invalid choice. Please select 0-8."
                 [DOWNLOADING_CONFIG_SEED]="Downloading config.seed.ts from GitHub..."
@@ -308,13 +305,13 @@ set_language() {
             ;;
         ru)
             LANG=(
-                #check
+                #Check
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Версия: %s"
-                #Menu
-                [MENU_0]="Выход"
+                #Main menu
+                [EXIT]="Выход"
                 [MENU_1]="Установка компонентов Remnawave"
                 [MENU_2]="Переустановить панель/ноду"
                 [MENU_3]="Запустить панель/ноду"
@@ -328,7 +325,6 @@ set_language() {
                 [MENU_11]="Кастомные шаблоны правил от legiz"
                 [PROMPT_ACTION]="Выберите действие (0-11):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 0-11."
-                [EXITING]="Выход"
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
                 [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
@@ -339,14 +335,12 @@ set_language() {
                 [INSTALL_PANEL]="Установить только панель"
                 [INSTALL_ADD_NODE]="Добавить ноду в панель"
                 [INSTALL_NODE]="Установить только ноду"
-                [INSTALL_EXIT]="Выход"
                 [INSTALL_PROMPT]="Выберите действие (0-4):"
                 [INSTALL_INVALID_CHOICE]="Неверный выбор. Выберите 0-4."
                 #IPv6 Submenu
                 [IPV6_MENU_TITLE]="Управление IPv6"
                 [IPV6_ENABLE]="Включить IPv6"
                 [IPV6_DISABLE]="Отключить IPv6"
-                [IPV6_EXIT]="Выход"
                 [IPV6_PROMPT]="Выберите действие (0-2):"
                 [IPV6_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
                 #Remna
@@ -360,7 +354,7 @@ set_language() {
                 [ENTER_CF_TOKEN]="Введите Cloudflare API токен или глобальный ключ:"
                 [ENTER_CF_EMAIL]="Введите зарегистрированную почту Cloudflare:"
                 [CHECK_CERTS]="Проверка сертификатов..."
-                [CERT_EXIST1]="Сертификаты найдены в /etc/letsencrypt/live/"
+                [CERT_FOUND]="Сертификаты найдены в /etc/letsencrypt/live/"
                 [CERT_EXIST]="Используем существующие сертификаты"
                 [CF_VALIDATING]="Cloudflare API ключ и email валидны"
                 [CF_INVALID]="Неверный Cloudflare API ключ или email после %d попыток."
@@ -368,9 +362,9 @@ set_language() {
                 [CERT_MISSING]="Сертификаты не найдены. Получаем новые..."
                 [WAITING]="Пожалуйста, подождите..."
                 #API
-                [REGISTERING_REMNAWAVE]="Регистрация в Remnawave"
-                [CHECK_SERVER]="Проверка доступности сервера..."
-                [SERVER_NOT_READY]="Сервер не готов, ожидание..."
+                [REGISTERING_REMNAWAVE]="Процесс регистрации в Remnawave"
+                [CHECK_CONTAINERS]="Проверка доступности контейнеров..."
+                [CONTAINERS_NOT_READY]="Контейнеры не готовы, ожидание..."
                 [REGISTRATION_SUCCESS]="Регистрация прошла успешно!"
                 [GET_PUBLIC_KEY]="Получаем публичный ключ..."
                 [PUBLIC_KEY_SUCCESS]="Публичный ключ успешно получен."
@@ -378,7 +372,7 @@ set_language() {
                 [GENERATE_KEYS_SUCCESS]="Ключи успешно сгенерированы."
                 [UPDATING_XRAY_CONFIG]="Обновление конфигурации Xray..."
                 [XRAY_CONFIG_UPDATED]="Конфигурация Xray успешно обновлена."
-                [NODE_CREATED]="Узел успешно создан."
+                [NODE_CREATED]="Нода успешно создана."
                 [CREATE_HOST]="Создаем хост с UUID: "
                 [HOST_CREATED]="Хост успешно создан."
                 #Stop/Start
@@ -417,8 +411,8 @@ set_language() {
                 [ERROR_GENERATE_KEYS]="Не удалось сгенерировать ключи."
                 [ERROR_EMPTY_RESPONSE_CONFIG]="Пустой ответ от сервера при обновлении конфигурации."
                 [ERROR_UPDATE_XRAY_CONFIG]="Не удалось обновить конфигурацию Xray."
-                [ERROR_EMPTY_RESPONSE_NODE]="Пустой ответ от сервера при создании узла."
-                [ERROR_CREATE_NODE]="Не удалось создать узел."
+                [ERROR_EMPTY_RESPONSE_NODE]="Пустой ответ от сервера при создании ноды."
+                [ERROR_CREATE_NODE]="Не удалось создать ноду."
                 [ERROR_EMPTY_RESPONSE_INBOUNDS]="Пустой ответ от сервера при получении inbounds."
                 [ERROR_EXTRACT_UUID]="Не удалось извлечь UUID из ответа."
                 [ERROR_EMPTY_RESPONSE_HOST]="Пустой ответ от сервера при создании хоста."
@@ -426,7 +420,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Ошибка при регистрации - пустой ответ сервера"
                 [ERROR_REGISTER]="Ошибка регистрации"
                 #Reinstall
-                [REINSTALL_WARNING]="Все данные будут удалены с сервера. Вы уверены? (y/n):"
+                [REINSTALL_WARNING]="Все данные панели/ноды будут удалены с сервера. Вы уверены? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
                 [REINSTALL_PROMPT]="Выберите действие (0-3):"
                 [INVALID_REINSTALL_CHOICE]="Неверный выбор. Выберите 0-3."
@@ -517,7 +511,7 @@ set_language() {
                 [CERT_METHOD_PROMPT]="Выберите метод генерации сертификатов для всех доменов:"
                 [CERT_METHOD_CF]="1. Cloudflare API (поддерживает wildcard)"
                 [CERT_METHOD_ACME]="2. ACME HTTP-01 (один домен, без wildcard)"
-                [CERT_METHOD_CHOOSE]="Выберите опцию (1-2):"
+                [CERT_METHOD_CHOOSE]="Выберите действие (1-2):"
                 [EMAIL_PROMPT]="Введите ваш email для регистрации в Let's Encrypt:"
                 [CERTS_SKIPPED]="Все сертификаты уже существуют. Пропускаем генерацию."
                 [ACME_METHOD]="Используем ACME (Let's Encrypt) с HTTP-01 вызовом (без поддержки wildcard)..."
@@ -537,7 +531,7 @@ set_language() {
                 [CHOOSE_TEMPLATE_SOURCE]="Выберите источник шаблонов:"
                 [SIMPLE_WEB_TEMPLATES]="Simple web templates"
                 [SNI_TEMPLATES]="SNI templates"
-                [CHOOSE_TEMPLATE_OPTION]="Выберите опцию (0-2):"
+                [CHOOSE_TEMPLATE_OPTION]="Выберите действие (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
                 [PORT_8443_OPEN]="Открыть доступ к панели на порту 8443"
                 [PORT_8443_CLOSE]="Закрыть доступ к панели на порту 8443"
@@ -552,7 +546,7 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Пустой ответ от API при обновлении шаблона правил."
                 [ERROR_UPDATE_TEMPLATE]="Не удалось обновить шаблон правил"
                 [TEMPLATE_UPDATED_SUCCESS]="Шаблон правил успешно обновлён."
-                [SELECT_TEMPLATE_CUSTOM]="Выберите шаблон правил"
+                [SELECT_TEMPLATE_CUSTOM]="Выберите действие (0-8):"
                 [SELECT_TEMPLATE_CUSTOM1]="Выберите шаблон правил\nЗапускать только на сервере с панелью"
                 [TEMPLATE_SELECT_CHOICE]="Неверный выбор. Выберите 0-8."
                 [RESTORING_DEFAULT_TEMPLATES]="Восстановление шаблонов правил по умолчанию из GitHub..."
@@ -609,7 +603,6 @@ log_entry() {
 
 run_remnawave_cli() {
     if ! docker ps --format '{{.Names}}' | grep -q '^remnawave$'; then
-        #echo -e "${COLOR_RED}${LANG[CLI_FAILED]}${COLOR_RESET}"
         echo -e "${COLOR_YELLOW}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
         return 1
     fi
@@ -816,7 +809,7 @@ show_menu() {
     echo -e ""
     echo -e "${COLOR_YELLOW}11. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -829,7 +822,7 @@ show_install_menu() {
     echo -e "${COLOR_YELLOW}3. ${LANG[INSTALL_ADD_NODE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}4. ${LANG[INSTALL_NODE]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[INSTALL_EXIT]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -866,7 +859,7 @@ manage_install() {
             log_clear
             ;;
         0)
-            echo -e "${COLOR_YELLOW}${LANG[INSTALL_EXIT]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
             log_clear
             remnawave_reverse
             ;;
@@ -886,7 +879,7 @@ manage_panel_access() {
     echo -e "${COLOR_YELLOW}1. ${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
     reading "${LANG[IPV6_PROMPT]}" ACCESS_OPTION
     case $ACCESS_OPTION in
@@ -903,7 +896,7 @@ manage_panel_access() {
             manage_panel_access
             ;;
         0)
-            echo -e "${COLOR_YELLOW}${LANG[MENU_0]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
             log_clear
             remnawave_reverse
             ;;
@@ -924,7 +917,7 @@ show_reinstall_options() {
     echo -e "${COLOR_YELLOW}2. ${LANG[INSTALL_PANEL]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}3. ${LANG[INSTALL_NODE]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -935,7 +928,7 @@ show_ipv6_menu() {
     echo -e "${COLOR_YELLOW}1. ${LANG[IPV6_ENABLE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[IPV6_DISABLE]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[IPV6_EXIT]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -956,7 +949,7 @@ manage_ipv6() {
             manage_ipv6
             ;;
         0)
-            echo -e "${COLOR_YELLOW}${LANG[IPV6_EXIT]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
             log_clear
             remnawave_reverse
             ;;
@@ -982,13 +975,13 @@ show_template_menu() {
     echo -e "${COLOR_YELLOW}7. Singbox   | RU-BUNDLE + OISD BIG (ADBLOCK)${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}8. ${LANG[RESTORE_TEMPLATES]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
 manage_template_upload() {
     show_template_menu
-    reading "${LANG[SELECT_TEMPLATE_CUSTOM]} (0-8):" TEMPLATE_OPTION
+    reading "${LANG[SELECT_TEMPLATE_CUSTOM]}" TEMPLATE_OPTION
     case $TEMPLATE_OPTION in
         1)
             update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/marz-sub/refs/heads/main/v2ray/default.json" "false"
@@ -997,7 +990,7 @@ manage_template_upload() {
             update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle.json" "false"
             ;;
         3)
-            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all-block.json" "false"
+            update_subscription_template "XRAY_JSON" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/other/marzban-v2ray-ru-bundle-category-ads-all.json" "false"
             ;;
         4)
             update_subscription_template "MIHOMO" "https://raw.githubusercontent.com/legiz-ru/mihomo-rule-sets/refs/heads/main/examples/remnawave_prod_rubundle.yaml" "true"
@@ -1015,7 +1008,7 @@ manage_template_upload() {
             restore_default_templates
             ;;
         0)
-            echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
             return 0
             ;;
         *)
@@ -1083,12 +1076,12 @@ restore_default_templates() {
     fi
 
     local template_configs=(
-        "CLASH|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/clash.yaml|yaml"
-        "MIHOMO|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/mihomo.yaml|yaml"
-        "STASH|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/stash.yaml|yaml"
-        "SINGBOX|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/singbox.json|json"
-        "SINGBOX_LEGACY|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/singbox_legacy.json|json"
-        "XRAY_JSON|https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/templates/xray.json|json"
+        "CLASH|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/clash.yaml|yaml"
+        "MIHOMO|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/mihomo.yaml|yaml"
+        "STASH|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/stash.yaml|yaml"
+        "SINGBOX|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/singbox.json|json"
+        "SINGBOX_LEGACY|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/singbox-legacy.json|json"
+        "XRAY_JSON|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/xray-json.json|json"
     )
 
     for template_entry in "${template_configs[@]}"; do
@@ -1227,12 +1220,12 @@ choose_reinstall_type() {
                     esac
                     log_clear
                 else
-                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
                     exit 0
                 fi
                 ;;
             0)
-                echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
                 remnawave_reverse
                 ;;
             *)
@@ -1288,7 +1281,7 @@ show_template_source_options() {
     echo -e "${COLOR_YELLOW}1. ${LANG[SIMPLE_WEB_TEMPLATES]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[SNI_TEMPLATES]}${COLOR_RESET}"
     echo -e ""
-    echo -e "${COLOR_YELLOW}0. ${LANG[MENU_0]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
@@ -1624,7 +1617,7 @@ check_certificates() {
 
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
         if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/privkey.pem" ]; then
-            echo -e "${COLOR_GREEN}${LANG[CERT_EXIST1]}${COLOR_RESET}""$DOMAIN"
+            echo -e "${COLOR_GREEN}${LANG[CERT_FOUND]}${COLOR_RESET}""$DOMAIN"
             return 0
         fi
     fi
@@ -2770,12 +2763,12 @@ EOL
     echo -e "${COLOR_YELLOW}${LANG[REGISTERING_REMNAWAVE]}${COLOR_RESET}"
     sleep 20
 
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CONTAINERS]}${COLOR_RESET}"
     until curl -s "http://$domain_url/api/auth/register" \
         --header 'X-Forwarded-For: 127.0.0.1' \
         --header 'X-Forwarded-Proto: https' \
         > /dev/null; do
-        echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
+        echo -e "${COLOR_RED}${LANG[CONTAINERS_NOT_READY]}${COLOR_RESET}"
         sleep 10
     done
 
@@ -3439,12 +3432,12 @@ EOL
     sleep 20
 
     local domain_url="127.0.0.1:3000"
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_SERVER]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CONTAINERS]}${COLOR_RESET}"
     until curl -s "http://$domain_url/api/auth/register" \
         --header 'X-Forwarded-For: 127.0.0.1' \
         --header 'X-Forwarded-Proto: https' \
         > /dev/null; do
-        echo -e "${COLOR_RED}${LANG[SERVER_NOT_READY]}${COLOR_RESET}"
+        echo -e "${COLOR_RED}${LANG[CONTAINERS_NOT_READY]}${COLOR_RESET}"
         sleep 5
     done
 
@@ -3887,7 +3880,7 @@ add_node_to_panel() {
     echo
 
     if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
         exit 0
     fi
 
@@ -4437,7 +4430,7 @@ case $OPTION in
                     remnawave_reverse
                     ;;
                 0)
-                    echo -e "${COLOR_YELLOW}${LANG[EXITING]}${COLOR_RESET}"
+                    echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
                     remnawave_reverse
                     ;;
                 *)
@@ -4463,7 +4456,7 @@ case $OPTION in
         remnawave_reverse
         ;;
     0)
-        echo -e "${COLOR_YELLOW}${LANG[MENU_0]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
         exit 0
         ;;
     *)
