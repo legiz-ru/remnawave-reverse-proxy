@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.6b"
+SCRIPT_VERSION="1.6.7"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -34,6 +34,14 @@ declare -A LANG=(
     [LANG_RU]="Русский"
 )
 
+show_language() {
+    echo -e "${COLOR_GREEN}${LANG[CHOOSE_LANG]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[LANG_EN]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[LANG_RU]}${COLOR_RESET}"
+    echo -e ""
+}
+
 set_language() {
     case $1 in
         en)
@@ -59,13 +67,26 @@ set_language() {
                 [MENU_8]="Install random template for selfsteal node"
                 [MENU_9]="Manage panel access (Only for panel + node)"
                 [MENU_10]="Custom rules template from legiz"
-                [MENU_11]="Check for updates script"
-                [PROMPT_ACTION]="Select action (0-11):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-11."
+                [MENU_11]="Certificates"
+                [MENU_12]="Check for updates script"
+                [PROMPT_ACTION]="Select action (0-12):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-12."
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
                 [CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?"
+                #Cert Submenu
+                [CERT_MENU_TITLE]="Manage Certificates"
+                [CERT_UPDATE]="Update current certificates"
+                [CERT_GENERATE]="Generate new certificates for another domain"
+                [CERT_PROMPT1]="Select action (0-2):"
+                [CERT_INVALID_CHOICE]="Invalid choice. Please select 0-2."
+                [CERT_UPDATE_CHECK]="Checking certificate generation method..."
+                [CERT_UPDATE_SUCCESS]="Certificates successfully updated."
+                [CERT_UPDATE_FAIL]="Failed to update certificates."
+                [CERT_GENERATE_PROMPT]="Enter the domain for new certificates (e.g., example.com):"
+                [CERT_METHOD_UNKNOWN]="Unknown certificate generation method."
+                [CERT_NOT_DUE]="Certificate for %s is not yet due for renewal."
                 #Install Submenu
                 [INSTALL_MENU_TITLE]="Install Remnawave Components"
                 [INSTALL_PANEL_NODE]="Install panel and node on one server"
@@ -185,7 +206,7 @@ set_language() {
                 [IPV6_ENABLED]="IPv6 has been enabled."
                 [DISABLING_IPV6]="Disabling IPv6..."
                 [IPV6_DISABLED]="IPv6 has been disabled."
-                # add_node_to_panel
+                #Add node to panel
                 [ADD_NODE_TO_PANEL]="Adding node to panel"
                 [EMPTY_SAVED_PANEL_DOMAIN]="Saved panel domain is empty. Requesting a new one..."
                 [USING_SAVED_PANEL_DOMAIN]="Using saved panel domain: %s"
@@ -279,6 +300,7 @@ set_language() {
                 [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
                 [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
                 # Template Upload
+                [TEMPLATE_NOT_APPLIED]="Custom rules template not applied"
                 [UPLOADING_TEMPLATE]="Uploading custom rules template..."
                 [ERROR_FETCH_TEMPLATE]="Failed to fetch custom rules template."
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Empty response from API when updating template."
@@ -305,6 +327,17 @@ set_language() {
                 [RENEWAL_CONF_NOT_FOUND]="Renewal configuration file not found."
                 [ARCHIVE_DIR_MISMATCH]="Archive directory mismatch in configuration."
                 [CERT_VERSION_NOT_FOUND]="Failed to determine certificate version."
+                [RESULTS_CERTIFICATE_UPDATES]="Results of certificate updates:"
+                [CERTIFICATE_FOR]="Certificate for "
+                [SUCCESSFULLY_UPDATED]="successfully updated"
+                [FAILED_TO_UPDATE_CERTIFICATE_FOR]="Failed to update certificate for "
+                [ERROR_CHECKING_EXPIRY_FOR]="Error checking expiry date for "
+                [DOES_NOT_REQUIRE_UPDATE]="does not require updating ("
+                [UPDATED]="Updated"
+                [REMAINING]="Remaining"
+                [ERROR_UPDATE]="Error updating"
+                [ALREADY_EXPIRED]="already expired"
+                [CERT_CLOUDFLARE_FILE_NOT_FOUND]="Cloudflare credentials file not found."
             )
             ;;
         ru)
@@ -326,13 +359,26 @@ set_language() {
                 [MENU_8]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_9]="Управление доступом к панели (Только для панели + нода)"
                 [MENU_10]="Кастомные шаблоны правил от legiz"
-                [MENU_11]="Проверить обновления скрипта"
-                [PROMPT_ACTION]="Выберите действие (0-11):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-11."
+                [MENU_11]="Управление сертификатами"
+                [MENU_12]="Проверить обновления скрипта"
+                [PROMPT_ACTION]="Выберите действие (0-12):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-12."
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
                 [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
                 [CONFIRM_SERVER_PANEL]="Вы уверены, что находитесь на сервере с установленной панелью?"
+                #Cert Submenu
+                [CERT_MENU_TITLE]="Управление сертификатами"
+                [CERT_UPDATE]="Обновить текущие сертификаты"
+                [CERT_GENERATE]="Сгенерировать новые сертификаты для другого домена"
+                [CERT_PROMPT1]="Выберите действие (0-2):"
+                [CERT_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
+                [CERT_UPDATE_CHECK]="Проверка метода генерации сертификата..."
+                [CERT_UPDATE_SUCCESS]="Сертификаты успешно обновлены."
+                [CERT_UPDATE_FAIL]="Не удалось обновить сертификаты."
+                [CERT_GENERATE_PROMPT]="Введите домен для новых сертификатов (например, example.com):"
+                [CERT_METHOD_UNKNOWN]="Неизвестный метод генерации сертификата."
+                [CERT_NOT_DUE]="Сертификат для %s еще не требует обновления."
                 #Install Submenu
                 [INSTALL_MENU_TITLE]="Установка компонентов Remnawave"
                 [INSTALL_PANEL_NODE]="Установить панель и ноду на один сервер"
@@ -451,7 +497,7 @@ set_language() {
                 [IPV6_ALREADY_DISABLED]="IPv6 уже отключен"
                 [DISABLING_IPV6]="Отключение IPv6..."
                 [IPV6_DISABLED]="IPv6 отключен."
-                # add_node_to_panel
+                #Add node to panel
                 [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
                 [EMPTY_SAVED_PANEL_DOMAIN]="Сохранённый домен панели пуст. Запрашиваем новый..."
                 [USING_SAVED_PANEL_DOMAIN]="Используем сохранённый домен панели: %s"
@@ -545,6 +591,7 @@ set_language() {
                 [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
                 [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
                 # Template Upload
+                [TEMPLATE_NOT_APPLIED]="Шаблон правил не применён"
                 [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
                 [ERROR_FETCH_TEMPLATE]="Не удалось загрузить шаблон правил."
                 [ERROR_EMPTY_RESPONSE_TEMPLATE]="Пустой ответ от API при обновлении шаблона правил."
@@ -569,6 +616,17 @@ set_language() {
                 [RENEWAL_CONF_NOT_FOUND]="Файл конфигурации обновления сертификатов не найден."
                 [ARCHIVE_DIR_MISMATCH]="Несоответствие директории архива в конфигурации."
                 [CERT_VERSION_NOT_FOUND]="Не удалось определить версию сертификатов."
+                [RESULTS_CERTIFICATE_UPDATES]="Результаты обновления сертификатов:"
+                [CERTIFICATE_FOR]="Сертификат для "
+                [SUCCESSFULLY_UPDATED]="успешно обновлен"
+                [FAILED_TO_UPDATE_CERTIFICATE_FOR]="Не удалось обновить сертификат для "
+                [ERROR_CHECKING_EXPIRY_FOR]="Ошибка проверки даты истечения для "
+                [DOES_NOT_REQUIRE_UPDATE]="не требует обновления ("
+                [UPDATED]="Обновлен"
+                [REMAINING]="Осталось"
+                [ERROR_UPDATE]="Ошибка обновления"
+                [ALREADY_EXPIRED]="уже истек"
+                [CERT_CLOUDFLARE_FILE_NOT_FOUND]="Файл учетных данных Cloudflare не найден."
             )
             ;;
     esac
@@ -789,14 +847,6 @@ generate_password() {
     echo "$password"
 }
 
-show_language() {
-    echo -e "${COLOR_GREEN}${LANG[CHOOSE_LANG]}${COLOR_RESET}"
-    echo -e ""
-    echo -e "${COLOR_YELLOW}1. ${LANG[LANG_EN]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}2. ${LANG[LANG_RU]}${COLOR_RESET}"
-    echo -e ""
-}
-
 show_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
@@ -814,12 +864,14 @@ show_menu() {
     echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Manage panel access
     echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Upload custom template from legiz
-    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}" # Manage certificates
+    echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
 }
 
+#Manage Install Remnawave Components
 show_install_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[INSTALL_MENU_TITLE]}${COLOR_RESET}"
@@ -878,8 +930,10 @@ manage_install() {
             ;;
     esac
 }
+#Manage Install Remnawave Components
 
-manage_panel_access() {
+#Manage Panel Access
+show_panel_access() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
     echo -e ""
@@ -888,6 +942,10 @@ manage_panel_access() {
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
+}
+
+manage_panel_access() {
+    show_panel_access
     reading "${LANG[IPV6_PROMPT]}" ACCESS_OPTION
     case $ACCESS_OPTION in
         1)
@@ -916,6 +974,60 @@ manage_panel_access() {
     esac
 }
 
+open_panel_access() {
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
+    if [ ! -f "nginx.conf" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
+        exit 1
+    fi
+
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+
+    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "$dir/nginx.conf" | grep "~*\w\+.*=")
+    cookies_random1=$(echo "$cookie_line" | grep -oP '~*\K\w+(?==)')
+    cookies_random2=$(echo "$cookie_line" | grep -oP '=\K\w+(?=")')
+
+    if [ -z "$PANEL_DOMAIN" ] || [ -z "$cookies_random1" ] || [ -z "$cookies_random2" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
+    ufw allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+    ufw reload > /dev/null 2>&1
+    sleep 1
+
+    local panel_link="https://${PANEL_DOMAIN}:8443/auth/login?${cookies_random1}=${cookies_random2}"
+    echo -e "${COLOR_YELLOW}${LANG[OPEN_PANEL_LINK]}${COLOR_RESET}"
+    echo -e "${COLOR_WHITE}${panel_link}${COLOR_RESET}"
+    echo -e "${COLOR_RED}${LANG[PORT_8443_WARNING]}${COLOR_RESET}"
+
+    sleep 2
+    log_clear
+}
+
+close_panel_access() {
+    echo -e "${COLOR_YELLOW}${LANG[CLOSE_PANEL_ACCESS]}${COLOR_RESET}"
+    ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+    ufw reload > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    sleep 2
+    log_clear
+}
+#Manage Panel Access
+
+#Show Reinstall Options
 show_reinstall_options() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[REINSTALL_TYPE_TITLE]}${COLOR_RESET}"
@@ -928,6 +1040,53 @@ show_reinstall_options() {
     echo -e ""
 }
 
+choose_reinstall_type() {
+    show_reinstall_options
+    reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
+    case $REINSTALL_OPTION in
+        1|2|3)
+                echo -e "${COLOR_RED}${LANG[REINSTALL_WARNING]}${COLOR_RESET}"
+                read confirm
+                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+                    reinstall_remnawave
+                    if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
+                        install_packages
+                    fi
+                    case $REINSTALL_OPTION in
+                        1) installation ;;
+                        2) installation_panel ;;
+                        3) installation_node ;;
+                    esac
+                    log_clear
+                else
+                    echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                    exit 0
+                fi
+                ;;
+            0)
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                remnawave_reverse
+                ;;
+            *)
+                echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
+                exit 1
+                ;;
+        esac
+}
+
+reinstall_remnawave() {
+    if [ -d "/opt/remnawave" ]; then
+        cd /opt/remnawave || return
+        docker compose down -v --rmi all --remove-orphans > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+    fi
+    docker system prune -a --volumes -f > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    rm -rf /opt/remnawave 2>/dev/null
+}
+#Show Reinstall Options
+
+#Manage IPv6
 show_ipv6_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[IPV6_MENU_TITLE]}${COLOR_RESET}"
@@ -969,6 +1128,54 @@ manage_ipv6() {
     esac
 }
 
+enable_ipv6() {
+    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 0 ]; then
+        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_ENABLED]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[ENABLE_IPV6]}${COLOR_RESET}"
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
+
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
+
+    echo "net.ipv6.conf.all.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.lo.disable_ipv6 = 0" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 0" >> /etc/sysctl.conf
+
+    sysctl -p > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[IPV6_ENABLED]}${COLOR_RESET}"
+}
+
+disable_ipv6() {
+    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 1 ]; then
+        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_DISABLED]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo -e "${COLOR_YELLOW}${LANG[DISABLING_IPV6]}${COLOR_RESET}"
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
+
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
+
+    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
+
+    sysctl -p > /dev/null 2>&1
+    echo -e "${COLOR_GREEN}${LANG[IPV6_DISABLED]}${COLOR_RESET}"
+}
+#Manage IPv6
+
+#Manage Template
 show_template_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[SELECT_TEMPLATE_CUSTOM1]}${COLOR_RESET}"
@@ -1197,50 +1404,134 @@ restore_default_templates() {
     return 0
 }
 
-reinstall_remnawave() {
-    if [ -d "/opt/remnawave" ]; then
-        cd /opt/remnawave || return
-        docker compose down -v --rmi all --remove-orphans > /dev/null 2>&1 &
-        spinner $! "${LANG[WAITING]}"
-    fi
-    docker system prune -a --volumes -f > /dev/null 2>&1 &
-    spinner $! "${LANG[WAITING]}"
-    rm -rf /opt/remnawave 2>/dev/null
-}
+update_subscription_template() {
+    local template_type="$1"
+    local template_url="$2"
+    local is_yaml_template="$3" # "true" for YAML, "false" for JSON
+    local domain_url="127.0.0.1:3000"
+    TOKEN_FILE="${DIR_REMNAWAVE}token"
+    PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
 
-choose_reinstall_type() {
-    show_reinstall_options
-    reading "${LANG[REINSTALL_PROMPT]}" REINSTALL_OPTION
-    case $REINSTALL_OPTION in
-        1|2|3)
-                echo -e "${COLOR_RED}${LANG[REINSTALL_WARNING]}${COLOR_RESET}"
-                read confirm
-                if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-                    reinstall_remnawave
-                    if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                        install_packages
-                    fi
-                    case $REINSTALL_OPTION in
-                        1) installation ;;
-                        2) installation_panel ;;
-                        3) installation_node ;;
-                    esac
-                    log_clear
-                else
-                    echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
-                    exit 0
-                fi
-                ;;
-            0)
-                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
-                remnawave_reverse
-                ;;
-            *)
-                echo -e "${COLOR_YELLOW}${LANG[INVALID_REINSTALL_CHOICE]}${COLOR_RESET}"
-                exit 1
-                ;;
-        esac
+    echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
+    sleep 1
+
+    if [ -f "$PANEL_DOMAIN_FILE" ]; then
+        PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
+        if [ -z "$PANEL_DOMAIN" ]; then
+            echo -e "${COLOR_YELLOW}${LANG[EMPTY_SAVED_PANEL_DOMAIN]}${COLOR_RESET}"
+            PANEL_DOMAIN=""
+        else
+            printf "${COLOR_YELLOW}${LANG[USING_SAVED_PANEL_DOMAIN]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+        fi
+    fi
+
+    if [ -z "$PANEL_DOMAIN" ]; then
+        reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
+        echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
+    fi
+
+    if [ -f "$TOKEN_FILE" ]; then
+        token=$(cat "$TOKEN_FILE")
+        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
+        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            token=""
+        fi
+    fi
+
+    if [ -z "$token" ]; then
+        reading "${LANG[ENTER_PANEL_USERNAME]}" username
+        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+
+        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+
+        token=$(echo "$login_response" | jq -r '.response.accessToken')
+        if [ -z "$token" ] || [ "$token" == "null" ]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+            return 1
+        fi
+
+        echo "$token" > "$TOKEN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+
+    local template_content=$(curl -s "$template_url")
+    if [ -z "$template_content" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    if [ "$is_yaml_template" = "true" ]; then
+        if command -v yq >/dev/null 2>&1; then
+            if ! echo "$template_content" | yq e '.' - >/dev/null 2>&1; then
+                echo -e "${COLOR_RED}Invalid YAML template from $template_url${COLOR_RESET}"
+                return 1
+            fi
+        else
+            if [ -z "$template_content" ]; then
+                echo -e "${COLOR_RED}Invalid YAML template: empty content from $template_url${COLOR_RESET}"
+                return 1
+            fi
+        fi
+        template_field="encodedTemplateYaml"
+        template_value=$(echo "$template_content" | base64 -w 0)
+    else
+        if ! echo "$template_content" | jq . >/dev/null 2>&1; then
+            echo -e "${COLOR_RED}Invalid JSON template from $template_url${COLOR_RESET}"
+            return 1
+        fi
+        template_field="templateJson"
+        template_value="$template_content"
+    fi
+
+    local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token" "$PANEL_DOMAIN")
+    if [ -z "$get_response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    if ! echo "$get_response" | jq -e '.response' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: $get_response${COLOR_RESET}"
+        return 1
+    fi
+    local uuid=$(echo "$get_response" | jq -r '.response.uuid // null')
+    if [ -z "$uuid" ] || [ "$uuid" == "null" ]; then
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_EXTRACT_UUID]}${COLOR_RESET}"
+        return 1
+    fi
+
+    if [ "$is_yaml_template" = "true" ]; then
+        local request_body=$(jq -n --arg template "$template_value" \
+                                  --arg type "$template_type" \
+                                  --arg uuid "$uuid" \
+                                  '{encodedTemplateYaml: $template, templateType: $type, templateJson: {}, uuid: $uuid}')
+    else
+        local request_body=$(jq -n --argjson template "$template_value" \
+                                  --arg type "$template_type" \
+                                  --arg uuid "$uuid" \
+                                  '{templateJson: $template, templateType: $type, encodedTemplateYaml: "", uuid: $uuid}')
+    fi
+
+    local response=$(make_api_request "PUT" "http://$domain_url/api/subscription-templates" "$token" "$PANEL_DOMAIN" "$request_body")
+
+    if [ -z "$response" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    if echo "$response" | jq -e '.response | select(.uuid != null)' > /dev/null; then
+        echo -e "${COLOR_GREEN}${LANG[TEMPLATE_UPDATED_SUCCESS]}${COLOR_RESET}"
+        return 0
+    else
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: ${LANG[TEMPLATE_NOT_APPLIED]}${COLOR_RESET}"
+        return 1
+    fi
 }
+#Manage Template
 
 add_cron_rule() {
     local rule="$1"
@@ -1281,6 +1572,7 @@ spinner() {
   printf "\r\033[K" > /dev/tty
 }
 
+#Manage Template for steal
 show_template_source_options() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[CHOOSE_TEMPLATE_SOURCE]}${COLOR_RESET}"
@@ -1368,6 +1660,7 @@ randomhtml() {
     cd /opt/
     rm -rf simple-web-templates-main/ sni-templates-main/
 }
+#Manage Template for steal
 
 install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
@@ -1437,52 +1730,6 @@ install_packages() {
 
     touch ${DIR_REMNAWAVE}install_packages
     clear
-}
-
-enable_ipv6() {
-    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 0 ]; then
-        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_ENABLED]}${COLOR_RESET}"
-        return 0
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[ENABLE_IPV6]}${COLOR_RESET}"
-    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
-
-    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
-    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
-    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
-    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
-
-    echo "net.ipv6.conf.all.disable_ipv6 = 0" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.default.disable_ipv6 = 0" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.lo.disable_ipv6 = 0" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 0" >> /etc/sysctl.conf
-
-    sysctl -p > /dev/null 2>&1
-    echo -e "${COLOR_GREEN}${LANG[IPV6_ENABLED]}${COLOR_RESET}"
-}
-
-disable_ipv6() {
-    if [ "$(sysctl -n net.ipv6.conf.all.disable_ipv6)" -eq 1 ]; then
-        echo -e "${COLOR_YELLOW}${LANG[IPV6_ALREADY_DISABLED]}${COLOR_RESET}"
-        return 0
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[DISABLING_IPV6]}${COLOR_RESET}"
-    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
-
-    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
-    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
-    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
-    sed -i "/net.ipv6.conf.$interface_name.disable_ipv6/d" /etc/sysctl.conf
-
-    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
-
-    sysctl -p > /dev/null 2>&1
-    echo -e "${COLOR_GREEN}${LANG[IPV6_DISABLED]}${COLOR_RESET}"
 }
 
 extract_domain() {
@@ -1595,26 +1842,364 @@ is_wildcard_cert() {
     fi
 }
 
-check_cert_expiry() {
-    local domain=$1
-    local cert_path="/etc/letsencrypt/live/$domain/fullchain.pem"
+check_certificates() {
+    local DOMAIN=$1
+    local cert_dir="/etc/letsencrypt/live"
+    local live_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "${DOMAIN}*" | sort -V | tail -n 1)
 
-    if [ ! -f "$cert_path" ]; then
-        echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}"
-        return 1
+    if [ -n "$live_dir" ] && [ -d "$live_dir" ]; then
+        local files=("cert.pem" "chain.pem" "fullchain.pem" "privkey.pem")
+        for file in "${files[@]}"; do
+            local file_path="$live_dir/$file"
+            if [ ! -f "$file_path" ]; then
+                return 1
+            fi
+            if [ ! -L "$file_path" ]; then
+                fix_letsencrypt_structure "$(basename "$live_dir")"
+                if [ $? -ne 0 ]; then
+                    return 1
+                fi
+            fi
+        done
+        echo -e "${COLOR_GREEN}${LANG[CERT_FOUND]}$(basename "$live_dir")${COLOR_RESET}"
+        return 0
     fi
 
-    local expiry_date=$(openssl x509 -enddate -noout -in "$cert_path" | cut -d= -f2)
-    local expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null)
-    local current_epoch=$(date +%s)
+    local base_domain=$(extract_domain "$DOMAIN")
+    if [ "$base_domain" != "$DOMAIN" ]; then
+        live_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "${base_domain}*" | sort -V | tail -n 1)
+        if [ -n "$live_dir" ] && [ -d "$live_dir" ] && is_wildcard_cert "$base_domain"; then
+            echo -e "${COLOR_GREEN}${LANG[WILDCARD_CERT_FOUND]}$base_domain ${LANG[FOR_DOMAIN]} $DOMAIN${COLOR_RESET}"
+            return 0
+        fi
+    fi
 
-    if [ -z "$expiry_epoch" ]; then
+    echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}"
+    return 1
+}
+
+check_api() {
+    local attempts=3
+    local attempt=1
+
+    while [ $attempt -le $attempts ]; do
+        if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
+            api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "Authorization: Bearer ${CLOUDFLARE_API_KEY}" --header "Content-Type: application/json")
+        else
+            api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "X-Auth-Key: ${CLOUDFLARE_API_KEY}" --header "X-Auth-Email: ${CLOUDFLARE_EMAIL}" --header "Content-Type: application/json")
+        fi
+
+        if echo "$api_response" | grep -q '"success":true'; then
+            echo -e "${COLOR_GREEN}${LANG[CF_VALIDATING]}${COLOR_RESET}"
+            return 0
+        else
+            echo -e "${COLOR_RED}$(printf "${LANG[CF_INVALID_ATTEMPT]}" "$attempt" "$attempts")${COLOR_RESET}"
+            if [ $attempt -lt $attempts ]; then
+                reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
+                reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
+            fi
+            attempt=$((attempt + 1))
+        fi
+    done
+    error "$(printf "${LANG[CF_INVALID]}" "$attempts")"
+}
+
+get_certificates() {
+    local DOMAIN=$1
+    local CERT_METHOD=$2
+    local LETSENCRYPT_EMAIL=$3
+    local BASE_DOMAIN=$(extract_domain "$DOMAIN")
+    local WILDCARD_DOMAIN="*.$BASE_DOMAIN"
+
+    printf "${COLOR_YELLOW}${LANG[GENERATING_CERTS]}${COLOR_RESET}\n" "$DOMAIN"
+
+    case $CERT_METHOD in
+        1)
+            # Cloudflare API (DNS-01 support wildcard)
+            reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
+            reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
+
+            check_api
+
+            mkdir -p ~/.secrets/certbot
+            if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
+                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
+dns_cloudflare_api_token = $CLOUDFLARE_API_KEY
+EOL
+            else
+                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
+dns_cloudflare_email = $CLOUDFLARE_EMAIL
+dns_cloudflare_api_key = $CLOUDFLARE_API_KEY
+EOL
+            fi
+            chmod 600 ~/.secrets/certbot/cloudflare.ini
+
+            certbot certonly \
+                --dns-cloudflare \
+                --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini \
+                --dns-cloudflare-propagation-seconds 60 \
+                -d "$BASE_DOMAIN" \
+                -d "$WILDCARD_DOMAIN" \
+                --email "$CLOUDFLARE_EMAIL" \
+                --agree-tos \
+                --non-interactive \
+                --key-type ecdsa \
+                --elliptic-curve secp384r1
+            ;;
+        2)
+            # ACME HTTP-01 (without wildcard)
+            ufw allow 80/tcp comment 'HTTP for ACME challenge' > /dev/null 2>&1
+
+            certbot certonly \
+                --standalone \
+                -d "$DOMAIN" \
+                --email "$LETSENCRYPT_EMAIL" \
+                --agree-tos \
+                --non-interactive \
+                --http-01-port 80 \
+                --key-type ecdsa \
+                --elliptic-curve secp384r1
+
+            ufw delete allow 80/tcp > /dev/null 2>&1
+            ufw reload > /dev/null 2>&1
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
+            exit 1
+            ;;
+    esac
+
+    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
+        add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
+    else
+        echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
+        exit 1
+    fi
+}
+
+#Manage Certificates
+show_manage_certificates() {
+    echo -e "${COLOR_GREEN}${LANG[CERT_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[CERT_UPDATE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[CERT_GENERATE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+}
+
+manage_certificates() {
+    show_manage_certificates
+    reading "${LANG[CERT_PROMPT1]}" CERT_OPTION
+    case $CERT_OPTION in
+        1)
+            update_current_certificates
+            log_clear
+            ;;
+        2)
+            generate_new_certificates
+            log_clear
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            remnawave_reverse
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[CERT_INVALID_CHOICE]}${COLOR_RESET}"
+            exit 1
+            ;;
+    esac
+}
+
+update_certificate_symlinks() {
+    local domain=$1
+    local live_dir="/etc/letsencrypt/live/$domain"
+    local archive_dir="/etc/letsencrypt/archive/$domain"
+
+    if [ -d "$live_dir" ] && [ -d "$archive_dir" ]; then
+        latest_archive=$(ls -1 "$archive_dir" | grep -E 'fullchain[0-9]+.pem' | sort -V | tail -n 1 | sed 's/fullchain\(.*\).pem/\1/')
+        if [ -n "$latest_archive" ]; then
+            latest_fullchain="$archive_dir/fullchain$latest_archive.pem"
+            latest_privkey="$archive_dir/privkey$latest_archive.pem"
+
+            if [ ! -L "$live_dir/fullchain.pem" ] || [ "$(readlink -f "$live_dir/fullchain.pem")" != "$latest_fullchain" ]; then
+                ln -sf "$latest_fullchain" "$live_dir/fullchain.pem"
+            fi
+            if [ ! -L "$live_dir/privkey.pem" ] || [ "$(readlink -f "$live_dir/privkey.pem")" != "$latest_privkey" ]; then
+                ln -sf "$latest_privkey" "$live_dir/privkey.pem"
+            fi
+        fi
+    fi
+}
+
+update_current_certificates() {
+    local cert_dir="/etc/letsencrypt/live"
+    if [ ! -d "$cert_dir" ]; then
+        echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    declare -A unique_domains
+    declare -A cert_status
+    local any_updated=false
+    local renew_threshold=20 # Порог обновления в днях
+
+    for domain_dir in "$cert_dir"/*; do
+        if [ -d "$domain_dir" ]; then
+            local domain=$(basename "$domain_dir")
+            local cert_domain=$(echo "$domain" | sed -E 's/(-[0-9]+)$//')
+            unique_domains["$cert_domain"]="$domain_dir"
+        fi
+    done
+
+    for cert_domain in "${!unique_domains[@]}"; do
+        local domain_dir="${unique_domains[$cert_domain]}"
+        local domain=$(basename "$domain_dir")
+        local cert_method="2" # Default ACME
+        local renewal_conf="/etc/letsencrypt/renewal/$domain.conf"
+        if [ -f "$renewal_conf" ] && grep -q "dns_cloudflare" "$renewal_conf"; then
+            cert_method="1" # Cloudflare
+        fi
+
+        local cert_file="$domain_dir/fullchain.pem"
+        local cert_mtime_before=$(stat -c %Y "$cert_file" 2>/dev/null || echo 0)
+
+        local days_left=$(check_cert_expiry "$domain")
+        if [ $? -ne 0 ]; then
+            cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
+            continue
+        fi
+
+        if [ "$cert_method" == "1" ]; then
+            local cf_credentials_file=$(grep "dns_cloudflare_credentials" "$renewal_conf" | cut -d'=' -f2 | tr -d ' ')
+            if [ -n "$cf_credentials_file" ] && [ ! -f "$cf_credentials_file" ]; then
+                echo -e "${COLOR_RED}${LANG[CERT_CLOUDFLARE_FILE_NOT_FOUND]}${COLOR_RESET}"
+                reading "${COLOR_YELLOW}${LANG[ENTER_CF_EMAIL]}${COLOR_RESET}" CLOUDFLARE_EMAIL
+                reading "${COLOR_YELLOW}${LANG[ENTER_CF_TOKEN]}${COLOR_RESET}" CLOUDFLARE_API_KEY
+
+                check_api
+
+                mkdir -p "$(dirname "$cf_credentials_file")"
+                cat > "$cf_credentials_file" <<EOL
+dns_cloudflare_email = $CLOUDFLARE_EMAIL
+dns_cloudflare_api_key = $CLOUDFLARE_API_KEY
+EOL
+                chmod 600 "$cf_credentials_file"
+            fi
+        fi
+
+        if [ "$days_left" -le "$renew_threshold" ]; then
+            certbot renew --cert-name "$domain" --quiet > /dev/null 2>&1 &
+            local cert_pid=$!
+            spinner $cert_pid "${LANG[WAITING]}"
+            wait $cert_pid
+        else
+            cert_status["$cert_domain"]="${LANG[REMAINING]} $days_left ${LANG[DAYS]}"
+            continue
+        fi
+
+        local new_cert_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "$cert_domain*" | sort -V | tail -n 1)
+        local new_domain=$(basename "$new_cert_dir")
+        local cert_mtime_after=$(stat -c %Y "$new_cert_dir/fullchain.pem" 2>/dev/null || echo 0)
+        if check_certificates "$new_domain" > /dev/null 2>&1; then
+            local new_days_left=$(check_cert_expiry "$new_domain")
+            if [ $? -eq 0 ]; then
+                cert_status["$cert_domain"]="${LANG[REMAINING]} $new_days_left ${LANG[DAYS]}"
+            else
+                cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
+            fi
+            if [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
+                cert_status["$cert_domain"]="${LANG[UPDATED]}"
+                any_updated=true
+                update_certificate_symlinks "$cert_domain"
+            fi
+        else
+            cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
+        fi
+    done
+
+    echo -e "${COLOR_YELLOW}${LANG[RESULTS_CERTIFICATE_UPDATES]}${COLOR_RESET}"
+    for cert_domain in "${!cert_status[@]}"; do
+        if [[ "${cert_status[$cert_domain]}" == "${LANG[UPDATED]}" ]]; then
+            echo -e "${COLOR_GREEN}${LANG[CERTIFICATE_FOR]}$cert_domain ${LANG[SUCCESSFULLY_UPDATED]}${COLOR_RESET}"
+        elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_UPDATE]}" ]]; then
+            echo -e "${COLOR_RED}${LANG[FAILED_TO_UPDATE_CERTIFICATE_FOR]}$cert_domain${COLOR_RESET}"
+        elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_PARSING_CERT]}" ]]; then
+            echo -e "${COLOR_RED}${LANG[ERROR_CHECKING_EXPIRY_FOR]}$cert_domain${COLOR_RESET}"
+        else
+            echo -e "${COLOR_YELLOW}${LANG[CERTIFICATE_FOR]}$cert_domain ${LANG[DOES_NOT_REQUIRE_UPDATE]}${cert_status[$cert_domain]})${COLOR_RESET}"
+        fi
+    done
+
+    sleep 2
+    log_clear
+    remnawave_reverse
+}
+
+generate_new_certificates() {
+    reading "${LANG[CERT_GENERATE_PROMPT]}" NEW_DOMAIN
+    check_domain "$NEW_DOMAIN" true false
+    local domain_check_result=$?
+    if [ $domain_check_result -eq 2 ]; then
+        echo -e "${COLOR_RED}${LANG[ABORT_MESSAGE]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
+    reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
+
+    local LETSENCRYPT_EMAIL=""
+    if [ "$CERT_METHOD" == "2" ]; then
+        reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
+    fi
+
+    if [ "$CERT_METHOD" == "1" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$NEW_DOMAIN...${COLOR_RESET}"
+        get_certificates "$NEW_DOMAIN" "1" "" "*.$NEW_DOMAIN"
+    elif [ "$CERT_METHOD" == "2" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[GENERATING_CERTS]} $NEW_DOMAIN...${COLOR_RESET}"
+        get_certificates "$NEW_DOMAIN" "2" "$LETSENCRYPT_EMAIL"
+    else
+        echo -e "${COLOR_RED}${LANG[CERT_INVALID_CHOICE]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if check_certificates "$NEW_DOMAIN"; then
+        echo -e "${COLOR_GREEN}${LANG[CERT_UPDATE_SUCCESS]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
+    fi
+
+    sleep 2
+    log_clear
+    remnawave_reverse
+}
+
+check_cert_expiry() {
+    local domain="$1"
+    local cert_dir="/etc/letsencrypt/live"
+    local live_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "${domain}*" | sort -V | tail -n 1)
+    if [ -z "$live_dir" ] || [ ! -d "$live_dir" ]; then
+        return 1
+    fi
+    local cert_file="$live_dir/fullchain.pem"
+    if [ ! -f "$cert_file" ]; then
+        return 1
+    fi
+    local expiry_date=$(openssl x509 -in "$cert_file" -noout -enddate | sed 's/notAfter=//')
+    if [ -z "$expiry_date" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_PARSING_CERT]}${COLOR_RESET}"
         return 1
     fi
-
+    local expiry_epoch=$(TZ=UTC date -d "$expiry_date" +%s 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_PARSING_CERT]}${COLOR_RESET}"
+        return 1
+    fi
+    local current_epoch=$(date +%s)
     local days_left=$(( (expiry_epoch - current_epoch) / 86400 ))
-
     echo "$days_left"
     return 0
 }
@@ -1661,134 +2246,7 @@ fix_letsencrypt_structure() {
 
     return 0
 }
-
-check_certificates() {
-    local DOMAIN=$1
-    local live_dir="/etc/letsencrypt/live/$DOMAIN"
-
-    if [ ! -d "$live_dir" ]; then
-        return 1
-    fi
-
-    local files=("cert.pem" "chain.pem" "fullchain.pem" "privkey.pem")
-    for file in "${files[@]}"; do
-        local file_path="$live_dir/$file"
-        if [ ! -f "$file_path" ]; then
-            return 1
-        fi
-        if [ ! -L "$file_path" ]; then
-            echo -e "${COLOR_YELLOW}Файл $file_path не является символической ссылкой. Исправляем...${COLOR_RESET}"
-            fix_letsencrypt_structure "$DOMAIN"
-            if [ $? -ne 0 ]; then
-                return 1
-            fi
-        fi
-    done
-
-    echo -e "${COLOR_GREEN}${LANG[CERT_FOUND]}$DOMAIN${COLOR_RESET}"
-    return 0
-}
-
-get_certificates() {
-    local DOMAIN=$1
-    local CERT_METHOD=$2
-    local LETSENCRYPT_EMAIL=$3
-    local BASE_DOMAIN=$(extract_domain "$DOMAIN")
-    local WILDCARD_DOMAIN="*.$BASE_DOMAIN"
-
-    printf "${COLOR_YELLOW}${LANG[GENERATING_CERTS]}${COLOR_RESET}\n" "$DOMAIN"
-
-    case $CERT_METHOD in
-        1)
-            # Cloudflare API (DNS-01 с поддержкой wildcard)
-            reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
-            reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
-
-            check_api() {
-                local attempts=3
-                local attempt=1
-
-                while [ $attempt -le $attempts ]; do
-                    if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
-                        api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "Authorization: Bearer ${CLOUDFLARE_API_KEY}" --header "Content-Type: application/json")
-                    else
-                        api_response=$(curl --silent --request GET --url https://api.cloudflare.com/client/v4/zones --header "X-Auth-Key: ${CLOUDFLARE_API_KEY}" --header "X-Auth-Email: ${CLOUDFLARE_EMAIL}" --header "Content-Type: application/json")
-                    fi
-
-                    if echo "$api_response" | grep -q '"success":true'; then
-                        echo -e "${COLOR_GREEN}${LANG[CF_VALIDATING]}${COLOR_RESET}"
-                        return 0
-                    else
-                        echo -e "${COLOR_RED}$(printf "${LANG[CF_INVALID_ATTEMPT]}" "$attempt" "$attempts")${COLOR_RESET}"
-                        if [ $attempt -lt $attempts ]; then
-                            reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
-                            reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
-                        fi
-                        attempt=$((attempt + 1))
-                    fi
-                done
-                error "$(printf "${LANG[CF_INVALID]}" "$attempts")"
-            }
-
-            check_api
-
-            mkdir -p ~/.secrets/certbot
-            if [[ $CLOUDFLARE_API_KEY =~ [A-Z] ]]; then
-                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
-dns_cloudflare_api_token = $CLOUDFLARE_API_KEY
-EOL
-            else
-                cat > ~/.secrets/certbot/cloudflare.ini <<EOL
-dns_cloudflare_email = $CLOUDFLARE_EMAIL
-dns_cloudflare_api_key = $CLOUDFLARE_API_KEY
-EOL
-            fi
-            chmod 600 ~/.secrets/certbot/cloudflare.ini
-
-            certbot certonly \
-                --dns-cloudflare \
-                --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini \
-                --dns-cloudflare-propagation-seconds 60 \
-                -d "$BASE_DOMAIN" \
-                -d "$WILDCARD_DOMAIN" \
-                --email "$CLOUDFLARE_EMAIL" \
-                --agree-tos \
-                --non-interactive \
-                --key-type ecdsa \
-                --elliptic-curve secp384r1
-            ;;
-        2)
-            # ACME HTTP-01 (без wildcard)
-            echo -e "${COLOR_YELLOW}${LANG[ACME_METHOD]}${COLOR_RESET}"
-            ufw allow 80/tcp comment 'HTTP for ACME challenge' > /dev/null 2>&1
-
-            certbot certonly \
-                --standalone \
-                -d "$DOMAIN" \
-                --email "$LETSENCRYPT_EMAIL" \
-                --agree-tos \
-                --non-interactive \
-                --http-01-port 80 \
-                --key-type ecdsa \
-                --elliptic-curve secp384r1
-
-            ufw delete allow 80/tcp > /dev/null 2>&1
-            ufw reload > /dev/null 2>&1
-            ;;
-        *)
-            echo -e "${COLOR_RED}${LANG[INVALID_CERT_METHOD]}${COLOR_RESET}"
-            exit 1
-            ;;
-    esac
-
-    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'" >> /etc/letsencrypt/renewal/$DOMAIN.conf
-        add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-    else
-        echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]}${COLOR_RESET}"
-        exit 1
-    fi
-}
+#Manage Certificates
 
 ### API Functions ###
 make_api_request() {
@@ -2173,6 +2631,7 @@ EOF
 
 ### API Functions ###
 
+#Install Panel + Node
 install_remnawave() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
 
@@ -2671,6 +3130,9 @@ networks:
   remnawave-network:
     name: remnawave-network
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
     external: false
 
 volumes:
@@ -2819,7 +3281,7 @@ EOL
 
     spinner $! "${LANG[WAITING]}"
 
-    remnawave_network_subnet=$(docker network inspect remnawave-network | grep -oP '"Subnet": "\K[^"]+')
+    remnawave_network_subnet=172.30.0.0/16
     ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp
      
     local domain_url="127.0.0.1:3000"
@@ -2898,9 +3360,9 @@ EOL
 
     randomhtml
 }
+#Install Panel + Node
 
-
-
+#Install Panel
 install_remnawave_panel() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
 
@@ -3549,7 +4011,9 @@ EOL
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
     echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
 }
+#Install Panel
 
+#Install Node
 install_remnawave_node() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
 
@@ -3922,7 +4386,9 @@ EOL
     done
 
 }
+#Install Node
 
+#Add Node to Panel
 generate_pretty_name() {
     local adjectives=("Fast" "Silent" "Shadow" "Ghost" "Swift" "Hidden" "Clever" "Bright")
     local nouns=("Node" "Wave" "Link" "Port" "Stream" "Hub" "Gate" "Core")
@@ -4227,186 +4693,7 @@ EOF
     echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
 }
-
-open_panel_access() {
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-
-    if [ ! -f "nginx.conf" ]; then
-        echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
-        exit 1
-    fi
-
-    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
-
-    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "$dir/nginx.conf" | grep "~*\w\+.*=")
-    cookies_random1=$(echo "$cookie_line" | grep -oP '~*\K\w+(?==)')
-    cookies_random2=$(echo "$cookie_line" | grep -oP '=\K\w+(?=")')
-
-    if [ -z "$PANEL_DOMAIN" ] || [ -z "$cookies_random1" ] || [ -z "$cookies_random2" ]; then
-        echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
-    ufw allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
-    ufw reload > /dev/null 2>&1
-    sleep 1
-
-    local panel_link="https://${PANEL_DOMAIN}:8443/auth/login?${cookies_random1}=${cookies_random2}"
-    echo -e "${COLOR_YELLOW}${LANG[OPEN_PANEL_LINK]}${COLOR_RESET}"
-    echo -e "${COLOR_WHITE}${panel_link}${COLOR_RESET}"
-    echo -e "${COLOR_RED}${LANG[PORT_8443_WARNING]}${COLOR_RESET}"
-
-    sleep 2
-    log_clear
-}
-
-close_panel_access() {
-    echo -e "${COLOR_YELLOW}${LANG[CLOSE_PANEL_ACCESS]}${COLOR_RESET}"
-    ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
-    ufw reload > /dev/null 2>&1
-    echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
-    sleep 2
-    log_clear
-}
-
-update_subscription_template() {
-    local template_type="$1"
-    local template_url="$2"
-    local is_yaml_template="$3" # "true" for YAML, "false" for JSON
-    local domain_url="127.0.0.1:3000"
-    TOKEN_FILE="${DIR_REMNAWAVE}token"
-    PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
-
-    echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
-    sleep 1
-
-    if [ -f "$PANEL_DOMAIN_FILE" ]; then
-        PANEL_DOMAIN=$(cat "$PANEL_DOMAIN_FILE")
-        if [ -z "$PANEL_DOMAIN" ]; then
-            echo -e "${COLOR_YELLOW}${LANG[EMPTY_SAVED_PANEL_DOMAIN]}${COLOR_RESET}"
-            PANEL_DOMAIN=""
-        else
-            printf "${COLOR_YELLOW}${LANG[USING_SAVED_PANEL_DOMAIN]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
-        fi
-    fi
-
-    if [ -z "$PANEL_DOMAIN" ]; then
-        reading "${LANG[ENTER_PANEL_DOMAIN]}" PANEL_DOMAIN
-        echo "$PANEL_DOMAIN" > "$PANEL_DOMAIN_FILE"
-        echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
-    fi
-
-    if [ -f "$TOKEN_FILE" ]; then
-        token=$(cat "$TOKEN_FILE")
-        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
-        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
-            token=""
-        fi
-    fi
-
-    if [ -z "$token" ]; then
-        reading "${LANG[ENTER_PANEL_USERNAME]}" username
-        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
-
-        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
-
-        token=$(echo "$login_response" | jq -r '.response.accessToken')
-        if [ -z "$token" ] || [ "$token" == "null" ]; then
-            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
-            return 1
-        fi
-
-        echo "$token" > "$TOKEN_FILE"
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
-    fi
-
-    local template_content=$(curl -s "$template_url")
-    if [ -z "$template_content" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
-        return 1
-    fi
-
-    if [ "$is_yaml_template" = "true" ]; then
-        if command -v yq >/dev/null 2>&1; then
-            if ! echo "$template_content" | yq e '.' - >/dev/null 2>&1; then
-                echo -e "${COLOR_RED}Invalid YAML template from $template_url${COLOR_RESET}"
-                return 1
-            fi
-        else
-            if [ -z "$template_content" ]; then
-                echo -e "${COLOR_RED}Invalid YAML template: empty content from $template_url${COLOR_RESET}"
-                return 1
-            fi
-        fi
-        template_field="encodedTemplateYaml"
-        template_value=$(echo "$template_content" | base64 -w 0)
-    else
-        if ! echo "$template_content" | jq . >/dev/null 2>&1; then
-            echo -e "${COLOR_RED}Invalid JSON template from $template_url${COLOR_RESET}"
-            return 1
-        fi
-        template_field="templateJson"
-        template_value="$template_content"
-    fi
-
-    local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token" "$PANEL_DOMAIN")
-    if [ -z "$get_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
-        return 1
-    fi
-
-    if ! echo "$get_response" | jq -e '.response' > /dev/null; then
-        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: $get_response${COLOR_RESET}"
-        return 1
-    fi
-    local uuid=$(echo "$get_response" | jq -r '.response.uuid // null')
-    if [ -z "$uuid" ] || [ "$uuid" == "null" ]; then
-        echo -e "${COLOR_RED}${LANG[FAILED_TO_EXTRACT_UUID]}${COLOR_RESET}"
-        return 1
-    fi
-
-    if [ "$is_yaml_template" = "true" ]; then
-        local request_body=$(jq -n --arg template "$template_value" \
-                                  --arg type "$template_type" \
-                                  --arg uuid "$uuid" \
-                                  '{encodedTemplateYaml: $template, templateType: $type, templateJson: {}, uuid: $uuid}')
-    else
-        local request_body=$(jq -n --argjson template "$template_value" \
-                                  --arg type "$template_type" \
-                                  --arg uuid "$uuid" \
-                                  '{templateJson: $template, templateType: $type, encodedTemplateYaml: "", uuid: $uuid}')
-    fi
-
-    local response=$(make_api_request "PUT" "http://$domain_url/api/subscription-templates" "$token" "$PANEL_DOMAIN" "$request_body")
-
-    if [ -z "$response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_TEMPLATE]}${COLOR_RESET}"
-        return 1
-    fi
-
-    if echo "$response" | jq -e '.response | select(.uuid != null)' > /dev/null; then
-        echo -e "${COLOR_GREEN}${LANG[TEMPLATE_UPDATED_SUCCESS]}${COLOR_RESET}"
-        return 0
-    else
-        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_TEMPLATE]}: Template not applied${COLOR_RESET}"
-        return 1
-    fi
-}
+#Add Node to Panel
 
 log_entry
 check_root
@@ -4509,14 +4796,20 @@ case $OPTION in
     9)
         manage_panel_access
         ;;
-    11)
-        update_remnawave_reverse
+    10)
+        manage_template_upload
         sleep 2
         log_clear
         remnawave_reverse
         ;;
-    10)
-        manage_template_upload
+    11)
+        manage_certificates
+        sleep 2
+        log_clear
+        remnawave_reverse
+        ;;
+    12)
+        update_remnawave_reverse
         sleep 2
         log_clear
         remnawave_reverse
