@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.7"
+SCRIPT_VERSION="1.6.8"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -338,6 +338,10 @@ set_language() {
                 [ERROR_UPDATE]="Error updating"
                 [ALREADY_EXPIRED]="already expired"
                 [CERT_CLOUDFLARE_FILE_NOT_FOUND]="Cloudflare credentials file not found."
+                [TELEGRAM_OAUTH_WARNING]="Telegram OAuth is enabled (TELEGRAM_OAUTH_ENABLED=true)."
+                [CREATE_API_TOKEN_INSTRUCTION]="Go to the panel at: https://%s\nNavigate to 'API Tokens' -> 'Create New Token' and create a token.\nCopy the created token and enter it below."
+                [ENTER_API_TOKEN]="Enter the API token: "
+                [EMPTY_TOKEN_ERROR]="No token provided. Exiting."
             )
             ;;
         ru)
@@ -627,6 +631,10 @@ set_language() {
                 [ERROR_UPDATE]="Ошибка обновления"
                 [ALREADY_EXPIRED]="уже истек"
                 [CERT_CLOUDFLARE_FILE_NOT_FOUND]="Файл учетных данных Cloudflare не найден."
+                [TELEGRAM_OAUTH_WARNING]="Включена авторизация через Telegram (TELEGRAM_OAUTH_ENABLED=true)."
+                [CREATE_API_TOKEN_INSTRUCTION]="Зайдите в панель по адресу: https://%s\nПерейдите в раздел 'API токены' -> 'Создать новый токен' и создайте токен.\nСкопируйте созданный токен и введите его ниже."
+                [ENTER_API_TOKEN]="Введите API-токен: "
+                [EMPTY_TOKEN_ERROR]="Токен не введен. Завершение работы."
             )
             ;;
     esac
@@ -1411,6 +1419,7 @@ update_subscription_template() {
     local domain_url="127.0.0.1:3000"
     TOKEN_FILE="${DIR_REMNAWAVE}token"
     PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
+    ENV_FILE="/opt/remnawave/.env"
 
     echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
     sleep 1
@@ -1431,6 +1440,13 @@ update_subscription_template() {
         echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
     fi
 
+    local telegram_oauth_enabled=false
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
+            telegram_oauth_enabled=true
+        fi
+    fi
+
     if [ -f "$TOKEN_FILE" ]; then
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
@@ -1442,15 +1458,32 @@ update_subscription_template() {
     fi
 
     if [ -z "$token" ]; then
-        reading "${LANG[ENTER_PANEL_USERNAME]}" username
-        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+        if [ "$telegram_oauth_enabled" = true ]; then
+            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+            reading "${LANG[ENTER_API_TOKEN]}" token
+            if [ -z "$token" ]; then
+                echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
+                return 1
+            fi
+            local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
+            if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+                return 1
+            fi
+        else
+            reading "${LANG[ENTER_PANEL_USERNAME]}" username
+            reading "${LANG[ENTER_PANEL_PASSWORD]}" password
 
-        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+            local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
 
-        token=$(echo "$login_response" | jq -r '.response.accessToken')
-        if [ -z "$token" ] || [ "$token" == "null" ]; then
-            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
-            return 1
+            token=$(echo "$login_response" | jq -r '.response.accessToken')
+            if [ -z "$token" ] || [ "$token" == "null" ]; then
+                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+                return 1
+            fi
         fi
 
         echo "$token" > "$TOKEN_FILE"
@@ -4401,6 +4434,7 @@ generate_pretty_name() {
 add_node_to_panel() {
     TOKEN_FILE="${DIR_REMNAWAVE}token"
     PANEL_DOMAIN_FILE="${DIR_REMNAWAVE}panel_domain"
+    ENV_FILE="/opt/remnawave/.env"
 
     echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
     echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
@@ -4440,6 +4474,13 @@ add_node_to_panel() {
         echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
     fi
 
+    local telegram_oauth_enabled=false
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
+            telegram_oauth_enabled=true
+        fi
+    fi
+
     if [ -f "$TOKEN_FILE" ]; then
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
@@ -4451,15 +4492,33 @@ add_node_to_panel() {
     fi
 
     if [ -z "$token" ]; then
-        reading "${LANG[ENTER_PANEL_USERNAME]}" username
-        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+        if [ "$telegram_oauth_enabled" = true ]; then
+            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+            reading "${LANG[ENTER_API_TOKEN]}" token
+            if [ -z "$token" ]; then
+                echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
+                exit 1
+            fi
 
-        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+            local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
+            if ! echo "$test_response" | jq -e '.response' > /dev/null; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+                exit 1
+            fi
+        else
+            reading "${LANG[ENTER_PANEL_USERNAME]}" username
+            reading "${LANG[ENTER_PANEL_PASSWORD]}" password
 
-        token=$(echo "$login_response" | jq -r '.response.accessToken')
-        if [ -z "$token" ] || [ "$token" == "null" ]; then
-            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
-            exit 1
+            local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
+
+            token=$(echo "$login_response" | jq -r '.response.accessToken')
+            if [ -z "$token" ] || [ "$token" == "null" ]; then
+                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+                exit 1
+            fi
         fi
 
         echo "$token" > "$TOKEN_FILE"
