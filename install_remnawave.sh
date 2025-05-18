@@ -1462,9 +1462,7 @@ update_subscription_template() {
             echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[ENTER_API_TOKEN]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
             reading "${LANG[ENTER_API_TOKEN]}" token
             if [ -z "$token" ]; then
                 echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
@@ -4476,7 +4474,6 @@ add_node_to_panel() {
         echo -e "${COLOR_GREEN}${LANG[PANEL_DOMAIN_SAVED]}${COLOR_RESET}"
     fi
 
-    # Проверка параметра TELEGRAM_OAUTH_ENABLED
     local telegram_oauth_enabled=false
     if [ -f "$ENV_FILE" ]; then
         if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
@@ -4499,9 +4496,7 @@ add_node_to_panel() {
             echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[ENTER_API_TOKEN]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
             reading "${LANG[ENTER_API_TOKEN]}" token
             if [ -z "$token" ]; then
                 echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
