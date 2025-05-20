@@ -873,6 +873,7 @@ show_menu() {
     echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Manage panel access
     echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Upload custom template from legiz
     echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}" # Manage certificates
+    echo -e ""
     echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
