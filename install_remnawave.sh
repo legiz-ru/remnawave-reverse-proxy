@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.8"
+SCRIPT_VERSION="1.6.9"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -2045,27 +2045,6 @@ manage_certificates() {
     esac
 }
 
-update_certificate_symlinks() {
-    local domain=$1
-    local live_dir="/etc/letsencrypt/live/$domain"
-    local archive_dir="/etc/letsencrypt/archive/$domain"
-
-    if [ -d "$live_dir" ] && [ -d "$archive_dir" ]; then
-        latest_archive=$(ls -1 "$archive_dir" | grep -E 'fullchain[0-9]+.pem' | sort -V | tail -n 1 | sed 's/fullchain\(.*\).pem/\1/')
-        if [ -n "$latest_archive" ]; then
-            latest_fullchain="$archive_dir/fullchain$latest_archive.pem"
-            latest_privkey="$archive_dir/privkey$latest_archive.pem"
-
-            if [ ! -L "$live_dir/fullchain.pem" ] || [ "$(readlink -f "$live_dir/fullchain.pem")" != "$latest_fullchain" ]; then
-                ln -sf "$latest_fullchain" "$live_dir/fullchain.pem"
-            fi
-            if [ ! -L "$live_dir/privkey.pem" ] || [ "$(readlink -f "$live_dir/privkey.pem")" != "$latest_privkey" ]; then
-                ln -sf "$latest_privkey" "$live_dir/privkey.pem"
-            fi
-        fi
-    fi
-}
-
 update_current_certificates() {
     local cert_dir="/etc/letsencrypt/live"
     if [ ! -d "$cert_dir" ]; then
@@ -2075,8 +2054,7 @@ update_current_certificates() {
 
     declare -A unique_domains
     declare -A cert_status
-    local any_updated=false
-    local renew_threshold=20 # Порог обновления в днях
+    local renew_threshold=30
 
     for domain_dir in "$cert_dir"/*; do
         if [ -d "$domain_dir" ]; then
@@ -2097,6 +2075,8 @@ update_current_certificates() {
 
         local cert_file="$domain_dir/fullchain.pem"
         local cert_mtime_before=$(stat -c %Y "$cert_file" 2>/dev/null || echo 0)
+
+        fix_letsencrypt_structure "$cert_domain"
 
         local days_left=$(check_cert_expiry "$domain")
         if [ $? -ne 0 ]; then
@@ -2123,7 +2103,7 @@ EOL
         fi
 
         if [ "$days_left" -le "$renew_threshold" ]; then
-            certbot renew --cert-name "$domain" --quiet > /dev/null 2>&1 &
+            certbot renew --cert-name "$domain" --no-random-sleep-on-renew >> /var/log/letsencrypt/letsencrypt.log 2>&1 &
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
@@ -2144,8 +2124,6 @@ EOL
             fi
             if [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
                 cert_status["$cert_domain"]="${LANG[UPDATED]}"
-                any_updated=true
-                update_certificate_symlinks "$cert_domain"
             fi
         else
             cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
@@ -2239,45 +2217,73 @@ check_cert_expiry() {
 }
 
 fix_letsencrypt_structure() {
-    local domain="$1"
+    local domain=$1
     local live_dir="/etc/letsencrypt/live/$domain"
     local archive_dir="/etc/letsencrypt/archive/$domain"
     local renewal_conf="/etc/letsencrypt/renewal/$domain.conf"
 
-    [ ! -d "$live_dir" ] && echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}" && return 1
+    if [ ! -d "$live_dir" ]; then
+        echo -e "${COLOR_RED}${LANG[CERT_NOT_FOUND]}${COLOR_RESET}"
+        return 1
+    fi
+    if [ ! -d "$archive_dir" ]; then
+        echo -e "${COLOR_RED}${LANG[ARCHIVE_NOT_FOUND]}${COLOR_RESET}"
+        return 1
+    fi
+    if [ ! -f "$renewal_conf" ]; then
+        echo -e "${COLOR_RED}${LANG[RENEWAL_CONF_NOT_FOUND]}${COLOR_RESET}"
+        return 1
+    fi
 
-    [ ! -d "$archive_dir" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_DIR_NOT_FOUND]}${COLOR_RESET}" && return 1
+    local conf_archive_dir=$(grep "^archive_dir" "$renewal_conf" | cut -d'=' -f2 | tr -d ' ')
+    if [ "$conf_archive_dir" != "$archive_dir" ]; then
+        echo -e "${COLOR_RED}${LANG[ARCHIVE_DIR_MISMATCH]}${COLOR_RESET}"
+        return 1
+    fi
 
-    [ ! -f "$renewal_conf" ] && echo -e "${COLOR_RED}${LANG[RENEWAL_CONF_NOT_FOUND]}${COLOR_RESET}" && return 1
-
-    local conf_archive_dir=$(grep "^archive_dir" "$renewal_conf" | awk '{print $3}')
-    [ "$conf_archive_dir" != "$archive_dir" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_DIR_MISMATCH]}${COLOR_RESET}" && return 1
-    local latest_version=$(ls -v "$archive_dir"/cert*.pem 2>/dev/null | tail -n 1 | grep -o '[0-9]\+' | tail -n 1)
-    [ -z "$latest_version" ] && echo -e "${COLOR_RED}${LANG[CERT_VERSION_NOT_FOUND]}${COLOR_RESET}" && return 1
+    local latest_version=$(ls -1 "$archive_dir" | grep -E 'cert[0-9]+.pem' | sort -V | tail -n 1 | sed -E 's/.*cert([0-9]+)\.pem/\1/')
+    if [ -z "$latest_version" ]; then
+        echo -e "${COLOR_RED}${LANG[CERT_VERSION_NOT_FOUND]}${COLOR_RESET}"
+        return 1
+    fi
 
     local files=("cert" "chain" "fullchain" "privkey")
     for file in "${files[@]}"; do
-        local archive_file="$archive_dir/${file}${latest_version}.pem"
-        local live_file="$live_dir/${file}.pem"
-
-        [ ! -f "$archive_file" ] && echo -e "${COLOR_RED}${LANG[ARCHIVE_FILE_NOT_FOUND]}${COLOR_RESET}" && return 1
-
-        if [ -e "$live_file" ] && [ ! -L "$live_file" ]; then
-            rm -f "$live_file"
+        local archive_file="$archive_dir/$file$latest_version.pem"
+        local live_file="$live_dir/$file.pem"
+        if [ ! -f "$archive_file" ]; then
+            echo -e "${COLOR_RED}${LANG[FILE_NOT_FOUND]} $archive_file${COLOR_RESET}"
+            return 1
+        fi
+        if [ -f "$live_file" ] && [ ! -L "$live_file" ]; then
+            rm "$live_file"
         fi
         ln -sf "$archive_file" "$live_file"
-
-        local conf_path=$(grep "^$file =" "$renewal_conf" | awk '{print $3}')
-        [ "$conf_path" != "$live_file" ] && sed -i "s|^$file =.*|$file = $live_file|" "$renewal_conf"
     done
-    local expected_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-    if ! grep -Fx "$expected_hook" "$renewal_conf" > /dev/null; then
-        sed -i "s|^renew_hook =.*|$expected_hook|" "$renewal_conf" 2>/dev/null || echo "$expected_hook" >> "$renewal_conf"
+
+    local cert_path="$live_dir/cert.pem"
+    local chain_path="$live_dir/chain.pem"
+    local fullchain_path="$live_dir/fullchain.pem"
+    local privkey_path="$live_dir/privkey.pem"
+    if ! grep -q "^cert = $cert_path" "$renewal_conf"; then
+        sed -i "s|^cert =.*|cert = $cert_path|" "$renewal_conf"
     fi
+    if ! grep -q "^chain = $chain_path" "$renewal_conf"; then
+        sed -i "s|^chain =.*|chain = $chain_path|" "$renewal_conf"
+    fi
+    if ! grep -q "^fullchain = $fullchain_path" "$renewal_conf"; then
+        sed -i "s|^fullchain =.*|fullchain = $fullchain_path|" "$renewal_conf"
+    fi
+    if ! grep -q "^privkey = $privkey_path" "$renewal_conf"; then
+        sed -i "s|^privkey =.*|privkey = $privkey_path|" "$renewal_conf"
+    fi
+
+    local expected_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx && docker compose exec remnawave-nginx nginx -s reload'"
+    sed -i '/^renew_hook/d' "$renewal_conf"
+    echo "$expected_hook" >> "$renewal_conf"
 
     chmod 644 "$live_dir/cert.pem" "$live_dir/chain.pem" "$live_dir/fullchain.pem"
     chmod 600 "$live_dir/privkey.pem"
-
     return 0
 }
 #Manage Certificates
@@ -2665,6 +2671,164 @@ EOF
 
 ### API Functions ###
 
+handle_certificates() {
+    local -n domains_to_check_ref=$1
+    local cert_method="$2"
+    local letsencrypt_email="$3"
+    local target_dir="/opt/remnawave"
+
+    declare -A unique_domains
+    local need_certificates=false
+    local min_days_left=9999
+
+    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
+    sleep 1
+
+    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
+    for domain in "${!domains_to_check_ref[@]}"; do
+        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
+    done
+
+    for domain in "${!domains_to_check_ref[@]}"; do
+        if check_certificates "$domain"; then
+            days_left=$(check_cert_expiry "$domain")
+            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
+                min_days_left=$days_left
+            fi
+        else
+            base_domain=$(extract_domain "$domain")
+            if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
+                printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
+                days_left=$(check_cert_expiry "$base_domain")
+                if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
+                    min_days_left=$days_left
+                fi
+            else
+                need_certificates=true
+                break
+            fi
+        fi
+    done
+
+    if [ "$need_certificates" = true ]; then
+        echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
+        reading "${LANG[CERT_METHOD_CHOOSE]}" cert_method
+
+        if [ "$cert_method" == "2" ]; then
+            reading "${LANG[EMAIL_PROMPT]}" letsencrypt_email
+        fi
+    else
+        echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
+        cert_method="2"
+    fi
+
+    if [ "$need_certificates" = true ] && [ "$cert_method" == "1" ]; then
+        for domain in "${!domains_to_check_ref[@]}"; do
+            local base_domain=$(extract_domain "$domain")
+            unique_domains["$base_domain"]="1"
+        done
+
+        for domain in "${!unique_domains[@]}"; do
+            printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+            if check_certificates "$domain"; then
+                echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+                days_left=$(check_cert_expiry "$domain")
+                if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
+                    min_days_left=$days_left
+                fi
+            else
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}$ COLOR_RESET}"
+                echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
+                get_certificates "$domain" "$cert_method" "" "*.${domain}"
+                min_days_left=90
+            fi
+            for sub_domain in "${!domains_to_check_ref[@]}"; do
+                if [[ "$sub_domain" == *"$domain" ]]; then
+                    echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$sub_domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+                    echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$sub_domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+                fi
+            done
+        done
+    elif [ "$need_certificates" = true ] && [ "$cert_method" == "2" ]; then
+        for domain in "${!domains_to_check_ref[@]}"; do
+            printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
+            if check_certificates "$domain"; then
+                echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
+                get_certificates "$domain" "$cert_method" "$letsencrypt_email"
+            fi
+            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+        done
+    else
+        for domain in "${!domains_to_check_ref[@]}"; do
+            base_domain=$(extract_domain "$domain")
+            cert_domain="$domain"
+            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
+                cert_domain="$base_domain"
+            fi
+            echo "      - /etc/letsencrypt/live/$cert_domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+            echo "      - /etc/letsencrypt/live/$cert_domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+        done
+    fi
+
+    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
+        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
+        if [ "$min_days_left" -le 30 ]; then
+            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
+            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
+        else
+            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
+        fi
+
+        for domain in "${!unique_domains[@]}"; do
+            if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
+                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
+                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
+                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
+                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
+                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
+                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
+                fi
+            fi
+        done
+    else
+        if [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * * /usr/bin/certbot renew --quiet"; then
+            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[UPDATING_CRON]}${COLOR_RESET}"
+            crontab -u root -l 2>/dev/null | grep -v "/usr/bin/certbot renew --quiet" | crontab -u root -
+            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
+            for domain in "${!unique_domains[@]}"; do
+                if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
+                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
+                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
+                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
+                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
+                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
+                    fi
+                fi
+            done
+        else
+            echo -e "${COLOR_YELLOW}${LANG[CRON_ALREADY_EXISTS]}${COLOR_RESET}"
+            for domain in "${!unique_domains[@]}"; do
+                if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
+                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
+                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
+                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
+                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
+                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
+                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
+                    fi
+                fi
+            done
+        fi
+    fi
+}
+
 #Install Panel + Node
 install_remnawave() {
     mkdir -p /opt/remnawave && cd /opt/remnawave
@@ -2919,197 +3083,11 @@ installation() {
     domains_to_check["$SUB_DOMAIN"]=1
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
-    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
-    for domain in "${!domains_to_check[@]}"; do
-        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
-    done
-
-need_certificates=false
-min_days_left=9999
-
-for domain in "${!domains_to_check[@]}"; do
-    if check_certificates "$domain"; then
-        days_left=$(check_cert_expiry "$domain")
-        if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-            min_days_left=$days_left
-        fi
-    else
-        base_domain=$(extract_domain "$domain")
-        if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
-            days_left=$(check_cert_expiry "$base_domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            need_certificates=true
-            break
-        fi
-    fi
-done
-
-if [ "$need_certificates" = true ]; then
-    echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
-    reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
-
-    if [ "$CERT_METHOD" == "2" ]; then
-        reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
-    fi
-else
-    echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
-    CERT_METHOD="2"
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-
-        for domain in "${!domains_to_check[@]}"; do
-            base_domain=$(extract_domain "$domain")
-            cert_domain="$domain"
-            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                cert_domain="$base_domain"
-            fi
-            if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    else
-        if [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * * /usr/bin/certbot renew --quiet"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[UPDATING_CRON]}${COLOR_RESET}"
-            crontab -u root -l 2>/dev/null | grep -v "/usr/bin/certbot renew --quiet" | crontab -u root -
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        else
-            echo -e "${COLOR_YELLOW}${LANG[CRON_ALREADY_EXISTS]}${COLOR_RESET}"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        fi
-    fi
-fi
-
-if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        local base_domain=$(extract_domain "$domain")
-        unique_domains["$base_domain"]="1"
-    done
-
-    min_days_left=9999
-    for domain in "${!unique_domains[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-            days_left=$(check_cert_expiry "$domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "" "*.${domain}"
-            min_days_left=90
-        fi
-        for sub_domain in "${!domains_to_check[@]}"; do
-            if [[ "$sub_domain" == *"$domain" ]]; then
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$sub_domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$sub_domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-            fi
-        done
-    done
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-        for domain in "${!unique_domains[@]}"; do
-            if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    fi
-elif [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "2" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-        fi
-        echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-else
-    for domain in "${!domains_to_check[@]}"; do
-        base_domain=$(extract_domain "$domain")
-        cert_domain="$domain"
-        if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-            cert_domain="$base_domain"
-        fi
-        echo "      - /etc/letsencrypt/live/$cert_domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$cert_domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-fi
-
-PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
-SUB_CERT_DOMAIN="$SUB_DOMAIN"
-NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
+    PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
+    SUB_CERT_DOMAIN="$SUB_DOMAIN"
+    NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
@@ -3238,8 +3216,10 @@ server {
     add_header Set-Cookie \$set_cookie_header;
 
     location / {
+        error_page 418 = @unauthorized;
+        recursive_error_pages on;
         if (\$authorized = 0) {
-            return 302 https://$SELFSTEAL_DOMAIN;
+            return 418;
         }
         proxy_http_version 1.1;
         proxy_pass http://remnawave;
@@ -3253,6 +3233,11 @@ server {
         proxy_set_header X-Forwarded-Port \$server_port;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+    }
+
+    location @unauthorized {
+        root /var/www/html;
+        index index.html;
     }
 }
 
@@ -3632,195 +3617,10 @@ installation_panel() {
     domains_to_check["$PANEL_DOMAIN"]=1
     domains_to_check["$SUB_DOMAIN"]=1
 
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
-    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
-    for domain in "${!domains_to_check[@]}"; do
-        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
-    done
-
-need_certificates=false
-min_days_left=9999
-
-for domain in "${!domains_to_check[@]}"; do
-    if check_certificates "$domain"; then
-        days_left=$(check_cert_expiry "$domain")
-        if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-            min_days_left=$days_left
-        fi
-    else
-        base_domain=$(extract_domain "$domain")
-        if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
-            days_left=$(check_cert_expiry "$base_domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            need_certificates=true
-            break
-        fi
-    fi
-done
-
-if [ "$need_certificates" = true ]; then
-    echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
-    reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
-
-    if [ "$CERT_METHOD" == "2" ]; then
-        reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
-    fi
-else
-    echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
-    CERT_METHOD="2"
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-
-        for domain in "${!domains_to_check[@]}"; do
-            base_domain=$(extract_domain "$domain")
-            cert_domain="$domain"
-            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                cert_domain="$base_domain"
-            fi
-            if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    else
-        if [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * * /usr/bin/certbot renew --quiet"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[UPDATING_CRON]}${COLOR_RESET}"
-            crontab -u root -l 2>/dev/null | grep -v "/usr/bin/certbot renew --quiet" | crontab -u root -
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        else
-            echo -e "${COLOR_YELLOW}${LANG[CRON_ALREADY_EXISTS]}${COLOR_RESET}"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        fi
-    fi
-fi
-
-if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        local base_domain=$(extract_domain "$domain")
-        unique_domains["$base_domain"]="1"
-    done
-
-    min_days_left=9999
-    for domain in "${!unique_domains[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-            days_left=$(check_cert_expiry "$domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "" "*.${domain}"
-            min_days_left=90
-        fi
-        for sub_domain in "${!domains_to_check[@]}"; do
-            if [[ "$sub_domain" == *"$domain" ]]; then
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$sub_domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$sub_domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-            fi
-        done
-    done
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-        for domain in "${!unique_domains[@]}"; do
-            if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    fi
-elif [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "2" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-        fi
-        echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-else
-    for domain in "${!domains_to_check[@]}"; do
-        base_domain=$(extract_domain "$domain")
-        cert_domain="$domain"
-        if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-            cert_domain="$base_domain"
-        fi
-        echo "      - /etc/letsencrypt/live/$cert_domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$cert_domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-fi
-
-PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
-SUB_CERT_DOMAIN="$SUB_DOMAIN"
+    PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
+    SUB_CERT_DOMAIN="$SUB_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
     network_mode: host
@@ -4127,194 +3927,9 @@ installation_node() {
     declare -A domains_to_check
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
-    echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
-    sleep 1
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
-    echo -e "${COLOR_YELLOW}${LANG[REQUIRED_DOMAINS]}${COLOR_RESET}"
-    for domain in "${!domains_to_check[@]}"; do
-        echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
-    done
-
-    need_certificates=false
-min_days_left=9999
-
-for domain in "${!domains_to_check[@]}"; do
-    if check_certificates "$domain"; then
-        days_left=$(check_cert_expiry "$domain")
-        if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-            min_days_left=$days_left
-        fi
-    else
-        base_domain=$(extract_domain "$domain")
-        if check_certificates "$base_domain" && is_wildcard_cert "$base_domain"; then
-            printf "${COLOR_WHITE}${LANG[WILDCARD_CERT_FOUND]}%s ${LANG[FOR_DOMAIN]} %s${COLOR_RESET}\n" "$base_domain" "$domain"
-            days_left=$(check_cert_expiry "$base_domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            need_certificates=true
-            break
-        fi
-    fi
-done
-
-if [ "$need_certificates" = true ]; then
-    echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_ACME]}${COLOR_RESET}"
-    reading "${LANG[CERT_METHOD_CHOOSE]}" CERT_METHOD
-
-    if [ "$CERT_METHOD" == "2" ]; then
-        reading "${LANG[EMAIL_PROMPT]}" LETSENCRYPT_EMAIL
-    fi
-else
-    echo -e "${COLOR_GREEN}${LANG[CERTS_SKIPPED]}${COLOR_RESET}"
-    CERT_METHOD="2"
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-
-        for domain in "${!domains_to_check[@]}"; do
-            base_domain=$(extract_domain "$domain")
-            cert_domain="$domain"
-            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                cert_domain="$base_domain"
-            fi
-            if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    else
-        if [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * * /usr/bin/certbot renew --quiet"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[UPDATING_CRON]}${COLOR_RESET}"
-            crontab -u root -l 2>/dev/null | grep -v "/usr/bin/certbot renew --quiet" | crontab -u root -
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        else
-            echo -e "${COLOR_YELLOW}${LANG[CRON_ALREADY_EXISTS]}${COLOR_RESET}"
-            for domain in "${!domains_to_check[@]}"; do
-                base_domain=$(extract_domain "$domain")
-                cert_domain="$domain"
-                if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-                    cert_domain="$base_domain"
-                fi
-                if [ -f "/etc/letsencrypt/renewal/$cert_domain.conf" ]; then
-                    desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                    if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"; then
-                        echo "$desired_hook" >> "/etc/letsencrypt/renewal/$cert_domain.conf"
-                    elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf" > /dev/null; then
-                        sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$cert_domain.conf"
-                        echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                    fi
-                fi
-            done
-        fi
-    fi
-fi
-
-if [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "1" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        local base_domain=$(extract_domain "$domain")
-        unique_domains["$base_domain"]="1"
-    done
-
-    min_days_left=9999
-    for domain in "${!unique_domains[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-            days_left=$(check_cert_expiry "$domain")
-            if [ $? -eq 0 ] && [ "$days_left" -lt "$min_days_left" ]; then
-                min_days_left=$days_left
-            fi
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "" "*.${domain}"
-            min_days_left=90
-        fi
-        for sub_domain in "${!domains_to_check[@]}"; do
-            if [[ "$sub_domain" == *"$domain" ]]; then
-                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$sub_domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$sub_domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-            fi
-        done
-    done
-
-    if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
-        echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
-        if [ "$min_days_left" -le 30 ]; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
-        else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
-        fi
-        for domain in "${!unique_domains[@]}"; do
-            if [ -f "/etc/letsencrypt/renewal/$domain.conf" ]; then
-                desired_hook="renew_hook = sh -c 'cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx'"
-                if ! grep -q "renew_hook" "/etc/letsencrypt/renewal/$domain.conf"; then
-                    echo "$desired_hook" >> "/etc/letsencrypt/renewal/$domain.conf"
-                elif ! grep -Fx "$desired_hook" "/etc/letsencrypt/renewal/$domain.conf" > /dev/null; then
-                    sed -i "/renew_hook/c\\$desired_hook" "/etc/letsencrypt/renewal/$domain.conf"
-                    echo -e "${COLOR_YELLOW}${LANG[UPDATED_RENEW_HOOK]}${COLOR_RESET}"
-                fi
-            fi
-        done
-    fi
-elif [ "$need_certificates" = true ] && [ "$CERT_METHOD" == "2" ]; then
-    for domain in "${!domains_to_check[@]}"; do
-        printf "${COLOR_YELLOW}${LANG[CHECKING_CERTS_FOR]}${COLOR_RESET}\n" "$domain"
-        if check_certificates "$domain"; then
-            echo -e "${COLOR_YELLOW}${LANG[CERT_EXIST]}${COLOR_RESET}"
-        else
-            echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
-            get_certificates "$domain" "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-        fi
-        echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-else
-    for domain in "${!domains_to_check[@]}"; do
-        base_domain=$(extract_domain "$domain")
-        cert_domain="$domain"
-        if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
-            cert_domain="$base_domain"
-        fi
-        echo "      - /etc/letsencrypt/live/$cert_domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> /opt/remnawave/docker-compose.yml
-        echo "      - /etc/letsencrypt/live/$cert_domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> /opt/remnawave/docker-compose.yml
-    done
-fi
-
-NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
+    NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
       - /dev/shm:/dev/shm
