@@ -2671,18 +2671,16 @@ EOF
 
 ### API Functions ###
 
-# Новая функция для обработки сертификатов
 handle_certificates() {
-    local -n domains_to_check_ref=$1  # Ссылка на массив domains_to_check
-    local cert_method="$2"           # Метод генерации сертификатов (1 - Cloudflare, 2 - ACME)
-    local letsencrypt_email="$3"     # Email для Let's Encrypt (если нужен)
-    local target_dir="/opt/remnawave" # Целевая директория для docker-compose.yml
+    local -n domains_to_check_ref=$1
+    local cert_method="$2"
+    local letsencrypt_email="$3"
+    local target_dir="/opt/remnawave"
 
     declare -A unique_domains
     local need_certificates=false
     local min_days_left=9999
 
-    # Проверка существующих сертификатов
     echo -e "${COLOR_YELLOW}${LANG[CHECK_CERTS]}${COLOR_RESET}"
     sleep 1
 
@@ -2691,7 +2689,6 @@ handle_certificates() {
         echo -e "${COLOR_WHITE}- $domain${COLOR_RESET}"
     done
 
-    # Проверка сертификатов для каждого домена
     for domain in "${!domains_to_check_ref[@]}"; do
         if check_certificates "$domain"; then
             days_left=$(check_cert_expiry "$domain")
@@ -2713,7 +2710,6 @@ handle_certificates() {
         fi
     done
 
-    # Если нужны новые сертификаты, запрашиваем метод
     if [ "$need_certificates" = true ]; then
         echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CERT_METHOD_PROMPT]}${COLOR_RESET}"
         echo -e "${COLOR_YELLOW}${LANG[CERT_METHOD_CF]}${COLOR_RESET}"
@@ -2728,7 +2724,6 @@ handle_certificates() {
         cert_method="2"
     fi
 
-    # Обработка сертификатов в зависимости от метода
     if [ "$need_certificates" = true ] && [ "$cert_method" == "1" ]; then
         for domain in "${!domains_to_check_ref[@]}"; do
             local base_domain=$(extract_domain "$domain")
@@ -2780,7 +2775,6 @@ handle_certificates() {
         done
     fi
 
-    # Настройка cron для обновления сертификатов
     if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew --quiet"; then
         echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
         if [ "$min_days_left" -le 30 ]; then
