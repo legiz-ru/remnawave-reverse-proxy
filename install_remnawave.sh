@@ -944,7 +944,7 @@ manage_install() {
 #Manage Panel Access
 show_panel_access() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_9]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
