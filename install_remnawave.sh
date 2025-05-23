@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.9"
+SCRIPT_VERSION="1.6.9a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -785,6 +785,8 @@ update_panel_node() {
         sleep 5
         docker compose up -d > /dev/null 2>&1 &
         spinner $! "${LANG[WAITING]}"
+        sleep 1
+        docker image prune -f > /dev/null 2>&1
         echo -e "${COLOR_GREEN}${LANG[UPDATE_SUCCESS1]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[NO_UPDATE]}${COLOR_RESET}"
@@ -944,7 +946,7 @@ manage_install() {
 #Manage Panel Access
 show_panel_access() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_9]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
@@ -2739,7 +2741,7 @@ handle_certificates() {
                     min_days_left=$days_left
                 fi
             else
-                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}$ COLOR_RESET}"
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                 echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
                 get_certificates "$domain" "$cert_method" "" "*.${domain}"
                 min_days_left=90
@@ -2897,7 +2899,8 @@ METRICS_PORT=3001
 
 ### API ###
 # Possible values: max (start instances on all cores), number (start instances on number of cores), -1 (start instances on all cores - 1)
-# !!! Do not set this value more that physical cores count in your machine !!!
+# !!! Do not set this value more than physical cores count in your machine !!!
+# Review documentation: https://remna.st/docs/install/environment-variables#scaling-api
 API_INSTANCES=1
 
 ### DATABASE ###
@@ -2930,12 +2933,8 @@ TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
-# Optional
-# Only set if you want to use topics
-TELEGRAM_ADMIN_THREAD_ID=
-NODES_NOTIFY_THREAD_ID=
-
 ### FRONT_END ###
+# Used by CORS, you can leave it as * or place your domain there
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
@@ -2963,6 +2962,24 @@ WEBHOOK_URL=https://webhook.site/1234567890
 ### This secret is used to sign the webhook payload, must be exact 64 characters. Only a-z, 0-9, A-Z are allowed.
 WEBHOOK_SECRET_HEADER=vsmu67Kmg6R8FjIOF1WUY8LWBHie4scdEqrfsKmyf4IAf8dY3nFS0wwYHkhh6ZvQ
 
+### HWID DEVICE DETECTION AND LIMITATION ###
+# Don't enable this if you don't know what you are doing.
+# Review documentation before enabling this feature.
+# https://remna.st/docs/features/hwid-device-limit/
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
+
+### Bandwidth usage reached notifications
+BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
+# Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
+BANDWIDTH_USAGE_NOTIFICATIONS_THRESHOLD=[60, 80]
+
 ### CLOUDFLARE ###
 # USED ONLY FOR docker-compose-prod-with-cf.yml
 # NOT USED BY THE APP ITSELF
@@ -2974,17 +2991,6 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
-
-### HWID DEVICE DETECTION AND LIMITATION ###
-### Docs https://remna.st/docs/features/hwid-device-limit
-HWID_DEVICE_LIMIT_ENABLED=false
-HWID_FALLBACK_DEVICE_LIMIT=5
-HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
-
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -3013,10 +3019,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave:
     image: remnawave/backend:latest
@@ -3035,13 +3041,13 @@ services:
       remnawave-redis:
         condition: service_healthy
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1-alpine
+    image: valkey/valkey:8.1.1-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -3055,10 +3061,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-nginx:
     image: nginx:1.26
@@ -3090,17 +3096,17 @@ installation() {
     NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
-      - /dev/shm:/dev/shm
+      - /dev/shm:/dev/shm:rw
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
     depends_on:
       - remnawave
       - remnawave-subscription-page
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-subscription-page:
     image: remnawave/subscription-page:latest
@@ -3117,10 +3123,10 @@ installation() {
     networks:
       - remnawave-network
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnanode:
     image: remnawave/node:latest
@@ -3131,12 +3137,12 @@ installation() {
     env_file:
       - .env-node
     volumes:
-      - /dev/shm:/dev/shm
+      - /dev/shm:/dev/shm:rw
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
 networks:
   remnawave-network:
@@ -3433,7 +3439,8 @@ METRICS_PORT=3001
 
 ### API ###
 # Possible values: max (start instances on all cores), number (start instances on number of cores), -1 (start instances on all cores - 1)
-# !!! Do not set this value more that physical cores count in your machine !!!
+# !!! Do not set this value more than physical cores count in your machine !!!
+# Review documentation: https://remna.st/docs/install/environment-variables#scaling-api
 API_INSTANCES=1
 
 ### DATABASE ###
@@ -3466,12 +3473,8 @@ TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
 
-# Optional
-# Only set if you want to use topics
-TELEGRAM_ADMIN_THREAD_ID=
-NODES_NOTIFY_THREAD_ID=
-
 ### FRONT_END ###
+# Used by CORS, you can leave it as * or place your domain there
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
 ### SUBSCRIPTION PUBLIC DOMAIN ###
@@ -3499,6 +3502,24 @@ WEBHOOK_URL=https://webhook.site/1234567890
 ### This secret is used to sign the webhook payload, must be exact 64 characters. Only a-z, 0-9, A-Z are allowed.
 WEBHOOK_SECRET_HEADER=vsmu67Kmg6R8FjIOF1WUY8LWBHie4scdEqrfsKmyf4IAf8dY3nFS0wwYHkhh6ZvQ
 
+### HWID DEVICE DETECTION AND LIMITATION ###
+# Don't enable this if you don't know what you are doing.
+# Review documentation before enabling this feature.
+# https://remna.st/docs/features/hwid-device-limit/
+HWID_DEVICE_LIMIT_ENABLED=false
+HWID_FALLBACK_DEVICE_LIMIT=5
+HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
+
+### HWID DEVICE DETECTION PROVIDER ID ###
+# Apps, which currently support this feature:
+# - Happ
+PROVIDER_ID="123456"
+
+### Bandwidth usage reached notifications
+BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
+# Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
+BANDWIDTH_USAGE_NOTIFICATIONS_THRESHOLD=[60, 80]
+
 ### CLOUDFLARE ###
 # USED ONLY FOR docker-compose-prod-with-cf.yml
 # NOT USED BY THE APP ITSELF
@@ -3510,17 +3531,6 @@ CLOUDFLARE_TOKEN=ey...
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
-
-### HWID DEVICE DETECTION AND LIMITATION ###
-### Docs https://remna.st/docs/features/hwid-device-limit
-HWID_DEVICE_LIMIT_ENABLED=false
-HWID_FALLBACK_DEVICE_LIMIT=5
-HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
-
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
 EOL
 
     cat > docker-compose.yml <<EOL
@@ -3549,10 +3559,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave:
     image: remnawave/backend:latest
@@ -3571,13 +3581,13 @@ services:
       remnawave-redis:
         condition: service_healthy
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1-alpine
+    image: valkey/valkey:8.1.1-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -3591,10 +3601,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-nginx:
     image: nginx:1.26
@@ -3628,10 +3638,10 @@ installation_panel() {
       - remnawave
       - remnawave-subscription-page
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnawave-subscription-page:
     image: remnawave/subscription-page:latest
@@ -3648,10 +3658,10 @@ installation_panel() {
     networks:
       - remnawave-network
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
 networks:
   remnawave-network:
@@ -3932,17 +3942,17 @@ installation_node() {
     NODE_CERT_DOMAIN="$SELFSTEAL_DOMAIN"
 
     cat >> /opt/remnawave/docker-compose.yml <<EOL
-      - /dev/shm:/dev/shm
+      - /dev/shm:/dev/shm:rw
       - /var/www/html:/var/www/html:ro
     command: sh -c 'rm -f /dev/shm/nginx.sock && nginx -g "daemon off;"'
     network_mode: host
     depends_on:
       - remnanode
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 
   remnanode:
     image: remnawave/node:latest
@@ -3954,12 +3964,12 @@ installation_node() {
       - path: /opt/remnawave/.env-node
         required: false
     volumes:
-      - /dev/shm:/dev/shm
+      - /dev/shm:/dev/shm:rw
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
-        max-size: "30m"
-        max-file: "5"
+        max-size: '30m'
+        max-file: '5'
 EOL
 
 cat > /opt/remnawave/nginx.conf <<EOL
