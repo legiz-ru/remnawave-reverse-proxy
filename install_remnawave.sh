@@ -2739,7 +2739,7 @@ handle_certificates() {
                     min_days_left=$days_left
                 fi
             else
-                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}$ COLOR_RESET}"
+                echo -e "${COLOR_RED}${LANG[CERT_MISSING]}${COLOR_RESET}"
                 echo -e "${COLOR_YELLOW}${LANG[GENERATING_WILDCARD_CERT]} *.$domain${COLOR_RESET}"
                 get_certificates "$domain" "$cert_method" "" "*.${domain}"
                 min_days_left=90
