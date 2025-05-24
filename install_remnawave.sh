@@ -2590,7 +2590,7 @@ create_host() {
     "path": "",
     "sni": "$domain",
     "host": "$domain",
-    "alpn": "h2",
+    "alpn": null,
     "fingerprint": "chrome",
     "allowInsecure": false,
     "isDisabled": false
