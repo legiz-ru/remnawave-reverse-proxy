@@ -46,6 +46,9 @@ set_language() {
     case $1 in
         en)
             LANG=(
+                #Alias
+                [ALIAS_ADDED]="Alias 'rr' for 'remnawave_reverse' added to %s"
+                [ALIAS_ACTIVATE]="Please run 'source %s' or restart your terminal to apply the alias."
                 #Lang
                 [CHOOSE_LANG]="Select language:"
                 [LANG_EN]="English"
@@ -346,6 +349,9 @@ set_language() {
             ;;
         ru)
             LANG=(
+                #Alias
+                [ALIAS_ADDED]="Алиас 'rr' для 'remnawave_reverse' добавлен в %s"
+                [ALIAS_ACTIVATE]="Выполните 'source %s' или перезапустите терминал, чтобы применить алиас."
                 #Check
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
@@ -4411,6 +4417,20 @@ install_script_if_missing() {
         fi
         chmod +x "${DIR_REMNAWAVE}remnawave_reverse"
         ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
+    fi
+
+    local bashrc_file="/root/.bashrc"
+    local alias_line="alias rr='remnawave_reverse'"
+
+    if [ ! -f "$bashrc_file" ]; then
+        touch "$bashrc_file"
+        chmod 644 "$bashrc_file"
+    fi
+
+    if ! grep -Fx "$alias_line" "$bashrc_file" > /dev/null; then
+        echo "$alias_line" >> "$bashrc_file"
+        printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
+        echo -e "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}"
     fi
 }
 
