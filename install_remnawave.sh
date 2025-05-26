@@ -4436,8 +4436,6 @@ install_script_if_missing() {
     printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
 }
 
-install_script_if_missing
-
 if ! load_language; then
     show_language
     reading "Choose option (1-2):" LANG_OPTION
@@ -4448,6 +4446,8 @@ if ! load_language; then
         *) error "Invalid choice. Please select 1-2." ;;
     esac
 fi
+
+install_script_if_missing
 
 show_menu
 reading "${LANG[PROMPT_ACTION]}" OPTION
