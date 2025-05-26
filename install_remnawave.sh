@@ -4427,10 +4427,13 @@ install_script_if_missing() {
         chmod 644 "$bashrc_file"
     fi
 
+    if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
+        echo >> "$bashrc_file"
+    fi
     if ! grep -Fx "$alias_line" "$bashrc_file" > /dev/null; then
         echo "$alias_line" >> "$bashrc_file"
         printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
-        echo -e "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}"
+        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
     fi
 }
 
