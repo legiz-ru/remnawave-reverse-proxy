@@ -49,6 +49,7 @@ set_language() {
                 #Alias
                 [ALIAS_ADDED]="Alias 'rr' for 'remnawave_reverse' added to %s"
                 [ALIAS_ACTIVATE]="Please run 'source %s' or restart your terminal to apply the alias."
+                [ALIAS_EXISTS]="Alias 'rr' for 'remnawave_reverse' already exists in %s"
                 #Lang
                 [CHOOSE_LANG]="Select language:"
                 [LANG_EN]="English"
@@ -352,6 +353,7 @@ set_language() {
                 #Alias
                 [ALIAS_ADDED]="Алиас 'rr' для 'remnawave_reverse' добавлен в %s"
                 [ALIAS_ACTIVATE]="Выполните 'source %s' или перезапустите терминал, чтобы применить алиас."
+                [ALIAS_EXISTS]="Алиас 'rr' для 'remnawave_reverse' уже существует в %s"
                 #Check
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
@@ -4419,21 +4421,29 @@ install_script_if_missing() {
         ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
     fi
 
+    # Добавление алиаса rr для remnawave_reverse
     local bashrc_file="/root/.bashrc"
     local alias_line="alias rr='remnawave_reverse'"
 
+    # Проверка, существует ли .bashrc, если нет — создать
     if [ ! -f "$bashrc_file" ]; then
         touch "$bashrc_file"
         chmod 644 "$bashrc_file"
     fi
 
+    # Убедимся, что файл заканчивается переносом строки
     if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
         echo >> "$bashrc_file"
     fi
 
-    echo "$alias_line" >> "$bashrc_file"
-    printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
-    printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
+    # Проверка, есть ли уже алиас rr (с учётом возможных пробелов)
+    if ! grep -E "^[[:space:]]*alias rr='remnawave_reverse'[[:space:]]*$" "$bashrc_file" > /dev/null; then
+        echo "$alias_line" >> "$bashrc_file"
+        printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
+        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
+    else
+        printf "${COLOR_YELLOW}${LANG[ALIAS_EXISTS]}${COLOR_RESET}\n" "$bashrc_file"
+    fi
 }
 
 if ! load_language; then
