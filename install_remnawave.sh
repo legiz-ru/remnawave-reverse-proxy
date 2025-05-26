@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.9b"
+SCRIPT_VERSION="1.6.9c"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -48,7 +48,7 @@ set_language() {
             LANG=(
                 #Alias
                 [ALIAS_ADDED]="Alias 'rr' for 'remnawave_reverse' added to %s"
-                [ALIAS_ACTIVATE]="Please run 'source %s' or restart your terminal to apply the alias."
+                [ALIAS_ACTIVATE_GLOBAL]="Alias 'rr' is now available for all users. Run 'source %s' or open a new terminal to apply."
                 #Lang
                 [CHOOSE_LANG]="Select language:"
                 [LANG_EN]="English"
@@ -351,7 +351,7 @@ set_language() {
             LANG=(
                 #Alias
                 [ALIAS_ADDED]="Алиас 'rr' для 'remnawave_reverse' добавлен в %s"
-                [ALIAS_ACTIVATE]="Выполните 'source %s' или перезапустите терминал, чтобы применить алиас."
+                [ALIAS_ACTIVATE_GLOBAL]="Алиас 'rr' теперь доступен для всех пользователей. Выполните 'source %s' или перезапустите терминал, чтобы применить алиас."
                 #Check
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
@@ -4419,7 +4419,7 @@ install_script_if_missing() {
         ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
     fi
 
-    local bashrc_file="/root/.bashrc"
+    local bashrc_file="/etc/bash.bashrc"
     local alias_line="alias rr='remnawave_reverse'"
 
     if [ ! -f "$bashrc_file" ]; then
@@ -4430,10 +4430,13 @@ install_script_if_missing() {
     if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
         echo >> "$bashrc_file"
     fi
+
     if ! grep -E "^[[:space:]]*alias rr='remnawave_reverse'[[:space:]]*$" "$bashrc_file" > /dev/null; then
         echo "$alias_line" >> "$bashrc_file"
         printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
-        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
+        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE_GLOBAL]}${COLOR_RESET}\n" "$bashrc_file"
+    else
+        printf "${COLOR_YELLOW}${LANG[ALIAS_EXISTS]}${COLOR_RESET}\n" "$bashrc_file"
     fi
 }
 
