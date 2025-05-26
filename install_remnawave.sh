@@ -4418,9 +4418,24 @@ install_script_if_missing() {
         chmod +x "${DIR_REMNAWAVE}remnawave_reverse"
         ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
     fi
-}
 
-install_script_if_missing
+    local bashrc_file="/root/.bashrc"
+    local alias_line="alias rr='remnawave_reverse'"
+
+    if [ ! -f "$bashrc_file" ]; then
+        touch "$bashrc_file"
+        chmod 644 "$bashrc_file"
+    fi
+
+    if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
+        echo >> "$bashrc_file"
+    fi
+    if ! grep -E "^[[:space:]]*alias rr='remnawave_reverse'[[:space:]]*$" "$bashrc_file" > /dev/null; then
+        echo "$alias_line" >> "$bashrc_file"
+        printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
+        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE]}${COLOR_RESET}\n" "$bashrc_file"
+    fi
+}
 
 if ! load_language; then
     show_language
@@ -4433,7 +4448,10 @@ if ! load_language; then
     esac
 fi
 
+install_script_if_missing
+
 show_menu
+
 reading "${LANG[PROMPT_ACTION]}" OPTION
 
 case $OPTION in
