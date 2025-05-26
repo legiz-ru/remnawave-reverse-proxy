@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.6.9a"
+SCRIPT_VERSION="1.6.9b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -795,13 +795,15 @@ update_panel_node() {
 
 update_remnawave_reverse() {
     local remote_version=$(curl -s "$SCRIPT_URL" | grep -m 1 "SCRIPT_VERSION=" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
+    local update_script="${DIR_REMNAWAVE}remnawave_reverse"
+    local bin_link="/usr/local/bin/remnawave_reverse"
 
     if [ -z "$remote_version" ]; then
         echo -e "${COLOR_YELLOW}${LANG[VERSION_CHECK_FAILED]}${COLOR_RESET}"
         return 1
     fi
 
-    if [ -f "${DIR_REMNAWAVE}remnawave_reverse" ]; then
+    if [ -f "$update_script" ]; then
         if [ "$SCRIPT_VERSION" = "$remote_version" ]; then
             printf "${COLOR_GREEN}${LANG[LATEST_VERSION]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
             return 0
@@ -818,16 +820,33 @@ update_remnawave_reverse() {
         return 0
     fi
 
-    UPDATE_SCRIPT="${DIR_REMNAWAVE}remnawave_reverse"
     mkdir -p "${DIR_REMNAWAVE}"
-    if wget -q -O "$UPDATE_SCRIPT" "$SCRIPT_URL"; then
-        ln -sf "$UPDATE_SCRIPT" /usr/local/bin/remnawave_reverse
-        chmod +x "$UPDATE_SCRIPT"
+
+    local temp_script="${DIR_REMNAWAVE}remnawave_reverse.tmp"
+    if wget -q -O "$temp_script" "$SCRIPT_URL"; then
+        local downloaded_version=$(grep -m 1 "SCRIPT_VERSION=" "$temp_script" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
+        if [ "$downloaded_version" != "$remote_version" ]; then
+            echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
+            rm -f "$temp_script"
+            return 1
+        fi
+
+        if [ -f "$update_script" ]; then
+            rm -f "$update_script"
+        fi
+        mv "$temp_script" "$update_script"
+        chmod +x "$update_script"
+
+        ln -sf "$update_script" "$bin_link"
+
+        hash -r
+
         printf "${COLOR_GREEN}${LANG[UPDATE_SUCCESS]}${COLOR_RESET}\n" "$remote_version"
         echo -e "${COLOR_YELLOW}${LANG[RESTART_REQUIRED]}${COLOR_RESET}"
         exit 0
     else
         echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
+        rm -f "$temp_script"
         return 1
     fi
 }
