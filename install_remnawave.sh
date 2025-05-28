@@ -3230,10 +3230,6 @@ ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
 
-ssl_stapling on;
-ssl_stapling_verify on;
-resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
-
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
@@ -3746,10 +3742,6 @@ ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
 
-ssl_stapling on;
-ssl_stapling_verify on;
-resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
-
 server {
     server_name $PANEL_DOMAIN;
     listen 443 ssl;
@@ -4009,10 +4001,6 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
-
-ssl_stapling on;
-ssl_stapling_verify on;
-resolver 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220;
 
 server {
     server_name $SELFSTEAL_DOMAIN;
