@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0"
+SCRIPT_VERSION="1.7.0a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
