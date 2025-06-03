@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0"
+SCRIPT_VERSION="1.7.0a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -3083,7 +3083,7 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -3206,6 +3206,7 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
+ssl_session_tickets off;
 
 server {
     server_name $PANEL_DOMAIN;
@@ -3306,7 +3307,7 @@ EOL
 
     remnawave_network_subnet=172.30.0.0/16
     ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp > /dev/null 2>&1
-     
+
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
@@ -3633,7 +3634,7 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -3954,7 +3955,7 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -4007,6 +4008,7 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
+ssl_session_tickets off;
 
 server {
     server_name $SELFSTEAL_DOMAIN;
