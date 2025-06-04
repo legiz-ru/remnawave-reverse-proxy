@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0a"
+SCRIPT_VERSION="1.7.0b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -2086,6 +2086,12 @@ update_current_certificates() {
     declare -A unique_domains
     declare -A cert_status
     local renew_threshold=30
+    local log_dir="/var/log/letsencrypt"
+
+    if [ ! -d "$log_dir" ]; then
+        mkdir -p "$log_dir"
+        chmod 755 "$log_dir"
+    fi
 
     for domain_dir in "$cert_dir"/*; do
         if [ -d "$domain_dir" ]; then
