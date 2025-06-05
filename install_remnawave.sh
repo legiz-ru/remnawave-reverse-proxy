@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0b"
+SCRIPT_VERSION="1.7.0c"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -297,6 +297,8 @@ set_language() {
                 [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
                 [PORT_8443_OPEN]="Open port 8443 for panel access"
                 [PORT_8443_CLOSE]="Close port 8443 for panel access"
+                [PORT_8443_IN_USE]="Port 8443 already in use by another process. Check which services are using the port and free it."
+                [NO_PORT_CHECK_TOOLS]="Port checking tools (ss or netstat) not found. Install one of them."
                 [OPEN_PANEL_LINK]="Your panel access link:"
                 [PORT_8443_WARNING]="Don't forget, port 8443 is now open to the world. After fixing the panel, select the option to close port 8443."
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
@@ -345,6 +347,7 @@ set_language() {
                 [CREATE_API_TOKEN_INSTRUCTION]="Go to the panel at: https://%s\nNavigate to 'API Tokens' -> 'Create New Token' and create a token.\nCopy the created token and enter it below."
                 [ENTER_API_TOKEN]="Enter the API token: "
                 [EMPTY_TOKEN_ERROR]="No token provided. Exiting."
+                [RATE_LIMIT_EXCEEDED]="Rate limit exceeded for Let's Encrypt"
             )
             ;;
         ru)
@@ -595,6 +598,8 @@ set_language() {
                 [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
                 [PORT_8443_OPEN]="Открыть доступ к панели на порту 8443"
                 [PORT_8443_CLOSE]="Закрыть доступ к панели на порту 8443"
+                [PORT_8443_IN_USE]="Порт 8443 уже занят другим процессом. Проверьте, какие службы используют порт, и освободите его."
+                [NO_PORT_CHECK_TOOLS]="Не найдены инструменты для проверки порта (ss или netstat). Установите один из них."
                 [OPEN_PANEL_LINK]="Ваша ссылка для входа в панель:"
                 [PORT_8443_WARNING]="Не забудьте, что порт 8443 сейчас открыт для внешнего доступа. После восстановления панели выберите пункт закрытия порта 8443."
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
@@ -641,6 +646,7 @@ set_language() {
                 [CREATE_API_TOKEN_INSTRUCTION]="Зайдите в панель по адресу: https://%s\nПерейдите в раздел 'API токены' -> 'Создать новый токен' и создайте токен.\nСкопируйте созданный токен и введите его ниже."
                 [ENTER_API_TOKEN]="Введите API-токен: "
                 [EMPTY_TOKEN_ERROR]="Токен не введен. Завершение работы."
+                [RATE_LIMIT_EXCEEDED]="Превышен лимит выдачи сертификатов Let's Encrypt"
             )
             ;;
     esac
@@ -1036,6 +1042,21 @@ open_panel_access() {
 
     if [ -z "$PANEL_DOMAIN" ] || [ -z "$cookies_random1" ] || [ -z "$cookies_random2" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if command -v ss >/dev/null 2>&1; then
+        if ss -tuln | grep -q ":8443"; then
+            echo -e "${COLOR_RED}${LANG[PORT_8443_IN_USE]}${COLOR_RESET}"
+            exit 1
+        fi
+    elif command -v netstat >/dev/null 2>&1; then
+        if netstat -tuln | grep -q ":8443"; then
+            echo -e "${COLOR_RED}${LANG[PORT_8443_IN_USE]}${COLOR_RESET}"
+            exit 1
+        fi
+    else
+        echo -e "${COLOR_RED}${LANG[NO_PORT_CHECK_TOOLS]}${COLOR_RESET}"
         exit 1
     fi
 
@@ -2144,26 +2165,28 @@ EOL
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
+            local certbot_exit_code=$?
+            if [ "$certbot_exit_code" -ne 0 ]; then
+                cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}: ${LANG[RATE_LIMIT_EXCEEDED]}"
+                continue
+            fi
+
+            local new_cert_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "$cert_domain*" | sort -V | tail -n 1)
+            local new_domain=$(basename "$new_cert_dir")
+            local cert_mtime_after=$(stat -c %Y "$new_cert_dir/fullchain.pem" 2>/dev/null || echo 0)
+            if check_certificates "$new_domain" > /dev/null 2>&1 && [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
+                local new_days_left=$(check_cert_expiry "$new_domain")
+                if [ $? -eq 0 ]; then
+                    cert_status["$cert_domain"]="${LANG[UPDATED]}"
+                else
+                    cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
+                fi
+            else
+                cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
+            fi
         else
             cert_status["$cert_domain"]="${LANG[REMAINING]} $days_left ${LANG[DAYS]}"
             continue
-        fi
-
-        local new_cert_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "$cert_domain*" | sort -V | tail -n 1)
-        local new_domain=$(basename "$new_cert_dir")
-        local cert_mtime_after=$(stat -c %Y "$new_cert_dir/fullchain.pem" 2>/dev/null || echo 0)
-        if check_certificates "$new_domain" > /dev/null 2>&1; then
-            local new_days_left=$(check_cert_expiry "$new_domain")
-            if [ $? -eq 0 ]; then
-                cert_status["$cert_domain"]="${LANG[REMAINING]} $new_days_left ${LANG[DAYS]}"
-            else
-                cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
-            fi
-            if [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
-                cert_status["$cert_domain"]="${LANG[UPDATED]}"
-            fi
-        else
-            cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
         fi
     done
 
@@ -2171,8 +2194,8 @@ EOL
     for cert_domain in "${!cert_status[@]}"; do
         if [[ "${cert_status[$cert_domain]}" == "${LANG[UPDATED]}" ]]; then
             echo -e "${COLOR_GREEN}${LANG[CERTIFICATE_FOR]}$cert_domain ${LANG[SUCCESSFULLY_UPDATED]}${COLOR_RESET}"
-        elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_UPDATE]}" ]]; then
-            echo -e "${COLOR_RED}${LANG[FAILED_TO_UPDATE_CERTIFICATE_FOR]}$cert_domain${COLOR_RESET}"
+        elif [[ "${cert_status[$cert_domain]}" =~ "${LANG[ERROR_UPDATE]}" ]]; then
+            echo -e "${COLOR_RED}${LANG[FAILED_TO_UPDATE_CERTIFICATE_FOR]}$cert_domain: ${cert_status[$cert_domain]}${COLOR_RESET}"
         elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_PARSING_CERT]}" ]]; then
             echo -e "${COLOR_RED}${LANG[ERROR_CHECKING_EXPIRY_FOR]}$cert_domain${COLOR_RESET}"
         else
