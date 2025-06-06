@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0c"
+SCRIPT_VERSION="1.7.1"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -56,6 +56,23 @@ set_language() {
                 #check
                 [ERROR_ROOT]="Script must be run as root"
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
+                #Install Packages
+                [ERROR_UPDATE_LIST]="Failed to update package list"
+                [ERROR_INSTALL_PACKAGES]="Failed to install required packages"
+                [ERROR_INSTALL_CRON]="Failed to install cron"
+                [ERROR_START_CRON]="Failed to start cron"
+                [ERROR_CONFIGURE_LOCALES]="Error: Failed to configure locales"
+                [ERROR_DOWNLOAD_DOCKER_KEY]="Failed to download Docker GPG key"
+                [ERROR_UPDATE_DOCKER_LIST]="Failed to update package list after adding Docker repository"
+                [ERROR_INSTALL_DOCKER]="Failed to install Docker"
+                [ERROR_DOCKER_NOT_INSTALLED]="Docker is not installed"
+                [ERROR_START_DOCKER]="Failed to start Docker"
+                [ERROR_ENABLE_DOCKER]="Failed to enable Docker auto-start"
+                [ERROR_DOCKER_NOT_WORKING]="Docker is not working properly"
+                [ERROR_CONFIGURE_UFW]="Failed to configure UFW"
+                [ERROR_CONFIGURE_UPGRADES]="Failed to configure unattended-upgrades"
+                [ERROR_DOCKER_DNS]="Error: Unable to resolve download.docker.com. Check your DNS settings."
+                [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Version: %s"
@@ -360,6 +377,23 @@ set_language() {
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Версия: %s"
+                #Install Packages
+                [ERROR_UPDATE_LIST]="Ошибка: Не удалось обновить список пакетов"
+                [ERROR_INSTALL_PACKAGES]="Ошибка: Не удалось установить необходимые пакеты"
+                [ERROR_INSTALL_CRON]="Ошибка: Не удалось установить cron"
+                [ERROR_START_CRON]="Ошибка: Не удалось запустить cron"
+                [ERROR_CONFIGURE_LOCALES]="Ошибка: Не удалось настроить локали"
+                [ERROR_DOWNLOAD_DOCKER_KEY]="Ошибка: Не удалось загрузить ключ Docker"
+                [ERROR_UPDATE_DOCKER_LIST]="Ошибка: Не удалось обновить список пакетов после добавления репозитория Docker"
+                [ERROR_INSTALL_DOCKER]="Ошибка: Не удалось установить Docker"
+                [ERROR_DOCKER_NOT_INSTALLED]="Ошибка: Docker не установлен"
+                [ERROR_START_DOCKER]="Ошибка: Не удалось запустить Docker"
+                [ERROR_ENABLE_AUTOSTART_DOCKER]="Ошибка: Не удалось включить автозапуск Docker"
+                [ERROR_DOCKER_NOT_WORKING]="Ошибка: Docker не работает корректно"
+                [ERROR_CONFIGURE_UFW]="Ошибка: Не удалось настроить UFW"
+                [ERROR_CONFIGURE_UPGRADES]="Ошибка: Не удалось настроить unattended-upgrades"
+                [ERROR_DOCKER_DNS]="Ошибка: Не удалось разрешить домен download.docker.com. Проверьте настройки DNS."
+                [SUCCESSFUL_INSTALL]="Все пакеты успешно установлены"
                 #Main menu
                 [EXIT]="Выход"
                 [MENU_1]="Установка компонентов Remnawave"
@@ -932,16 +966,24 @@ manage_install() {
     reading "${LANG[INSTALL_PROMPT]}" INSTALL_OPTION
     case $INSTALL_OPTION in
         1)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation
             sleep 2
             log_clear
             ;;
         2)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation_panel
             sleep 2
@@ -952,8 +994,12 @@ manage_install() {
             log_clear
             ;;
         4)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation_node
             sleep 2
@@ -1746,49 +1792,105 @@ randomhtml() {
 
 install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
-    apt-get update -y
-    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk
+    
+    if ! apt-get update -y; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_LIST]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
+        echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     if ! dpkg -l | grep -q '^ii.*cron '; then
-        apt-get install -y cron
+        if ! apt-get install -y cron; then
+            echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CRON]}" "${COLOR_RESET}" >&2
+            return 1
+        fi
     fi
 
     if ! systemctl is-active --quiet cron; then
-        systemctl start cron || {
+        if ! systemctl start cron; then
             echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
-        }
+            return 1
+        fi
     fi
-
     if ! systemctl is-enabled --quiet cron; then
-        systemctl enable cron || {
+        if ! systemctl enable cron; then
             echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
-        }
+            return 1
+        fi
     fi
 
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
         if grep -q "^# en_US.UTF-8 UTF-8" /etc/locale.gen; then
-            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/letc/gen
         else
-            echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+            echo "en_US.UTF-8 UTF-8" >> /etc/loc/gen
         fi
     fi
-    locale-gen
-    update-locale LANG=en_US.UTF-8
+    if ! locale-gen || ! update-locale LANG=en_US.UTF-8; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_LOCALES]}$${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! ping -c 1 download.docker.com >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_DNS]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     if grep -q "Ubuntu" /etc/os-release; then
         install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null
+        if ! curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_DOWNLOAD_DOCKER_KEY]}${COLOR_RESET}" >&2
+            return 1
+        fi
         chmod a+r /etc/apt/keyrings/docker.asc
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     elif grep -q "Debian" /etc/os-release; then
         install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/debian/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null
+        if ! curl -fsSL https://download.docker.com/linux/debian/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_DOWNLOAD_DOCKER_KEY]}${COLOR_RESET}" >&2
+            return 1
+        fi
         chmod a+r /etc/apt/keyrings/docker.asc
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     fi
 
-    apt-get update
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    if ! apt-get update; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_DOCKER_LIST]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
+        echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! command -v docker >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_NOT_INSTALLED]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! systemctl is-active --quiet docker; then
+        if ! systemctl start docker; then
+            echo -e "${COLOR_RED}${LANG[ERROR_START_DOCKER]}${COLOR_RESET}" >&2
+            return 1
+        fi
+    fi
+
+    if ! systemctl is-enabled --quiet docker; then
+        if ! systemctl enable docker; then
+            echo -e "${COLOR_RED}${LANG[ERROR_ENABLE_DOCKER]}${COLOR_RESET}" >&2
+            return 1
+        fi
+    fi
+
+    if ! docker info >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_NOT_WORKING]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     # BBR
     if ! grep -q "net.core.default_qdisc = fq" /etc/sysctl.conf; then
@@ -1797,20 +1899,24 @@ install_packages() {
     if ! grep -q "net.ipv4.tcp_congestion_control = bbr" /etc/sysctl.conf; then
         echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
     fi
+    sysctl -p >/dev/null
 
     # UFW
-    ufw --force reset
-    ufw allow 22/tcp comment 'SSH'
-    ufw allow 443/tcp comment 'HTTPS'
-    ufw --force enable
+    if ! ufw --force reset || ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UFW]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
-    # Unattended-upgrade
-    echo 'Unattended-Upgrade::Mail "root";' >> /etc/apt/apt.conf.d/50unattended-upgrades
+    # Unattended-upgrades
+    echo 'Unattended-Upgrade::MailTo "root";' >> /etc/apt/apt.conf.d/50-unattended-upgrades
     echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
-    dpkg-reconfigure -f noninteractive unattended-upgrades
-    systemctl restart unattended-upgrades
+    if ! dpkg-reconfigure -f noninteractive unattended-upgrades || ! systemctl restart unattended-upgrades; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UPGRADES]}" "${COLOR_RESET}" >&2
+        return 1
+    fi
 
     touch ${DIR_REMNAWAVE}install_packages
+    echo -e "${COLOR_GREEN}${LANG[SUCCESS_INSTALL]}${COLOR_RESET}"
     clear
 }
 
