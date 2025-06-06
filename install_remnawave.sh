@@ -1908,7 +1908,7 @@ install_packages() {
     fi
 
     # Unattended-upgrades
-    echo 'Unattended-Upgrade::MailTo "root";' >> /etc/apt/apt.conf.d/50-unattended-upgrades
+    echo 'Unattended-Upgrade::Mail "root";' >> /etc/apt/apt.conf.d/50unattended-upgrades
     echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
     if ! dpkg-reconfigure -f noninteractive unattended-upgrades || ! systemctl restart unattended-upgrades; then
         echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UPGRADES]}" "${COLOR_RESET}" >&2
