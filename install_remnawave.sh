@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.1"
+SCRIPT_VERSION="1.7.1a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -72,6 +72,7 @@ set_language() {
                 [ERROR_CONFIGURE_UFW]="Failed to configure UFW"
                 [ERROR_CONFIGURE_UPGRADES]="Failed to configure unattended-upgrades"
                 [ERROR_DOCKER_DNS]="Error: Unable to resolve download.docker.com. Check your DNS settings."
+                [ERROR_INSTALL_CERTBOT]="Error: Failed to install certbot"
                 [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
@@ -393,6 +394,7 @@ set_language() {
                 [ERROR_CONFIGURE_UFW]="Ошибка: Не удалось настроить UFW"
                 [ERROR_CONFIGURE_UPGRADES]="Ошибка: Не удалось настроить unattended-upgrades"
                 [ERROR_DOCKER_DNS]="Ошибка: Не удалось разрешить домен download.docker.com. Проверьте настройки DNS."
+                [ERROR_INSTALL_CERTBOT]="Ошибка: Не удалось установить certbot"
                 [SUCCESSFUL_INSTALL]="Все пакеты успешно установлены"
                 #Main menu
                 [EXIT]="Выход"
@@ -966,7 +968,7 @@ manage_install() {
     reading "${LANG[INSTALL_PROMPT]}" INSTALL_OPTION
     case $INSTALL_OPTION in
         1)
-            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
                 install_packages || {
                     echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
                     log_clear
@@ -978,7 +980,7 @@ manage_install() {
             log_clear
             ;;
         2)
-            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
                 install_packages || {
                     echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
                     log_clear
@@ -994,7 +996,7 @@ manage_install() {
             log_clear
             ;;
         4)
-            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
                 install_packages || {
                     echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
                     log_clear
@@ -2185,10 +2187,24 @@ manage_certificates() {
     reading "${LANG[CERT_PROMPT1]}" CERT_OPTION
     case $CERT_OPTION in
         1)
+            if ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CERTBOT]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
+            fi
             update_current_certificates
             log_clear
             ;;
         2)
+            if ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CERTBOT]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
+            fi
             generate_new_certificates
             log_clear
             ;;
