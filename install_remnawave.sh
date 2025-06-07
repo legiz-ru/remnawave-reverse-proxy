@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.2"
+SCRIPT_VERSION="1.7.2a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -1775,6 +1775,8 @@ randomhtml() {
     local random_meta_id=$(openssl rand -hex 16)
     local random_comment=$(openssl rand -hex 8)
     local random_class_suffix=$(openssl rand -hex 4)
+    local random_title_prefix="Page_"
+    local random_title_suffix=$(openssl rand -hex 4)
 
     local meta_names=("viewport-id" "session-id" "track-id" "render-id" "page-id" "config-id")
     local random_meta_name=${meta_names[$RANDOM % ${#meta_names[@]}]}
@@ -1782,8 +1784,10 @@ randomhtml() {
     local class_prefixes=("style" "data" "ui" "layout" "theme" "view")
     local random_class_prefix=${class_prefixes[$RANDOM % ${#class_prefixes[@]}]}
     local random_class="$random_class_prefix-$random_class_suffix"
+    local random_title="${random_title_prefix}${random_title_suffix}"
 
     find "./$RandomHTML" -type f -name "*.html" -exec sed -i \
+        -e "s|<title>.*</title>|<title>${random_title}</title>|" \
         -e "s/<\/head>/<meta name=\"$random_meta_name\" content=\"$random_meta_id\">\n<!-- $random_comment -->\n<\/head>/" \
         -e "s/<body/<body class=\"$random_class\"/" \
         {} \;
