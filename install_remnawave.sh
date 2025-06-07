@@ -1738,9 +1738,9 @@ randomhtml() {
         selected_url=${template_urls[$RANDOM % ${#template_urls[@]}]}
     else
         if [ "$template_source" = "simple" ]; then
-            selected_url=${template_urls[0]}  # Simple web templates (165 templates)
+            selected_url=${template_urls[0]}  # Simple web templates
         else
-            selected_url=${template_urls[1]}  # Sni templates (6 templates)
+            selected_url=${template_urls[1]}  # Sni templates
         fi
     fi
 
@@ -1779,44 +1779,30 @@ randomhtml() {
     local random_title_suffix=$(openssl rand -hex 4)
     local random_footer_text="Designed by RandomSite_${random_title_suffix}"
     local random_id_suffix=$(openssl rand -hex 4)
-    local random_class_prefixes=("rnd" "dyn" "cnt" "sec" "tmp" "mod")
 
     local meta_names=("viewport-id" "session-id" "track-id" "render-id" "page-id" "config-id")
     local random_meta_name=${meta_names[$RANDOM % ${#meta_names[@]}]}
 
-    local class_prefix=${random_class_prefixes[$RANDOM % ${#random_class_prefixes[@]}]}
-    local random_class="${class_prefix}-${random_class_suffix}"
+    local class_prefixes=("style" "data" "ui" "layout" "theme" "view")
+    local random_class_prefix=${class_prefixes[$RANDOM % ${#class_prefixes[@]}]}
+    local random_class="$random_class_prefix-$random_class_suffix"
     local random_title="${random_title_prefix}${random_title_suffix}"
 
-    find "./$RandomHTML" -type f -name "*.html" -exec sh -c '
-        file="$1"
-
-        if head -n 5 "$file" | grep -q "WebThemez\|freewebsitetemplates\|Author"; then
-            sed -i "1,5d" "$file"
-        fi
-
-        sed -i \
-            -e "s|<!-- Website template by freewebsitetemplates.com -->||" \
-            -e "s|<!-- Theme by: WebThemez.com -->||" \
-            -e "s|<a href=\"http://freewebsitetemplates.com\">Free Website Templates</a>|<span>${random_footer_text}</span>|" \
-            -e "s|<a href=\"http://webthemez.com\" alt=\"webthemez\">WebThemez.com</a>|<span>${random_footer_text}</span>|" \
-            -e "s|id=\"Content\"|id=\"rnd_${random_id_suffix}\"|" \
-            -e "s|id=\"subscribe\"|id=\"sub_${random_id_suffix}\"|" \
-            -e "s|id=\"Header\"|id=\"hdr_${random_id_suffix}\"|" \
-            -e "s|class=\"wrapper\"|class=\"${random_class}-wrap\"|" \
-            -e "s|class=\"countdown styled\"|class=\"${random_class}-count ${random_class}-style\"|" \
-            -e "s|<title>.*</title>|<title>${random_title}</title>|" \
-            -e "s/<\/head>/<meta name=\"$random_meta_name\" content=\"$random_meta_id\">\n<!-- $random_comment -->\n<\/head>/" \
-            -e "s/<body/<body class=\"${random_class}\"/" \
-            "$file"
-    ' _ {} \;
+    find "./$RandomHTML" -type f -name "*.html" -exec sed -i \
+        -e "s|<!-- Website template by freewebsitetemplates.com -->||" \
+        -e "s|<!-- Theme by: WebThemez.com -->||" \
+        -e "s|<a href=\"http://freewebsitetemplates.com\">Free Website Templates</a>|<span>${random_footer_text}</span>|" \
+        -e "s|<a href=\"http://webthemez.com\" alt=\"webthemez\">WebThemez.com</a>|<span>${random_footer_text}</span>|" \
+        -e "s|id=\"Content\"|id=\"rnd_${random_id_suffix}\"|" \
+        -e "s|id=\"subscribe\"|id=\"sub_${random_id_suffix}\"|" \
+        -e "s|<title>.*</title>|<title>${random_title}</title>|" \
+        -e "s/<\/head>/<meta name=\"$random_meta_name\" content=\"$random_meta_id\">\n<!-- $random_comment -->\n<\/head>/" \
+        -e "s/<body/<body class=\"$random_class\"/" \
+        {} \;
 
     find "./$RandomHTML" -type f -name "*.css" -exec sed -i \
         -e "1i\/* $random_comment */" \
-        -e "1i.${random_class} { display: block; }" \
-        -e "s|.wrapper|.${random_class}-wrap|g" \
-        -e "s|.countdown|.${random_class}-count|g" \
-        -e "s|.styled|.${random_class}-style|g" \
+        -e "1i.$random_class { display: block; }" \
         {} \;
 
     kill "$spinner_pid" 2>/dev/null
