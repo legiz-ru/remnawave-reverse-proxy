@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.1a"
+SCRIPT_VERSION="1.7.2"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -366,6 +366,7 @@ set_language() {
                 [ENTER_API_TOKEN]="Enter the API token: "
                 [EMPTY_TOKEN_ERROR]="No token provided. Exiting."
                 [RATE_LIMIT_EXCEEDED]="Rate limit exceeded for Let's Encrypt"
+                [FAILED_TO_MODIFY_HTML_FILES]="Failed to modify HTML files"
             )
             ;;
         ru)
@@ -683,6 +684,7 @@ set_language() {
                 [ENTER_API_TOKEN]="Введите API-токен: "
                 [EMPTY_TOKEN_ERROR]="Токен не введен. Завершение работы."
                 [RATE_LIMIT_EXCEEDED]="Превышен лимит выдачи сертификатов Let's Encrypt"
+                [FAILED_TO_MODIFY_HTML_FILES]="Не удалось изменить HTML файлы"
             )
             ;;
     esac
@@ -1770,6 +1772,27 @@ randomhtml() {
         cd ..
     fi
 
+    local random_meta_id=$(openssl rand -hex 16)
+    local random_comment=$(openssl rand -hex 8)
+    local random_class_suffix=$(openssl rand -hex 4)
+
+    local meta_names=("viewport-id" "session-id" "track-id" "render-id" "page-id" "config-id")
+    local random_meta_name=${meta_names[$RANDOM % ${#meta_names[@]}]}
+
+    local class_prefixes=("style" "data" "ui" "layout" "theme" "view")
+    local random_class_prefix=${class_prefixes[$RANDOM % ${#class_prefixes[@]}]}
+    local random_class="$random_class_prefix-$random_class_suffix"
+
+    find "./$RandomHTML" -type f -name "*.html" -exec sed -i \
+        -e "s/<\/head>/<meta name=\"$random_meta_name\" content=\"$random_meta_id\">\n<!-- $random_comment -->\n<\/head>/" \
+        -e "s/<body/<body class=\"$random_class\"/" \
+        {} \;
+
+    find "./$RandomHTML" -type f -name "*.css" -exec sed -i \
+        -e "1i\/* $random_comment */" \
+        -e "1i.$random_class { display: block; }" \
+        {} \;
+
     kill "$spinner_pid" 2>/dev/null
     wait "$spinner_pid" 2>/dev/null
     printf "\r\033[K" > /dev/tty
@@ -1785,6 +1808,11 @@ randomhtml() {
         echo "${LANG[TEMPLATE_COPY]}"
     else
         echo "${LANG[UNPACK_ERROR]}" && exit 1
+    fi
+
+    if ! find "/var/www/html" -type f -name "*.html" -exec grep -q "$random_meta_name" {} \; 2>/dev/null; then
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_MODIFY_HTML_FILES]}${COLOR_RESET}"
+        return 1
     fi
 
     cd /opt/
@@ -1825,15 +1853,18 @@ install_packages() {
         fi
     fi
 
+    if [ ! -f /etc/locale.gen ]; then
+        echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+    fi
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
         if grep -q "^# en_US.UTF-8 UTF-8" /etc/locale.gen; then
-            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/letc/gen
+            sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
         else
-            echo "en_US.UTF-8 UTF-8" >> /etc/loc/gen
+            echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
         fi
     fi
     if ! locale-gen || ! update-locale LANG=en_US.UTF-8; then
-        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_LOCALES]}$${COLOR_RESET}" >&2
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_LOCALES]}${COLOR_RESET}" >&2
         return 1
     fi
 
