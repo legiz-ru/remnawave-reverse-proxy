@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.3"
+SCRIPT_VERSION="1.7.3a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -1329,9 +1329,9 @@ manage_custom_legiz() {
             if ! command -v yq >/dev/null 2>&1; then
                 echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
                 sleep 1
-                apt-get update > /dev/null 2>&1 &
+                apt-get install -y yq > /dev/null 2>&1 &
                 spinner $! "${LANG[WAITING]}"
-                if ! apt-get install -y yq > /dev/null 2>&1; then
+                if ! wait $!; then
                     echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}"
                     sleep 2
                     log_clear
