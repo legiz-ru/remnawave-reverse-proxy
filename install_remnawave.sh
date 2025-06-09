@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.0"
+SCRIPT_VERSION="1.7.2b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -56,6 +56,24 @@ set_language() {
                 #check
                 [ERROR_ROOT]="Script must be run as root"
                 [ERROR_OS]="Supported only Debian 11/12 and Ubuntu 22.04/24.04"
+                #Install Packages
+                [ERROR_UPDATE_LIST]="Failed to update package list"
+                [ERROR_INSTALL_PACKAGES]="Failed to install required packages"
+                [ERROR_INSTALL_CRON]="Failed to install cron"
+                [ERROR_START_CRON]="Failed to start cron"
+                [ERROR_CONFIGURE_LOCALES]="Error: Failed to configure locales"
+                [ERROR_DOWNLOAD_DOCKER_KEY]="Failed to download Docker GPG key"
+                [ERROR_UPDATE_DOCKER_LIST]="Failed to update package list after adding Docker repository"
+                [ERROR_INSTALL_DOCKER]="Failed to install Docker"
+                [ERROR_DOCKER_NOT_INSTALLED]="Docker is not installed"
+                [ERROR_START_DOCKER]="Failed to start Docker"
+                [ERROR_ENABLE_DOCKER]="Failed to enable Docker auto-start"
+                [ERROR_DOCKER_NOT_WORKING]="Docker is not working properly"
+                [ERROR_CONFIGURE_UFW]="Failed to configure UFW"
+                [ERROR_CONFIGURE_UPGRADES]="Failed to configure unattended-upgrades"
+                [ERROR_DOCKER_DNS]="Error: Unable to resolve download.docker.com. Check your DNS settings."
+                [ERROR_INSTALL_CERTBOT]="Error: Failed to install certbot"
+                [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Version: %s"
@@ -297,6 +315,8 @@ set_language() {
                 [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
                 [PORT_8443_OPEN]="Open port 8443 for panel access"
                 [PORT_8443_CLOSE]="Close port 8443 for panel access"
+                [PORT_8443_IN_USE]="Port 8443 already in use by another process. Check which services are using the port and free it."
+                [NO_PORT_CHECK_TOOLS]="Port checking tools (ss or netstat) not found. Install one of them."
                 [OPEN_PANEL_LINK]="Your panel access link:"
                 [PORT_8443_WARNING]="Don't forget, port 8443 is now open to the world. After fixing the panel, select the option to close port 8443."
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
@@ -345,6 +365,8 @@ set_language() {
                 [CREATE_API_TOKEN_INSTRUCTION]="Go to the panel at: https://%s\nNavigate to 'API Tokens' -> 'Create New Token' and create a token.\nCopy the created token and enter it below."
                 [ENTER_API_TOKEN]="Enter the API token: "
                 [EMPTY_TOKEN_ERROR]="No token provided. Exiting."
+                [RATE_LIMIT_EXCEEDED]="Rate limit exceeded for Let's Encrypt"
+                [FAILED_TO_MODIFY_HTML_FILES]="Failed to modify HTML files"
             )
             ;;
         ru)
@@ -357,6 +379,24 @@ set_language() {
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
                 [VERSION_LABEL]="Версия: %s"
+                #Install Packages
+                [ERROR_UPDATE_LIST]="Ошибка: Не удалось обновить список пакетов"
+                [ERROR_INSTALL_PACKAGES]="Ошибка: Не удалось установить необходимые пакеты"
+                [ERROR_INSTALL_CRON]="Ошибка: Не удалось установить cron"
+                [ERROR_START_CRON]="Ошибка: Не удалось запустить cron"
+                [ERROR_CONFIGURE_LOCALES]="Ошибка: Не удалось настроить локали"
+                [ERROR_DOWNLOAD_DOCKER_KEY]="Ошибка: Не удалось загрузить ключ Docker"
+                [ERROR_UPDATE_DOCKER_LIST]="Ошибка: Не удалось обновить список пакетов после добавления репозитория Docker"
+                [ERROR_INSTALL_DOCKER]="Ошибка: Не удалось установить Docker"
+                [ERROR_DOCKER_NOT_INSTALLED]="Ошибка: Docker не установлен"
+                [ERROR_START_DOCKER]="Ошибка: Не удалось запустить Docker"
+                [ERROR_ENABLE_AUTOSTART_DOCKER]="Ошибка: Не удалось включить автозапуск Docker"
+                [ERROR_DOCKER_NOT_WORKING]="Ошибка: Docker не работает корректно"
+                [ERROR_CONFIGURE_UFW]="Ошибка: Не удалось настроить UFW"
+                [ERROR_CONFIGURE_UPGRADES]="Ошибка: Не удалось настроить unattended-upgrades"
+                [ERROR_DOCKER_DNS]="Ошибка: Не удалось разрешить домен download.docker.com. Проверьте настройки DNS."
+                [ERROR_INSTALL_CERTBOT]="Ошибка: Не удалось установить certbot"
+                [SUCCESSFUL_INSTALL]="Все пакеты успешно установлены"
                 #Main menu
                 [EXIT]="Выход"
                 [MENU_1]="Установка компонентов Remnawave"
@@ -595,6 +635,8 @@ set_language() {
                 [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
                 [PORT_8443_OPEN]="Открыть доступ к панели на порту 8443"
                 [PORT_8443_CLOSE]="Закрыть доступ к панели на порту 8443"
+                [PORT_8443_IN_USE]="Порт 8443 уже занят другим процессом. Проверьте, какие службы используют порт, и освободите его."
+                [NO_PORT_CHECK_TOOLS]="Не найдены инструменты для проверки порта (ss или netstat). Установите один из них."
                 [OPEN_PANEL_LINK]="Ваша ссылка для входа в панель:"
                 [PORT_8443_WARNING]="Не забудьте, что порт 8443 сейчас открыт для внешнего доступа. После восстановления панели выберите пункт закрытия порта 8443."
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
@@ -641,6 +683,8 @@ set_language() {
                 [CREATE_API_TOKEN_INSTRUCTION]="Зайдите в панель по адресу: https://%s\nПерейдите в раздел 'API токены' -> 'Создать новый токен' и создайте токен.\nСкопируйте созданный токен и введите его ниже."
                 [ENTER_API_TOKEN]="Введите API-токен: "
                 [EMPTY_TOKEN_ERROR]="Токен не введен. Завершение работы."
+                [RATE_LIMIT_EXCEEDED]="Превышен лимит выдачи сертификатов Let's Encrypt"
+                [FAILED_TO_MODIFY_HTML_FILES]="Не удалось изменить HTML файлы"
             )
             ;;
     esac
@@ -926,16 +970,24 @@ manage_install() {
     reading "${LANG[INSTALL_PROMPT]}" INSTALL_OPTION
     case $INSTALL_OPTION in
         1)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation
             sleep 2
             log_clear
             ;;
         2)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation_panel
             sleep 2
@@ -946,8 +998,12 @@ manage_install() {
             log_clear
             ;;
         4)
-            if [ ! -f ${DIR_REMNAWAVE}install_packages ]; then
-                install_packages
+            if [ ! -f "${DIR_REMNAWAVE}install_packages" ] || ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1 || ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
             fi
             installation_node
             sleep 2
@@ -1036,6 +1092,21 @@ open_panel_access() {
 
     if [ -z "$PANEL_DOMAIN" ] || [ -z "$cookies_random1" ] || [ -z "$cookies_random2" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if command -v ss >/dev/null 2>&1; then
+        if ss -tuln | grep -q ":8443"; then
+            echo -e "${COLOR_RED}${LANG[PORT_8443_IN_USE]}${COLOR_RESET}"
+            exit 1
+        fi
+    elif command -v netstat >/dev/null 2>&1; then
+        if netstat -tuln | grep -q ":8443"; then
+            echo -e "${COLOR_RED}${LANG[PORT_8443_IN_USE]}${COLOR_RESET}"
+            exit 1
+        fi
+    else
+        echo -e "${COLOR_RED}${LANG[NO_PORT_CHECK_TOOLS]}${COLOR_RESET}"
         exit 1
     fi
 
@@ -1701,6 +1772,39 @@ randomhtml() {
         cd ..
     fi
 
+    local random_meta_id=$(openssl rand -hex 16)
+    local random_comment=$(openssl rand -hex 8)
+    local random_class_suffix=$(openssl rand -hex 4)
+    local random_title_prefix="Page_"
+    local random_title_suffix=$(openssl rand -hex 4)
+    local random_footer_text="Designed by RandomSite_${random_title_suffix}"
+    local random_id_suffix=$(openssl rand -hex 4)
+
+    local meta_names=("viewport-id" "session-id" "track-id" "render-id" "page-id" "config-id")
+    local random_meta_name=${meta_names[$RANDOM % ${#meta_names[@]}]}
+
+    local class_prefixes=("style" "data" "ui" "layout" "theme" "view")
+    local random_class_prefix=${class_prefixes[$RANDOM % ${#class_prefixes[@]}]}
+    local random_class="$random_class_prefix-$random_class_suffix"
+    local random_title="${random_title_prefix}${random_title_suffix}"
+
+    find "./$RandomHTML" -type f -name "*.html" -exec sed -i \
+        -e "s|<!-- Website template by freewebsitetemplates.com -->||" \
+        -e "s|<!-- Theme by: WebThemez.com -->||" \
+        -e "s|<a href=\"http://freewebsitetemplates.com\">Free Website Templates</a>|<span>${random_footer_text}</span>|" \
+        -e "s|<a href=\"http://webthemez.com\" alt=\"webthemez\">WebThemez.com</a>|<span>${random_footer_text}</span>|" \
+        -e "s|id=\"Content\"|id=\"rnd_${random_id_suffix}\"|" \
+        -e "s|id=\"subscribe\"|id=\"sub_${random_id_suffix}\"|" \
+        -e "s|<title>.*</title>|<title>${random_title}</title>|" \
+        -e "s/<\/head>/<meta name=\"$random_meta_name\" content=\"$random_meta_id\">\n<!-- $random_comment -->\n<\/head>/" \
+        -e "s/<body/<body class=\"$random_class\"/" \
+        {} \;
+
+    find "./$RandomHTML" -type f -name "*.css" -exec sed -i \
+        -e "1i\/* $random_comment */" \
+        -e "1i.$random_class { display: block; }" \
+        {} \;
+
     kill "$spinner_pid" 2>/dev/null
     wait "$spinner_pid" 2>/dev/null
     printf "\r\033[K" > /dev/tty
@@ -1718,6 +1822,11 @@ randomhtml() {
         echo "${LANG[UNPACK_ERROR]}" && exit 1
     fi
 
+    if ! find "/var/www/html" -type f -name "*.html" -exec grep -q "$random_meta_name" {} \; 2>/dev/null; then
+        echo -e "${COLOR_RED}${LANG[FAILED_TO_MODIFY_HTML_FILES]}${COLOR_RESET}"
+        return 1
+    fi
+
     cd /opt/
     rm -rf simple-web-templates-main/ sni-templates-main/
 }
@@ -1725,25 +1834,40 @@ randomhtml() {
 
 install_packages() {
     echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
-    apt-get update -y
-    apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk
+    
+    if ! apt-get update -y; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_LIST]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
+        echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     if ! dpkg -l | grep -q '^ii.*cron '; then
-        apt-get install -y cron
+        if ! apt-get install -y cron; then
+            echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CRON]}" "${COLOR_RESET}" >&2
+            return 1
+        fi
     fi
 
     if ! systemctl is-active --quiet cron; then
-        systemctl start cron || {
+        if ! systemctl start cron; then
             echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
-        }
+            return 1
+        fi
     fi
-
     if ! systemctl is-enabled --quiet cron; then
-        systemctl enable cron || {
+        if ! systemctl enable cron; then
             echo -e "${COLOR_RED}${LANG[START_CRON_ERROR]}${COLOR_RESET}" >&2
-        }
+            return 1
+        fi
     fi
 
+    if [ ! -f /etc/locale.gen ]; then
+        echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+    fi
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
         if grep -q "^# en_US.UTF-8 UTF-8" /etc/locale.gen; then
             sed -i 's/^# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
@@ -1751,23 +1875,67 @@ install_packages() {
             echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
         fi
     fi
-    locale-gen
-    update-locale LANG=en_US.UTF-8
+    if ! locale-gen || ! update-locale LANG=en_US.UTF-8; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_LOCALES]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! ping -c 1 download.docker.com >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_DNS]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     if grep -q "Ubuntu" /etc/os-release; then
         install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null
+        if ! curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_DOWNLOAD_DOCKER_KEY]}${COLOR_RESET}" >&2
+            return 1
+        fi
         chmod a+r /etc/apt/keyrings/docker.asc
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     elif grep -q "Debian" /etc/os-release; then
         install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/debian/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null
+        if ! curl -fsSL https://download.docker.com/linux/debian/gpg | tee /etc/apt/keyrings/docker.asc > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[ERROR_DOWNLOAD_DOCKER_KEY]}${COLOR_RESET}" >&2
+            return 1
+        fi
         chmod a+r /etc/apt/keyrings/docker.asc
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     fi
 
-    apt-get update
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    if ! apt-get update; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_DOCKER_LIST]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
+        echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_DOCKER]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! command -v docker >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_NOT_INSTALLED]}${COLOR_RESET}" >&2
+        return 1
+    fi
+
+    if ! systemctl is-active --quiet docker; then
+        if ! systemctl start docker; then
+            echo -e "${COLOR_RED}${LANG[ERROR_START_DOCKER]}${COLOR_RESET}" >&2
+            return 1
+        fi
+    fi
+
+    if ! systemctl is-enabled --quiet docker; then
+        if ! systemctl enable docker; then
+            echo -e "${COLOR_RED}${LANG[ERROR_ENABLE_DOCKER]}${COLOR_RESET}" >&2
+            return 1
+        fi
+    fi
+
+    if ! docker info >/dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DOCKER_NOT_WORKING]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
     # BBR
     if ! grep -q "net.core.default_qdisc = fq" /etc/sysctl.conf; then
@@ -1776,20 +1944,24 @@ install_packages() {
     if ! grep -q "net.ipv4.tcp_congestion_control = bbr" /etc/sysctl.conf; then
         echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
     fi
+    sysctl -p >/dev/null
 
     # UFW
-    ufw --force reset
-    ufw allow 22/tcp comment 'SSH'
-    ufw allow 443/tcp comment 'HTTPS'
-    ufw --force enable
+    if ! ufw --force reset || ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UFW]}${COLOR_RESET}" >&2
+        return 1
+    fi
 
-    # Unattended-upgrade
+    # Unattended-upgrades
     echo 'Unattended-Upgrade::Mail "root";' >> /etc/apt/apt.conf.d/50unattended-upgrades
     echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
-    dpkg-reconfigure -f noninteractive unattended-upgrades
-    systemctl restart unattended-upgrades
+    if ! dpkg-reconfigure -f noninteractive unattended-upgrades || ! systemctl restart unattended-upgrades; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UPGRADES]}" "${COLOR_RESET}" >&2
+        return 1
+    fi
 
     touch ${DIR_REMNAWAVE}install_packages
+    echo -e "${COLOR_GREEN}${LANG[SUCCESS_INSTALL]}${COLOR_RESET}"
     clear
 }
 
@@ -2058,10 +2230,24 @@ manage_certificates() {
     reading "${LANG[CERT_PROMPT1]}" CERT_OPTION
     case $CERT_OPTION in
         1)
+            if ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CERTBOT]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
+            fi
             update_current_certificates
             log_clear
             ;;
         2)
+            if ! command -v certbot >/dev/null 2>&1; then
+                install_packages || {
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_CERTBOT]}${COLOR_RESET}"
+                    log_clear
+                    exit 1
+                }
+            fi
             generate_new_certificates
             log_clear
             ;;
@@ -2086,6 +2272,12 @@ update_current_certificates() {
     declare -A unique_domains
     declare -A cert_status
     local renew_threshold=30
+    local log_dir="/var/log/letsencrypt"
+
+    if [ ! -d "$log_dir" ]; then
+        mkdir -p "$log_dir"
+        chmod 755 "$log_dir"
+    fi
 
     for domain_dir in "$cert_dir"/*; do
         if [ -d "$domain_dir" ]; then
@@ -2138,26 +2330,28 @@ EOL
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
+            local certbot_exit_code=$?
+            if [ "$certbot_exit_code" -ne 0 ]; then
+                cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}: ${LANG[RATE_LIMIT_EXCEEDED]}"
+                continue
+            fi
+
+            local new_cert_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "$cert_domain*" | sort -V | tail -n 1)
+            local new_domain=$(basename "$new_cert_dir")
+            local cert_mtime_after=$(stat -c %Y "$new_cert_dir/fullchain.pem" 2>/dev/null || echo 0)
+            if check_certificates "$new_domain" > /dev/null 2>&1 && [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
+                local new_days_left=$(check_cert_expiry "$new_domain")
+                if [ $? -eq 0 ]; then
+                    cert_status["$cert_domain"]="${LANG[UPDATED]}"
+                else
+                    cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
+                fi
+            else
+                cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
+            fi
         else
             cert_status["$cert_domain"]="${LANG[REMAINING]} $days_left ${LANG[DAYS]}"
             continue
-        fi
-
-        local new_cert_dir=$(find "$cert_dir" -maxdepth 1 -type d -name "$cert_domain*" | sort -V | tail -n 1)
-        local new_domain=$(basename "$new_cert_dir")
-        local cert_mtime_after=$(stat -c %Y "$new_cert_dir/fullchain.pem" 2>/dev/null || echo 0)
-        if check_certificates "$new_domain" > /dev/null 2>&1; then
-            local new_days_left=$(check_cert_expiry "$new_domain")
-            if [ $? -eq 0 ]; then
-                cert_status["$cert_domain"]="${LANG[REMAINING]} $new_days_left ${LANG[DAYS]}"
-            else
-                cert_status["$cert_domain"]="${LANG[ERROR_PARSING_CERT]}"
-            fi
-            if [ "$cert_mtime_before" != "$cert_mtime_after" ]; then
-                cert_status["$cert_domain"]="${LANG[UPDATED]}"
-            fi
-        else
-            cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}"
         fi
     done
 
@@ -2165,8 +2359,8 @@ EOL
     for cert_domain in "${!cert_status[@]}"; do
         if [[ "${cert_status[$cert_domain]}" == "${LANG[UPDATED]}" ]]; then
             echo -e "${COLOR_GREEN}${LANG[CERTIFICATE_FOR]}$cert_domain ${LANG[SUCCESSFULLY_UPDATED]}${COLOR_RESET}"
-        elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_UPDATE]}" ]]; then
-            echo -e "${COLOR_RED}${LANG[FAILED_TO_UPDATE_CERTIFICATE_FOR]}$cert_domain${COLOR_RESET}"
+        elif [[ "${cert_status[$cert_domain]}" =~ "${LANG[ERROR_UPDATE]}" ]]; then
+            echo -e "${COLOR_RED}${LANG[FAILED_TO_UPDATE_CERTIFICATE_FOR]}$cert_domain: ${cert_status[$cert_domain]}${COLOR_RESET}"
         elif [[ "${cert_status[$cert_domain]}" == "${LANG[ERROR_PARSING_CERT]}" ]]; then
             echo -e "${COLOR_RED}${LANG[ERROR_CHECKING_EXPIRY_FOR]}$cert_domain${COLOR_RESET}"
         else
@@ -3083,7 +3277,7 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -3206,6 +3400,7 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
+ssl_session_tickets off;
 
 server {
     server_name $PANEL_DOMAIN;
@@ -3306,7 +3501,7 @@ EOL
 
     remnawave_network_subnet=172.30.0.0/16
     ufw allow from "$remnawave_network_subnet" to any port 2222 proto tcp > /dev/null 2>&1
-     
+
     local domain_url="127.0.0.1:3000"
     local target_dir="/opt/remnawave"
     local config_file="$target_dir/config.json"
@@ -3633,7 +3828,7 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -3954,7 +4149,7 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
-    
+
     handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
@@ -4007,6 +4202,7 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers on;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;
+ssl_session_tickets off;
 
 server {
     server_name $SELFSTEAL_DOMAIN;
