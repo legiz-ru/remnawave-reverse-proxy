@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.2b"
+SCRIPT_VERSION="1.7.3"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -87,7 +87,7 @@ set_language() {
                 [MENU_7]="Manage IPv6"
                 [MENU_8]="Install random template for selfsteal node"
                 [MENU_9]="Manage panel access (Only for panel + node)"
-                [MENU_10]="Custom rules template from legiz"
+                [MENU_10]="Custom Templates and Extensions by legiz"
                 [MENU_11]="Certificates"
                 [MENU_12]="Check for updates script"
                 [PROMPT_ACTION]="Select action (0-12):"
@@ -322,6 +322,16 @@ set_language() {
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
                 [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
                 [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
+                # Sub Page Upload
+                [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
+                [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
+                [SUB_PAGE_UPDATED_SUCCESS]="Custom sub page template successfully updated."
+                [SELECT_SUB_PAGE_CUSTOM]="Select action (0-4):"
+                [SELECT_SUB_PAGE_CUSTOM1]="Custom Sub Page Templates"
+                [SELECT_SUB_PAGE_CUSTOM2]="Custom Sub Page Templates\nOnly run on panel server"
+                [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-4."
+                [RESTORE_SUB_PAGE]="Restore default sub page"
+                [CONTAINER_NOT_FOUND]="Container remnawave-subscription-page not found"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Custom rules template not applied"
                 [UPLOADING_TEMPLATE]="Uploading custom rules template..."
@@ -330,7 +340,8 @@ set_language() {
                 [ERROR_UPDATE_TEMPLATE]="Failed to update custom rules template"
                 [TEMPLATE_UPDATED_SUCCESS]="Custom rules template successfully updated."
                 [SELECT_TEMPLATE_CUSTOM]="Select action (0-8):"
-                [SELECT_TEMPLATE_CUSTOM1]="Select Custom rules Template\nOnly run on panel server"
+                [SELECT_TEMPLATE_CUSTOM1]="Custom Rules Templates"
+                [SELECT_TEMPLATE_CUSTOM2]="Custom Rules Templates\nOnly run on panel server"
                 [TEMPLATE_SELECT_CHOICE]="Invalid choice. Please select 0-8."
                 [DOWNLOADING_CONFIG_SEED]="Downloading config.seed.ts from GitHub..."
                 [EXTRACT_FAILED]="Failed to extract configuration for %s"
@@ -408,7 +419,7 @@ set_language() {
                 [MENU_7]="Управление IPv6"
                 [MENU_8]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_9]="Управление доступом к панели (Только для панели + нода)"
-                [MENU_10]="Кастомные шаблоны правил от legiz"
+                [MENU_10]="Кастомные шаблоны и расширения от legiz"
                 [MENU_11]="Управление сертификатами"
                 [MENU_12]="Проверить обновления скрипта"
                 [PROMPT_ACTION]="Выберите действие (0-12):"
@@ -642,6 +653,16 @@ set_language() {
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
                 [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
                 [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
+                # Sub Page Upload
+                [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
+                [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
+                [SUB_PAGE_UPDATED_SUCCESS]="Пользовательский шаблон страницы подписки успешно обновлён."
+                [SELECT_SUB_PAGE_CUSTOM]="Выберите действие (0–4):"
+                [SELECT_SUB_PAGE_CUSTOM1]="Шаблоны страниц подписки"
+                [SELECT_SUB_PAGE_CUSTOM2]="Шаблоны страниц подписки\nЗапускать только на сервере с панелью"
+                [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 4."
+                [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
+                [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Шаблон правил не применён"
                 [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
@@ -650,7 +671,8 @@ set_language() {
                 [ERROR_UPDATE_TEMPLATE]="Не удалось обновить шаблон правил"
                 [TEMPLATE_UPDATED_SUCCESS]="Шаблон правил успешно обновлён."
                 [SELECT_TEMPLATE_CUSTOM]="Выберите действие (0-8):"
-                [SELECT_TEMPLATE_CUSTOM1]="Выберите шаблон правил\nЗапускать только на сервере с панелью"
+                [SELECT_TEMPLATE_CUSTOM1]="Шаблоны правил"
+                [SELECT_TEMPLATE_CUSTOM2]="Шаблоны правил\nЗапускать только на сервере с панелью"
                 [TEMPLATE_SELECT_CHOICE]="Неверный выбор. Выберите 0-8."
                 [RESTORING_DEFAULT_TEMPLATES]="Восстановление шаблонов правил по умолчанию из GitHub..."
                 [DEFAULT_TEMPLATES_COMPLETED]="Восстановление шаблонов правил по умолчанию завершено"
@@ -942,7 +964,7 @@ show_menu() {
     echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
     echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Manage panel access
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Upload custom template from legiz
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Custom Templates and Extensions by legiz
     echo -e "${COLOR_YELLOW}11. ${LANG[MENU_11]}${COLOR_RESET}" # Manage certificates
     echo -e ""
     echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}" # Check for updates
@@ -1282,10 +1304,62 @@ disable_ipv6() {
 }
 #Manage IPv6
 
-#Manage Template
+#Custom Templates and Extensions by legiz
+show_custom_legiz_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[SELECT_TEMPLATE_CUSTOM1]}${COLOR_RESET}" # Custom templates
+    echo -e "${COLOR_YELLOW}2. ${LANG[SELECT_SUB_PAGE_CUSTOM1]}${COLOR_RESET}" # Custom sub page
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+}
+
+manage_custom_legiz() {
+    show_custom_legiz_menu
+    reading "${LANG[IPV6_PROMPT]}" LEGIZ_OPTION
+    case $LEGIZ_OPTION in
+        1)
+            manage_template_upload
+            log_clear
+            manage_custom_legiz
+            ;;
+        2)
+            if ! command -v yq >/dev/null 2>&1; then
+                echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
+                sleep 1
+                apt-get update > /dev/null 2>&1 &
+                spinner $! "${LANG[WAITING]}"
+                if ! apt-get install -y yq > /dev/null 2>&1; then
+                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}"
+                    sleep 2
+                    log_clear
+                    manage_custom_legiz
+                    return 1
+                fi
+                echo -e "${COLOR_GREEN}${LANG[SUCCESS_INSTALL]}${COLOR_RESET}"
+            fi
+            manage_sub_page_upload
+            log_clear
+            manage_custom_legiz
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[IPV6_INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_custom_legiz
+            ;;
+    esac
+}
+
 show_template_menu() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[SELECT_TEMPLATE_CUSTOM1]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[SELECT_TEMPLATE_CUSTOM2]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. Xray json | without RU${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. Xray json | RU-BUNDLE${COLOR_RESET}"
@@ -1663,7 +1737,140 @@ update_subscription_template() {
         return 1
     fi
 }
-#Manage Template
+
+show_sub_page_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[SELECT_SUB_PAGE_CUSTOM2]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. Simple custom app list (clash and sing)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. Multiapp custom app list${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. Marzbanify web page template (clash and sing)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+}
+
+manage_sub_page_upload() {
+    show_sub_page_menu
+    reading "${LANG[SELECT_SUB_PAGE_CUSTOM]}" SUB_PAGE_OPTION
+    case $SUB_PAGE_OPTION in
+        1)
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            if ! curl -s -L -o /opt/remnawave/app-config.json "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json" > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            yq -Yi '
+              .services."remnawave-subscription-page".volumes = 
+                ((.services."remnawave-subscription-page".volumes // []) 
+                  | map(select(. != "./app-config.json:/opt/app/frontend/assets/app-config.json"))
+                  + ["./app-config.json:/opt/app/frontend/assets/app-config.json"])
+            ' /opt/remnawave/docker-compose.yml
+            cd /opt/remnawave
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+            ;;
+        2)
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            if ! curl -s -L -o /opt/remnawave/app-config.json "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json" > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            yq -Yi '
+              .services."remnawave-subscription-page".volumes = 
+                ((.services."remnawave-subscription-page".volumes // []) 
+                  | map(select(. != "./app-config.json:/opt/app/frontend/assets/app-config.json"))
+                  + ["./app-config.json:/opt/app/frontend/assets/app-config.json"])
+            ' /opt/remnawave/docker-compose.yml
+            cd /opt/remnawave
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+            ;;
+        3)
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            if ! curl -s -L -o /opt/remnawave/index.html "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/customweb/clash-sing/index.html" > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            yq -Yi '
+              .services."remnawave-subscription-page".volumes = 
+                ((.services."remnawave-subscription-page".volumes // []) 
+                  | map(select(. != "./index.html:/opt/app/frontend/index.html"))
+                  + ["./index.html:/opt/app/frontend/index.html"])
+            ' /opt/remnawave/docker-compose.yml
+            cd /opt/remnawave
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+            ;;
+        4)
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+            yq -Yi 'del(.services."remnawave-subscription-page".volumes)' /opt/remnawave/docker-compose.yml
+            cd /opt/remnawave
+            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+            spinner $! "${LANG[WAITING]}"
+            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[TEMPLATE_SUB_PAGE_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            log_clear
+            manage_sub_page_upload
+            ;;
+    esac
+}
+#Custom Templates and Extensions by legiz
 
 add_cron_rule() {
     local rule="$1"
@@ -1840,7 +2047,7 @@ install_packages() {
         return 1
     fi
 
-    if ! apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
+    if ! apt-get install -y ca-certificates curl jq yq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
         echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}" >&2
         return 1
     fi
@@ -4718,7 +4925,7 @@ case $OPTION in
         manage_panel_access
         ;;
     10)
-        manage_template_upload
+        manage_custom_legiz
         sleep 2
         log_clear
         remnawave_reverse
