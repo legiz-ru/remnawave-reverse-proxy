@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.3a"
+SCRIPT_VERSION="1.7.3b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -378,6 +378,11 @@ set_language() {
                 [EMPTY_TOKEN_ERROR]="No token provided. Exiting."
                 [RATE_LIMIT_EXCEEDED]="Rate limit exceeded for Let's Encrypt"
                 [FAILED_TO_MODIFY_HTML_FILES]="Failed to modify HTML files"
+                [INSTALLING_YQ]="Installing yq..."
+                [ERROR_SETTING_YQ_PERMISSIONS]="Error setting yq permissions!"
+                [YQ_SUCCESSFULLY_INSTALLED]="yq successfully installed!"
+                [YQ_DOESNT_WORK_AFTER_INSTALLATION]="Error: yq doesn't work after installation!"
+                [ERROR_DOWNLOADING_YQ]="Error downloading yq!"
             )
             ;;
         ru)
@@ -707,6 +712,11 @@ set_language() {
                 [EMPTY_TOKEN_ERROR]="Токен не введен. Завершение работы."
                 [RATE_LIMIT_EXCEEDED]="Превышен лимит выдачи сертификатов Let's Encrypt"
                 [FAILED_TO_MODIFY_HTML_FILES]="Не удалось изменить HTML файлы"
+                [INSTALLING_YQ]="Установка yq..."
+                [ERROR_SETTING_YQ_PERMISSIONS]="Ошибка установки прав yq!"
+                [YQ_SUCCESSFULLY_INSTALLED]="yq успешно установлен!"
+                [YQ_DOESNT_WORK_AFTER_INSTALLATION]="Ошибка: yq не работает после установки!"
+                [ERROR_DOWNLOADING_YQ]="Ошибка загрузки yq!"
             )
             ;;
     esac
@@ -1327,19 +1337,36 @@ manage_custom_legiz() {
             ;;
         2)
             if ! command -v yq >/dev/null 2>&1; then
-                echo -e "${COLOR_YELLOW}${LANG[INSTALL_PACKAGES]}${COLOR_RESET}"
-                sleep 1
-                apt-get install -y yq > /dev/null 2>&1 &
-                spinner $! "${LANG[WAITING]}"
-                if ! wait $!; then
-                    echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}"
+                echo -e "${COLOR_YELLOW}${LANG[INSTALLING_YQ]}${COLOR_RESET}"
+                
+                if ! wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq >/dev/null 2>&1; then
+                    echo -e "${COLOR_RED}${LANG[ERROR_DOWNLOADING_YQ]}${COLOR_RESET}"
                     sleep 2
                     log_clear
                     manage_custom_legiz
                     return 1
                 fi
-                echo -e "${COLOR_GREEN}${LANG[SUCCESS_INSTALL]}${COLOR_RESET}"
+                
+                if ! chmod +x /usr/bin/yq; then
+                    echo -e "${COLOR_RED}${LANG[ERROR_SETTING_YQ_PERMISSIONS]}${COLOR_RESET}"
+                    sleep 2
+                    log_clear
+                    manage_custom_legiz
+                    return 1
+                fi
+                
+                echo -e "${COLOR_GREEN}${LANG[YQ_SUCCESSFULLY_INSTALLED]}${COLOR_RESET}"
+                sleep 1
             fi
+            
+            if ! /usr/bin/yq --version >/dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[YQ_DOESNT_WORK_AFTER_INSTALLATION]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_custom_legiz
+                return 1
+            fi
+            
             manage_sub_page_upload
             log_clear
             manage_custom_legiz
@@ -1754,121 +1781,91 @@ show_sub_page_menu() {
 manage_sub_page_upload() {
     show_sub_page_menu
     reading "${LANG[SELECT_SUB_PAGE_CUSTOM]}" SUB_PAGE_OPTION
+
+    local config_file="/opt/remnawave/app-config.json"
+    local index_file="/opt/remnawave/index.html"
+    local docker_compose_file="/opt/remnawave/docker-compose.yml"
+
+    if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+        echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+        sleep 2
+        log_clear
+        manage_sub_page_upload
+        return 1
+    fi
+
     case $SUB_PAGE_OPTION in
-        1)
+        1|2)
+            [ -f "$index_file" ] && rm -f "$index_file"
+
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            if ! curl -s -L -o /opt/remnawave/app-config.json "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json" > /dev/null 2>&1; then
+            local template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+            [ "$SUB_PAGE_OPTION" == "2" ] && template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+
+            if ! curl -s -L -o "$config_file" "$template_url"; then
                 echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
                 sleep 2
                 log_clear
-                manage_sub_page_upload
                 return 1
             fi
-            yq -Yi '
-              .services."remnawave-subscription-page".volumes = 
-                ((.services."remnawave-subscription-page".volumes // []) 
-                  | map(select(. != "./app-config.json:/opt/app/frontend/assets/app-config.json"))
-                  + ["./app-config.json:/opt/app/frontend/assets/app-config.json"])
-            ' /opt/remnawave/docker-compose.yml
-            cd /opt/remnawave
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
             ;;
-        2)
-            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            if ! curl -s -L -o /opt/remnawave/app-config.json "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json" > /dev/null 2>&1; then
-                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-            yq -Yi '
-              .services."remnawave-subscription-page".volumes = 
-                ((.services."remnawave-subscription-page".volumes // []) 
-                  | map(select(. != "./app-config.json:/opt/app/frontend/assets/app-config.json"))
-                  + ["./app-config.json:/opt/app/frontend/assets/app-config.json"])
-            ' /opt/remnawave/docker-compose.yml
-            cd /opt/remnawave
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
-            ;;
+
         3)
+            [ -f "$config_file" ] && rm -f "$config_file"
+
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            if ! curl -s -L -o /opt/remnawave/index.html "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/customweb/clash-sing/index.html" > /dev/null 2>&1; then
+            if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/customweb/clash-sing/index.html"; then
                 echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
                 sleep 2
                 log_clear
-                manage_sub_page_upload
                 return 1
             fi
-            yq -Yi '
-              .services."remnawave-subscription-page".volumes = 
-                ((.services."remnawave-subscription-page".volumes // []) 
-                  | map(select(. != "./index.html:/opt/app/frontend/index.html"))
-                  + ["./index.html:/opt/app/frontend/index.html"])
-            ' /opt/remnawave/docker-compose.yml
-            cd /opt/remnawave
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
             ;;
+
         4)
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-            yq -Yi 'del(.services."remnawave-subscription-page".volumes)' /opt/remnawave/docker-compose.yml
-            cd /opt/remnawave
-            docker compose down remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
-            spinner $! "${LANG[WAITING]}"
-            echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
+            [ -f "$config_file" ] && rm -f "$config_file"
+            [ -f "$index_file" ] && rm -f "$index_file"
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
             ;;
+
         0)
             echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
             return 0
             ;;
+
         *)
-            echo -e "${COLOR_YELLOW}${LANG[TEMPLATE_SUB_PAGE_CHOICE]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[SUB_PAGE_SELECT_CHOICE]}${COLOR_RESET}"
             sleep 2
             log_clear
             manage_sub_page_upload
+            return 1
             ;;
     esac
+
+    /usr/bin/yq eval -i '... comments=""' "$docker_compose_file" 
+    
+    sed -i -e '/^  [a-zA-Z-]\+:$/ { x; p; x; }' "$docker_compose_file"
+    
+    sed -i '/./,$!d' "$docker_compose_file"
+    
+    sed -i -e '/^networks:/i\' -e '' "$docker_compose_file"
+    sed -i -e '/^volumes:/i\' -e '' "$docker_compose_file"
+
+    cd /opt/remnawave || return 1
+    docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    echo -e "${COLOR_GREEN}${LANG[SUB_PAGE_UPDATED_SUCCESS]}${COLOR_RESET}"
 }
 #Custom Templates and Extensions by legiz
 
@@ -2047,7 +2044,7 @@ install_packages() {
         return 1
     fi
 
-    if ! apt-get install -y ca-certificates curl jq yq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
+    if ! apt-get install -y ca-certificates curl jq ufw wget gnupg unzip nano dialog git certbot python3-certbot-dns-cloudflare unattended-upgrades locales dnsutils coreutils grep gawk; then
         echo -e "${COLOR_RED}${LANG[ERROR_INSTALL_PACKAGES]}${COLOR_RESET}" >&2
         return 1
     fi
