@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.3b"
+SCRIPT_VERSION="1.7.3c"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -3143,6 +3143,7 @@ handle_certificates() {
         cert_method="1"
     fi
 
+    declare -A cert_domains_added
     if [ "$need_certificates" = true ] && [ "$cert_method" == "1" ]; then
         for domain in "${!domains_to_check_ref[@]}"; do
             local base_domain=$(extract_domain "$domain")
@@ -3156,8 +3157,11 @@ handle_certificates() {
                 return 1
             fi
             min_days_left=90
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+            if [ -z "${cert_domains_added[$domain]}" ]; then
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+                cert_domains_added["$domain"]="1"
+            fi
         done
     elif [ "$need_certificates" = true ] && [ "$cert_method" == "2" ]; then
         for domain in "${!domains_to_check_ref[@]}"; do
@@ -3166,15 +3170,17 @@ handle_certificates() {
                 echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]} $domain${COLOR_RESET}"
                 continue
             fi
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+            if [ -z "${cert_domains_added[$domain]}" ]; then
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+                cert_domains_added["$domain"]="1"
+            fi
         done
     else
-        declare -A cert_domains_added
         for domain in "${!domains_to_check_ref[@]}"; do
             local base_domain=$(extract_domain "$domain")
             local cert_domain="$domain"
-            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
+            if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
                 cert_domain="$base_domain"
             fi
             if [ -z "${cert_domains_added[$cert_domain]}" ]; then
@@ -3473,6 +3479,8 @@ installation() {
     domains_to_check["$SUB_DOMAIN"]=1
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -3481,8 +3489,6 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4024,6 +4030,8 @@ installation_panel() {
     domains_to_check["$PANEL_DOMAIN"]=1
     domains_to_check["$SUB_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+    
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4032,8 +4040,6 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4345,6 +4351,8 @@ installation_node() {
     declare -A domains_to_check
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4353,8 +4361,6 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
