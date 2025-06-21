@@ -3429,11 +3429,6 @@ HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
 
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
-
 ### Bandwidth usage reached notifications
 BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
 # Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
@@ -3980,11 +3975,6 @@ WEBHOOK_SECRET_HEADER=vsmu67Kmg6R8FjIOF1WUY8LWBHie4scdEqrfsKmyf4IAf8dY3nFS0wwYHk
 HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
-
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
 
 ### Bandwidth usage reached notifications
 BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
