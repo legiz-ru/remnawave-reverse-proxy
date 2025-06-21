@@ -3548,6 +3548,8 @@ installation() {
     domains_to_check["$SUB_DOMAIN"]=1
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -3556,8 +3558,6 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4098,6 +4098,8 @@ installation_panel() {
     domains_to_check["$PANEL_DOMAIN"]=1
     domains_to_check["$SUB_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+    
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4106,8 +4108,6 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4419,6 +4419,8 @@ installation_node() {
     declare -A domains_to_check
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4427,8 +4429,6 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
