@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.3c"
+SCRIPT_VERSION="1.7.4"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -322,6 +322,10 @@ set_language() {
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
                 [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
                 [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
+                [NGINX_CONF_MODIFY_FAILED]="Failed to modify nginx.conf"
+                [PORT_8443_ALREADY_CONFIGURED]="Port 8443 already configured in nginx.conf"
+                [UFW_RELOAD_FAILED]="Failed to reload UFW."
+                [PORT_8443_ALREADY_CLOSED]="Port 8443 already closed in UFW."
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
                 [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
@@ -658,6 +662,10 @@ set_language() {
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
                 [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
                 [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
+                [NGINX_CONF_MODIFY_FAILED]="Не удалось изменить конфигурацию Nginx."
+                [PORT_8443_ALREADY_CONFIGURED]="Порт 8443 уже настроен в конфигурации Nginx."
+                [UFW_RELOAD_FAILED]="Не удалось перезагрузить UFW."
+                [PORT_8443_ALREADY_CLOSED]="Порт 8443 уже закрыт в UFW."
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
                 [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
@@ -1099,6 +1107,7 @@ manage_panel_access() {
 }
 
 open_panel_access() {
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
     local dir=""
     if [ -d "/root/remnawave" ]; then
         dir="/root/remnawave"
@@ -1142,7 +1151,19 @@ open_panel_access() {
         exit 1
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
+    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "$dir/nginx.conf"
+    if [ $? -ne 0 ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    docker compose down remnawave-nginx > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    
+    docker compose up -d remnawave-nginx > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    
     ufw allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
     ufw reload > /dev/null 2>&1
     sleep 1
@@ -1157,10 +1178,58 @@ open_panel_access() {
 }
 
 close_panel_access() {
-    echo -e "${COLOR_YELLOW}${LANG[CLOSE_PANEL_ACCESS]}${COLOR_RESET}"
-    ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
-    ufw reload > /dev/null 2>&1
-    echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
+    if [ ! -f "nginx.conf" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
+        exit 1
+    fi
+
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+
+    if [ -z "$PANEL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if grep -A 10 "server_name $PANEL_DOMAIN;" "$dir/nginx.conf" | grep -q "listen 8443 ssl;"; then
+        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+        if [ $? -ne 0 ]; then
+            echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
+            exit 1
+        fi
+
+        docker compose down remnawave-nginx > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        docker compose up -d remnawave-nginx > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[PORT_8443_NOT_CONFIGURED]}${COLOR_RESET}"
+    fi
+
+    if ufw status | grep -q "8443.*ALLOW"; then
+        ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+        ufw reload > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${COLOR_RED}${LANG[UFW_RELOAD_FAILED]}${COLOR_RESET}"
+            exit 1
+        fi
+        echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[PORT_8443_ALREADY_CLOSED]}${COLOR_RESET}"
+    fi
+
     sleep 2
     log_clear
 }
@@ -3479,8 +3548,6 @@ installation() {
     domains_to_check["$SUB_DOMAIN"]=1
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -3489,6 +3556,8 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
+
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -3615,7 +3684,6 @@ ssl_session_tickets off;
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
-    listen 8443 ssl;
     http2 on;
 
     ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
@@ -4030,8 +4098,6 @@ installation_panel() {
     domains_to_check["$PANEL_DOMAIN"]=1
     domains_to_check["$SUB_DOMAIN"]=1
 
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-    
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4040,6 +4106,8 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
+
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4351,8 +4419,6 @@ installation_node() {
     declare -A domains_to_check
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
-
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4361,6 +4427,8 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
+
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
