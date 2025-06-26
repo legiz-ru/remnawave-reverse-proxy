@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.4"
+SCRIPT_VERSION="1.7.4a"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -330,12 +330,18 @@ set_language() {
                 [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
                 [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
                 [SUB_PAGE_UPDATED_SUCCESS]="Custom sub page template successfully updated."
-                [SELECT_SUB_PAGE_CUSTOM]="Select action (0-4):"
+                [SELECT_SUB_PAGE_CUSTOM]="Select action (0-5):"
                 [SELECT_SUB_PAGE_CUSTOM1]="Custom Sub Page Templates"
                 [SELECT_SUB_PAGE_CUSTOM2]="Custom Sub Page Templates\nOnly run on panel server"
-                [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-4."
+                [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-5."
                 [RESTORE_SUB_PAGE]="Restore default sub page"
                 [CONTAINER_NOT_FOUND]="Container remnawave-subscription-page not found"
+                [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
+                [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
+                [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
+                [SUB_WITH_APPCONFIG_SKIP]="No, skip app-config.json"
+                [SUB_WITH_APPCONFIG_INVALID]="Invalid option, skipping app-config.json"
+                [SUB_WITH_APPCONFIG_INPUT]="Enter your choice: "
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Custom rules template not applied"
                 [UPLOADING_TEMPLATE]="Uploading custom rules template..."
@@ -670,12 +676,18 @@ set_language() {
                 [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
                 [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
                 [SUB_PAGE_UPDATED_SUCCESS]="Пользовательский шаблон страницы подписки успешно обновлён."
-                [SELECT_SUB_PAGE_CUSTOM]="Выберите действие (0–4):"
+                [SELECT_SUB_PAGE_CUSTOM]="Выберите действие (0–5):"
                 [SELECT_SUB_PAGE_CUSTOM1]="Шаблоны страниц подписки"
                 [SELECT_SUB_PAGE_CUSTOM2]="Шаблоны страниц подписки\nЗапускать только на сервере с панелью"
-                [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 4."
+                [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 5."
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
                 [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
+                [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
+                [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
+                [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
+                [SUB_WITH_APPCONFIG_SKIP]="No, skip app-config.json"
+                [SUB_WITH_APPCONFIG_INVALID]="Invalid option, skipping app-config.json"
+                [SUB_WITH_APPCONFIG_INPUT]="Enter your choice: "
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Шаблон правил не применён"
                 [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
@@ -1841,7 +1853,8 @@ show_sub_page_menu() {
     echo -e "${COLOR_YELLOW}1. Simple custom app list (clash and sing)${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. Multiapp custom app list${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}3. Marzbanify web page template (clash and sing)${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. Material web page template (support custom app list)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
@@ -1900,6 +1913,61 @@ manage_sub_page_upload() {
             ;;
 
         4)
+            [ -f "$config_file" ] && rm -f "$config_file"
+
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/material-remnawave-subscription-page/refs/heads/main/index.html"; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                return 1
+            fi
+
+            # Пользовательский выбор app-config.json
+            echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}2. ${LANG[SUB_WITH_APPCONFIG_OPTION2]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}0. ${LANG[SUB_WITH_APPCONFIG_SKIP]}${COLOR_RESET}"
+
+            reading "${LANG[SUB_WITH_APPCONFIG_INPUT]}" SUB_WITH_APPCONFIG
+
+            case $SUB_WITH_APPCONFIG in
+                1)
+                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+                    curl -s -L -o "$config_file" "$template_url" || {
+                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                        sleep 2
+                        log_clear
+                        return 1
+                    }
+                    ;;
+                2)
+                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+                    curl -s -L -o "$config_file" "$template_url" || {
+                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                        sleep 2
+                        log_clear
+                        return 1
+                    }
+                    ;;
+                0)
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    ;;
+                *)
+                    echo -e "${COLOR_RED}${LANG[SUB_WITH_APPCONFIG_INVALID]}${COLOR_RESET}"
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    ;;
+            esac
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
+
+            if [ -f "$config_file" ]; then
+                /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
+            fi
+            ;;
+        
+        5)
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
