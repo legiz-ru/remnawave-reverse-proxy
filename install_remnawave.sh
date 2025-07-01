@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.3b"
+SCRIPT_VERSION="1.7.5 Version Panel 2.0 DEV"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
-SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
 
 COLOR_RESET="\033[0m"
 COLOR_GREEN="\033[1;32m"
@@ -96,7 +96,7 @@ set_language() {
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
                 [CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?"
-                #Cert Submenu
+                #Manage Certificates
                 [CERT_MENU_TITLE]="Manage Certificates"
                 [CERT_UPDATE]="Update current certificates"
                 [CERT_GENERATE]="Generate new certificates for another domain"
@@ -108,7 +108,7 @@ set_language() {
                 [CERT_GENERATE_PROMPT]="Enter the domain for new certificates (e.g., example.com):"
                 [CERT_METHOD_UNKNOWN]="Unknown certificate generation method."
                 [CERT_NOT_DUE]="Certificate for %s is not yet due for renewal."
-                #Install Submenu
+                #Install Remnawave Components
                 [INSTALL_MENU_TITLE]="Install Remnawave Components"
                 [INSTALL_PANEL_NODE]="Install panel and node on one server"
                 [INSTALL_PANEL]="Install only the panel"
@@ -116,12 +116,18 @@ set_language() {
                 [INSTALL_NODE]="Install only the node"
                 [INSTALL_PROMPT]="Select action (0-3):"
                 [INSTALL_INVALID_CHOICE]="Invalid choice. Please select 0-3."
-                #IPv6 Submenu
+                #Manage IPv6
                 [IPV6_MENU_TITLE]="Manage IPv6"
                 [IPV6_ENABLE]="Enable IPv6"
                 [IPV6_DISABLE]="Disable IPv6"
                 [IPV6_PROMPT]="Select action (0-2):"
                 [IPV6_INVALID_CHOICE]="Invalid choice. Please select 0-2."
+                [IPV6_ALREADY_ENABLED]="IPv6 already enabled"
+                [IPV6_ALREADY_DISABLED]="IPv6 already disabled"
+                [ENABLE_IPV6]="Enabling IPv6..."
+                [IPV6_ENABLED]="IPv6 has been enabled."
+                [DISABLING_IPV6]="Disabling IPv6..."
+                [IPV6_DISABLED]="IPv6 has been disabled."
                 #Remna
                 [INSTALL_PACKAGES]="Installing required packages..."
                 [INSTALLING]="Installing panel and node"
@@ -146,15 +152,18 @@ set_language() {
                 [CONTAINERS_NOT_READY]="Containers are not ready, waiting..."
                 [REGISTRATION_SUCCESS]="Registration completed successfully!"
                 [GET_PUBLIC_KEY]="Getting public key..."
-                [PUBLIC_KEY_SUCCESS]="Public key successfully obtained."
+                [PUBLIC_KEY_SUCCESS]="Public key successfully obtained"
                 [GENERATE_KEYS]="Generating x25519 keys..."
-                [GENERATE_KEYS_SUCCESS]="Keys successfully generated."
-                [UPDATING_XRAY_CONFIG]="Updating Xray configuration..."
-                [XRAY_CONFIG_UPDATED]="Xray configuration successfully updated."
-                [NODE_CREATED]="Node successfully created."
-                [CREATE_HOST]="Creating host with UUID: "
-                [HOST_CREATED]="Host successfully created."
-                #Stop/Start
+                [GENERATE_KEYS_SUCCESS]="Keys successfully generated"
+                [CREATING_CONFIG_PROFILE]="Creating config profile..."
+                [CONFIG_PROFILE_CREATED]="Config profile successfully created"
+                [CREATING_NODE]="Creating node"
+                [NODE_CREATED]="Node successfully created"
+                [CREATE_HOST]="Creating host"
+                [HOST_CREATED]="Host successfully created"
+                [GET_DEFAULT_SQUAD]="Getting default squad"
+                [UPDATE_SQUAD]="Squad successfully updated"
+                #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Failed to change to directory %s"
                 [DIR_NOT_FOUND]="Directory /root/remnawave or /opt/remnawave not found"
                 [PANEL_RUNNING]="Panel/node already running"
@@ -198,7 +207,11 @@ set_language() {
                 [ERROR_CREATE_HOST]="Failed to create host."
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Registration error - empty server response"
                 [ERROR_REGISTER]="Registration error"
-                #Reinstall
+                [ERROR_EMPTY_RESPONSE_SQUAD_UPDATE]="Empty response from server when updating squad"
+                [ERROR_UPDATE_SQUAD]="Failed to update squad"
+                [ERROR_EMPTY_RESPONSE_SQUAD]="Empty response from server when getting squad"
+                [ERROR_NO_DEFAULT_SQUAD]="Failed to get default squad"
+                #Reinstall Panel/Node
                 [REINSTALL_WARNING]="All data panel/node will be deleted from the server. Are you sure? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
                 [REINSTALL_PROMPT]="Select action (0-3):"
@@ -220,13 +233,6 @@ set_language() {
                 [NODE_LAUNCHED]="Node successfully launched!"
                 [NODE_NOT_CONNECTED]="Node not connected after %d attempts!"
                 [CHECK_CONFIG]="Check the configuration or restart the panel."
-                #IPv6
-                [IPV6_ALREADY_ENABLED]="IPv6 already enabled"
-                [IPV6_ALREADY_DISABLED]="IPv6 already disabled"
-                [ENABLE_IPV6]="Enabling IPv6..."
-                [IPV6_ENABLED]="IPv6 has been enabled."
-                [DISABLING_IPV6]="Disabling IPv6..."
-                [IPV6_DISABLED]="IPv6 has been disabled."
                 #Add node to panel
                 [ADD_NODE_TO_PANEL]="Adding node to panel"
                 [EMPTY_SAVED_PANEL_DOMAIN]="Saved panel domain is empty. Requesting a new one..."
@@ -313,6 +319,7 @@ set_language() {
                 [SNI_TEMPLATES]="Sni templates"
                 [CHOOSE_TEMPLATE_OPTION]="Select option (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Invalid choice. Please select 0-2."
+                # Manage Panel Access
                 [PORT_8443_OPEN]="Open port 8443 for panel access"
                 [PORT_8443_CLOSE]="Close port 8443 for panel access"
                 [PORT_8443_IN_USE]="Port 8443 already in use by another process. Check which services are using the port and free it."
@@ -322,6 +329,10 @@ set_language() {
                 [PORT_8443_CLOSED]="Port 8443 has been closed."
                 [NGINX_CONF_NOT_FOUND]="File nginx.conf not found in $dir"
                 [NGINX_CONF_ERROR]="Failed to extract necessary parameters from nginx.conf"
+                [NGINX_CONF_MODIFY_FAILED]="Failed to modify nginx.conf"
+                [PORT_8443_ALREADY_CONFIGURED]="Port 8443 already configured in nginx.conf"
+                [UFW_RELOAD_FAILED]="Failed to reload UFW."
+                [PORT_8443_ALREADY_CLOSED]="Port 8443 already closed in UFW."
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
                 [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
@@ -332,6 +343,12 @@ set_language() {
                 [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-4."
                 [RESTORE_SUB_PAGE]="Restore default sub page"
                 [CONTAINER_NOT_FOUND]="Container remnawave-subscription-page not found"
+                [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
+                [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
+                [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
+                [SUB_WITH_APPCONFIG_SKIP]="No, skip app-config.json"
+                [SUB_WITH_APPCONFIG_INVALID]="Invalid option, skipping app-config.json"
+                [SUB_WITH_APPCONFIG_INPUT]="Select action (0-2):"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Custom rules template not applied"
                 [UPLOADING_TEMPLATE]="Uploading custom rules template..."
@@ -383,6 +400,7 @@ set_language() {
                 [YQ_SUCCESSFULLY_INSTALLED]="yq successfully installed!"
                 [YQ_DOESNT_WORK_AFTER_INSTALLATION]="Error: yq doesn't work after installation!"
                 [ERROR_DOWNLOADING_YQ]="Error downloading yq!"
+                [FAST_START]="Quick start: remnawave-reverse"
             )
             ;;
         ru)
@@ -433,7 +451,7 @@ set_language() {
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
                 [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
                 [CONFIRM_SERVER_PANEL]="Вы уверены, что находитесь на сервере с установленной панелью?"
-                #Cert Submenu
+                #Manage Certificates
                 [CERT_MENU_TITLE]="Управление сертификатами"
                 [CERT_UPDATE]="Обновить текущие сертификаты"
                 [CERT_GENERATE]="Сгенерировать новые сертификаты для другого домена"
@@ -445,7 +463,7 @@ set_language() {
                 [CERT_GENERATE_PROMPT]="Введите домен для новых сертификатов (например, example.com):"
                 [CERT_METHOD_UNKNOWN]="Неизвестный метод генерации сертификата."
                 [CERT_NOT_DUE]="Сертификат для %s еще не требует обновления."
-                #Install Submenu
+                #Install Remnawave Components
                 [INSTALL_MENU_TITLE]="Установка компонентов Remnawave"
                 [INSTALL_PANEL_NODE]="Установить панель и ноду на один сервер"
                 [INSTALL_PANEL]="Установить только панель"
@@ -453,12 +471,18 @@ set_language() {
                 [INSTALL_NODE]="Установить только ноду"
                 [INSTALL_PROMPT]="Выберите действие (0-4):"
                 [INSTALL_INVALID_CHOICE]="Неверный выбор. Выберите 0-4."
-                #IPv6 Submenu
+                #Manage IPv6
                 [IPV6_MENU_TITLE]="Управление IPv6"
                 [IPV6_ENABLE]="Включить IPv6"
                 [IPV6_DISABLE]="Отключить IPv6"
                 [IPV6_PROMPT]="Выберите действие (0-2):"
                 [IPV6_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
+                [IPV6_ALREADY_ENABLED]="IPv6 уже включен"
+                [ENABLE_IPV6]="Включение IPv6..."
+                [IPV6_ENABLED]="IPv6 включен."
+                [IPV6_ALREADY_DISABLED]="IPv6 уже отключен"
+                [DISABLING_IPV6]="Отключение IPv6..."
+                [IPV6_DISABLED]="IPv6 отключен."
                 #Remna
                 [INSTALL_PACKAGES]="Установка необходимых пакетов..."
                 [INSTALLING]="Установка панели и ноды"
@@ -483,15 +507,19 @@ set_language() {
                 [CONTAINERS_NOT_READY]="Контейнеры не готовы, ожидание..."
                 [REGISTRATION_SUCCESS]="Регистрация прошла успешно!"
                 [GET_PUBLIC_KEY]="Получаем публичный ключ..."
-                [PUBLIC_KEY_SUCCESS]="Публичный ключ успешно получен."
+                [PUBLIC_KEY_SUCCESS]="Публичный ключ успешно получен"
                 [GENERATE_KEYS]="Генерация ключей x25519..."
-                [GENERATE_KEYS_SUCCESS]="Ключи успешно сгенерированы."
-                [UPDATING_XRAY_CONFIG]="Обновление конфигурации Xray..."
-                [XRAY_CONFIG_UPDATED]="Конфигурация Xray успешно обновлена."
-                [NODE_CREATED]="Нода успешно создана."
-                [CREATE_HOST]="Создаем хост с UUID: "
-                [HOST_CREATED]="Хост успешно создан."
-                #Stop/Start
+                [GENERATE_KEYS_SUCCESS]="Ключи успешно сгенерированы"
+                [CREATING_CONFIG_PROFILE]="Создаем конфигурационный профиль..."
+                [CONFIG_PROFILE_CREATED]="Конфигурационный профиль успешно создан"
+                [CREATING_NODE]="Создание ноды"
+                [NODE_CREATED]="Нода успешно создана"
+                [CREATE_HOST]="Создаем хост"
+                [HOST_CREATED]="Хост успешно создан"
+                [GET_DEFAULT_SQUAD]="Получение default squad"
+                [UPDATE_SQUAD]="Squad успешно обновлен"
+                [GETTING_DEFAULT_SQUAD]="Получение default squad"
+                #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Не удалось перейти в директорию %s"
                 [DIR_NOT_FOUND]="Директория /root/remnawave или /opt/remnawave не найдена"
                 [PANEL_RUNNING]="Панель/нода уже запущена"
@@ -535,7 +563,11 @@ set_language() {
                 [ERROR_CREATE_HOST]="Не удалось создать хост."
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Ошибка при регистрации - пустой ответ сервера"
                 [ERROR_REGISTER]="Ошибка регистрации"
-                #Reinstall
+                [ERROR_EMPTY_RESPONSE_SQUAD_UPDATE]="Ошибка: Пустой ответ от сервера при обновлении squad"
+                [ERROR_UPDATE_SQUAD]="Ошибка обновления squad"
+                [ERROR_EMPTY_RESPONSE_SQUAD]="Ошибка: Пустой ответ от сервера при получении squad"
+                [ERROR_NO_DEFAULT_SQUAD]="Ошибка: Не удалось получить default squad"
+                #Reinstall Panel/Node
                 [REINSTALL_WARNING]="Все данные панели/ноды будут удалены с сервера. Вы уверены? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
                 [REINSTALL_PROMPT]="Выберите действие (0-3):"
@@ -556,13 +588,6 @@ set_language() {
                 [NODE_LAUNCHED]="Нода успешно подключена!"
                 [NODE_NOT_CONNECTED]="Нода не подключена после %d попыток!"
                 [CHECK_CONFIG]="Проверьте конфигурацию или перезапустите панель."
-                #IPv6
-                [IPV6_ALREADY_ENABLED]="IPv6 уже включен"
-                [ENABLE_IPV6]="Включение IPv6..."
-                [IPV6_ENABLED]="IPv6 включен."
-                [IPV6_ALREADY_DISABLED]="IPv6 уже отключен"
-                [DISABLING_IPV6]="Отключение IPv6..."
-                [IPV6_DISABLED]="IPv6 отключен."
                 #Add node to panel
                 [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
                 [EMPTY_SAVED_PANEL_DOMAIN]="Сохранённый домен панели пуст. Запрашиваем новый..."
@@ -593,7 +618,7 @@ set_language() {
                 [NODES_UPDATED_SUCCESS]="Существующие ноды успешно обновлены"
                 [FAILED_TO_UPDATE_NODE]="Не удалось обновить ноду %s"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
-                [CREATE_NEW_NODE]="Создаём новую ноду для %s..."
+                [CREATE_NEW_NODE]="Создаём новую ноду для %s"
                 [UPDATE_NODE_UUID]="Обновление для ноды с UUID: %s"
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
@@ -649,6 +674,7 @@ set_language() {
                 [SNI_TEMPLATES]="SNI templates"
                 [CHOOSE_TEMPLATE_OPTION]="Выберите действие (0-2):"
                 [INVALID_TEMPLATE_CHOICE]="Неверный выбор. Выберите 0-2."
+                #Manage panel access
                 [PORT_8443_OPEN]="Открыть доступ к панели на порту 8443"
                 [PORT_8443_CLOSE]="Закрыть доступ к панели на порту 8443"
                 [PORT_8443_IN_USE]="Порт 8443 уже занят другим процессом. Проверьте, какие службы используют порт, и освободите его."
@@ -658,6 +684,10 @@ set_language() {
                 [PORT_8443_CLOSED]="Порт 8443 закрыт."
                 [NGINX_CONF_NOT_FOUND]="Файл nginx.conf не найден в $dir"
                 [NGINX_CONF_ERROR]="Не удалось извлечь необходимые параметры из nginx.conf"
+                [NGINX_CONF_MODIFY_FAILED]="Не удалось изменить конфигурацию Nginx."
+                [PORT_8443_ALREADY_CONFIGURED]="Порт 8443 уже настроен в конфигурации Nginx."
+                [UFW_RELOAD_FAILED]="Не удалось перезагрузить UFW."
+                [PORT_8443_ALREADY_CLOSED]="Порт 8443 уже закрыт в UFW."
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
                 [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
@@ -668,6 +698,12 @@ set_language() {
                 [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 4."
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
                 [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
+                [SUB_WITH_APPCONFIG_ASK]="Добавить файл конфигурации app-config.json?"
+                [SUB_WITH_APPCONFIG_OPTION1]="Простой список приложений clash&sing"
+                [SUB_WITH_APPCONFIG_OPTION2]="Множественный список приложений"
+                [SUB_WITH_APPCONFIG_SKIP]="Нет, пропустить добавление конфигурации"
+                [SUB_WITH_APPCONFIG_INVALID]="Неверный выбор, конфигурация не будет добавлена"
+                [SUB_WITH_APPCONFIG_INPUT]="Выберите действие (0–2):"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Шаблон правил не применён"
                 [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
@@ -717,6 +753,7 @@ set_language() {
                 [YQ_SUCCESSFULLY_INSTALLED]="yq успешно установлен!"
                 [YQ_DOESNT_WORK_AFTER_INSTALLATION]="Ошибка: yq не работает после установки!"
                 [ERROR_DOWNLOADING_YQ]="Ошибка загрузки yq!"
+                [FAST_START]="Быстрый запуск: remnawave-reverse"
             )
             ;;
     esac
@@ -790,7 +827,7 @@ start_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
@@ -813,7 +850,7 @@ stop_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
@@ -933,6 +970,37 @@ update_remnawave_reverse() {
     fi
 }
 
+install_script_if_missing() {
+    if [ ! -f "${DIR_REMNAWAVE}remnawave_reverse" ] || [ ! -f "/usr/local/bin/remnawave_reverse" ]; then
+        mkdir -p "${DIR_REMNAWAVE}"
+        if ! wget -q -O "${DIR_REMNAWAVE}remnawave_reverse" "$SCRIPT_URL"; then
+            exit 1
+        fi
+        chmod +x "${DIR_REMNAWAVE}remnawave_reverse"
+        ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
+    fi
+
+    local bashrc_file="/etc/bash.bashrc"
+    local alias_line="alias rr='remnawave_reverse'"
+
+    if [ ! -f "$bashrc_file" ]; then
+        touch "$bashrc_file"
+        chmod 644 "$bashrc_file"
+    fi
+
+    if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
+        echo >> "$bashrc_file"
+    fi
+
+    if ! grep -E "^[[:space:]]*alias rr='remnawave_reverse'[[:space:]]*$" "$bashrc_file" > /dev/null; then
+        echo "$alias_line" >> "$bashrc_file"
+        printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
+        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE_GLOBAL]}${COLOR_RESET}\n" "$bashrc_file"
+    else
+        printf "${COLOR_YELLOW}${LANG[ALIAS_EXISTS]}${COLOR_RESET}\n" "$bashrc_file"
+    fi
+}
+
 generate_user() {
     local length=8
     tr -dc 'a-zA-Z' < /dev/urandom | fold -w $length | head -n 1
@@ -980,6 +1048,7 @@ show_menu() {
     echo -e "${COLOR_YELLOW}12. ${LANG[MENU_12]}${COLOR_RESET}" # Check for updates
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}- ${LANG[FAST_START]//remnawave-reverse/${COLOR_GREEN}remnawave-reverse${COLOR_RESET}}"
     echo -e ""
 }
 
@@ -1099,6 +1168,7 @@ manage_panel_access() {
 }
 
 open_panel_access() {
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
     local dir=""
     if [ -d "/root/remnawave" ]; then
         dir="/root/remnawave"
@@ -1142,7 +1212,19 @@ open_panel_access() {
         exit 1
     fi
 
-    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
+    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "$dir/nginx.conf"
+    if [ $? -ne 0 ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    docker compose down remnawave-nginx > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    
+    docker compose up -d remnawave-nginx > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    
     ufw allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
     ufw reload > /dev/null 2>&1
     sleep 1
@@ -1157,10 +1239,58 @@ open_panel_access() {
 }
 
 close_panel_access() {
-    echo -e "${COLOR_YELLOW}${LANG[CLOSE_PANEL_ACCESS]}${COLOR_RESET}"
-    ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
-    ufw reload > /dev/null 2>&1
-    echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
+    local dir=""
+    if [ -d "/root/remnawave" ]; then
+        dir="/root/remnawave"
+    elif [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
+    if [ ! -f "nginx.conf" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
+        exit 1
+    fi
+
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+
+    if [ -z "$PANEL_DOMAIN" ]; then
+        echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    if grep -A 10 "server_name $PANEL_DOMAIN;" "$dir/nginx.conf" | grep -q "listen 8443 ssl;"; then
+        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+        if [ $? -ne 0 ]; then
+            echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
+            exit 1
+        fi
+
+        docker compose down remnawave-nginx > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+        docker compose up -d remnawave-nginx > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[PORT_8443_NOT_CONFIGURED]}${COLOR_RESET}"
+    fi
+
+    if ufw status | grep -q "8443.*ALLOW"; then
+        ufw delete allow from 0.0.0.0/0 to any port 8443 proto tcp > /dev/null 2>&1
+        ufw reload > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${COLOR_RED}${LANG[UFW_RELOAD_FAILED]}${COLOR_RESET}"
+            exit 1
+        fi
+        echo -e "${COLOR_GREEN}${LANG[PORT_8443_CLOSED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[PORT_8443_ALREADY_CLOSED]}${COLOR_RESET}"
+    fi
+
     sleep 2
     log_clear
 }
@@ -1772,7 +1902,8 @@ show_sub_page_menu() {
     echo -e "${COLOR_YELLOW}1. Simple custom app list (clash and sing)${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. Multiapp custom app list${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}3. Marzbanify web page template (clash and sing)${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. Material web page template (support custom app list)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
@@ -1831,6 +1962,65 @@ manage_sub_page_upload() {
             ;;
 
         4)
+            [ -f "$config_file" ] && rm -f "$config_file"
+            [ -f "$index_file" ] && rm -f "$index_file"
+
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/material-remnawave-subscription-page/refs/heads/main/index.html"; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                return 1
+            fi
+
+            # Пользовательский выбор app-config.json
+            echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}2. ${LANG[SUB_WITH_APPCONFIG_OPTION2]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}0. ${LANG[SUB_WITH_APPCONFIG_SKIP]}${COLOR_RESET}"
+            echo -e ""
+            reading "${LANG[SUB_WITH_APPCONFIG_INPUT]}" SUB_WITH_APPCONFIG
+
+            case $SUB_WITH_APPCONFIG in
+                1)
+                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+                    curl -s -L -o "$config_file" "$template_url" || {
+                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                        sleep 2
+                        log_clear
+                        return 1
+                    }
+                    ;;
+                2)
+                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+                    curl -s -L -o "$config_file" "$template_url" || {
+                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                        sleep 2
+                        log_clear
+                        return 1
+                    }
+                    ;;
+                0)
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    [ -f "$index_file" ] && rm -f "$index_file"
+                    ;;
+                *)
+                    echo -e "${COLOR_RED}${LANG[SUB_WITH_APPCONFIG_INVALID]}${COLOR_RESET}"
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    ;;
+            esac
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
+
+            if [ -f "$config_file" ]; then
+                /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
+            fi
+            ;;
+        
+        5)
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
@@ -2805,159 +2995,24 @@ generate_xray_keys() {
     echo "$private_key $public_key"
 }
 
-get_xray_config() {
-    local domain_url=$1
-    local token=$2
-    local panel_domain=$3
-    local target_dir=$4
-
-    local config_file="$target_dir/config.json"
-    local response=$(make_api_request "GET" "http://$domain_url/api/xray" "$token" "$panel_domain")
-
-    if [ -z "$response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
-        return 1
-    fi
-
-    if echo "$response" | jq -e '.response.config' > /dev/null 2>&1; then
-        echo "$response" | jq -r '.response.config' > "$config_file"
-        if [ ! -f "$config_file" ]; then
-            echo -e "${COLOR_RED}${LANG[ERROR_SAVE_CONFIG]}${COLOR_RESET}"
-            return 1
-        fi
-    else
-        echo -e "${COLOR_RED}${LANG[ERROR_GET_XRAY_CONFIG]}${COLOR_RESET}"
-        echo "Response: $response"
-        return 1
-    fi
-}
-
-update_xray_config() {
-    local domain_url=$1
-    local token=$2
-    local panel_domain=$3
-    local target_dir=$4
-    local domain=$5
-    local public_key=$6
-    local private_key=$7
-
-    local short_id=$(openssl rand -hex 8)
-    local config_file="$target_dir/config.json"
-    cat > "$config_file" <<EOL
-{
-    "log": {
-        "loglevel": "warning"
-    },
-    "dns": {
-        "queryStrategy": "ForceIPv4",
-        "servers": [
-            {
-                "address": "https://dns.google/dns-query",
-                "skipFallback": false
-            }
-        ]
-    },
-    "inbounds": [
-        {
-            "tag": "Steal",
-            "port": 443,
-            "protocol": "vless",
-            "settings": {
-                "clients": [],
-                "decryption": "none"
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls",
-                    "quic"
-                ]
-            },
-            "streamSettings": {
-                "network": "tcp",
-                "security": "reality",
-                "realitySettings": {
-                    "show": false,
-                    "xver": 1,
-                    "dest": "/dev/shm/nginx.sock",
-                    "spiderX": "",
-                    "shortIds": [
-                        "$short_id"
-                    ],
-                    "publicKey": "$public_key",
-                    "privateKey": "$private_key",
-                    "serverNames": [
-                        "$domain"
-                    ]
-                }
-            }
-        }
-    ],
-    "outbounds": [
-        {
-            "tag": "DIRECT",
-            "protocol": "freedom"
-        },
-        {
-            "tag": "BLOCK",
-            "protocol": "blackhole"
-        }
-    ],
-    "routing": {
-        "rules": [
-            {
-                "ip": [
-                    "geoip:private"
-                ],
-                "type": "field",
-                "outboundTag": "BLOCK"
-            },
-            {
-                "type": "field",
-                "protocol": [
-                    "bittorrent"
-                ],
-                "outboundTag": "BLOCK"
-            }
-        ]
-    }
-}
-EOL
-
-    if [ ! -f "$config_file" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_CREATE_CONFIG]}${COLOR_RESET}"
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[CONFIG_CREATED]}${COLOR_RESET}"
-
-    local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$panel_domain" "$new_config")
-
-    rm -f "$config_file"
-
-    if [ -z "$update_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
-    fi
-
-    if echo "$update_response" | jq -e '.response.config' > /dev/null; then
-        printf "${COLOR_GREEN}${LANG[XRAY_CONFIG_UPDATED]}${COLOR_RESET}\n"
-    else
-        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_XRAY_CONFIG]}${COLOR_RESET}"
-    fi
-}
-
 create_node() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
-    local node_address="${4:-$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)}"
+    local config_profile_uuid=$4
+    local inbound_uuid=$5
+    local node_address="${6:-$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)}"
+    local node_name="${7:-Steal}"
 
     local node_data=$(cat <<EOF
 {
-    "name": "Steal",
+    "name": "$node_name",
     "address": "$node_address",
     "port": 2222,
+    "configProfile": {
+        "activeConfigProfileUuid": "$config_profile_uuid",
+        "activeInbounds": ["$inbound_uuid"]
+    },
     "isTrafficTrackingActive": false,
     "trafficLimitBytes": 0,
     "notifyPercent": 0,
@@ -2982,23 +3037,72 @@ EOF
     fi
 }
 
-get_inbound_uuid() {
+create_config_profile() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
+    local name=$4
+    local domain=$5
+    local public_key=$6
+    local private_key=$7
+    local inbound_tag="${8:-Steal}"
 
-    local inbounds_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$panel_domain")
+    local short_id=$(openssl rand -hex 8)
 
-    if [ -z "$inbounds_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_INBOUNDS]}${COLOR_RESET}"
+    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg public_key "$public_key" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
+        name: $name,
+        config: {
+            log: { loglevel: "warning" },
+            dns: {
+                queryStrategy: "ForceIPv4",
+                servers: [{ address: "https://dns.google/dns-query", skipFallback: false }]
+            },
+            inbounds: [{
+                tag: $inbound_tag,
+                port: 443,
+                protocol: "vless",
+                settings: { clients: [], decryption: "none" },
+                sniffing: { enabled: true, destOverride: ["http", "tls", "quic"] },
+                streamSettings: {
+                    network: "tcp",
+                    security: "reality",
+                    realitySettings: {
+                        show: false,
+                        xver: 1,
+                        dest: "/dev/shm/nginx.sock",
+                        spiderX: "",
+                        shortIds: [$short_id],
+                        publicKey: $public_key,
+                        privateKey: $private_key,
+                        serverNames: [$domain]
+                    }
+                }
+            }],
+            outbounds: [
+                { tag: "DIRECT", protocol: "freedom" },
+                { tag: "BLOCK", protocol: "blackhole" }
+            ],
+            routing: {
+                rules: [
+                    { ip: ["geoip:private"], type: "field", outboundTag: "BLOCK" },
+                    { type: "field", protocol: ["bittorrent"], outboundTag: "BLOCK" }
+                ]
+            }
+        }
+    }')
+
+    local response=$(make_api_request "POST" "http://$domain_url/api/config-profiles" "$token" "$panel_domain" "$request_body")
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CREATE_CONFIG_PROFILE]}: $response${COLOR_RESET}"
     fi
 
-    local inbound_uuid=$(echo "$inbounds_response" | jq -r '.response[0].uuid')
-    if [ -z "$inbound_uuid" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EXTRACT_UUID]}${COLOR_RESET}"
+    local config_uuid=$(echo "$response" | jq -r '.response.uuid')
+    local inbound_uuid=$(echo "$response" | jq -r '.response.inbounds[0].uuid')
+    if [ -z "$config_uuid" ] || [ "$config_uuid" = "null" ] || [ -z "$inbound_uuid" ] || [ "$inbound_uuid" = "null" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_CREATE_CONFIG_PROFILE]}: Invalid UUIDs in response: $response${COLOR_RESET}"
     fi
 
-    echo "$inbound_uuid"
+    echo "$config_uuid $inbound_uuid"
 }
 
 create_host() {
@@ -3006,96 +3110,83 @@ create_host() {
     local token=$2
     local panel_domain=$3
     local inbound_uuid=$4
-    local domain=$5
+    local address=$5
+    local config_uuid=$6
+    local host_remark="${7:-Steal}"
 
-    local host_data=$(cat <<EOF
-{
-    "inboundUuid": "$inbound_uuid",
-    "remark": "Steal",
-    "address": "$domain",
-    "port": 443,
-    "path": "",
-    "sni": "$domain",
-    "host": "$domain",
-    "alpn": null,
-    "fingerprint": "chrome",
-    "allowInsecure": false,
-    "isDisabled": false
-}
-EOF
-)
+    local request_body=$(jq -n --arg config_uuid "$config_uuid" --arg inbound_uuid "$inbound_uuid" --arg remark "$host_remark" --arg address "$address" '{
+        inbound: {
+            configProfileUuid: $config_uuid,
+            configProfileInboundUuid: $inbound_uuid
+        },
+        remark: $remark,
+        address: $address,
+        port: 443,
+        path: "",
+        sni: $address,
+        host: "",
+        alpn: null,
+        fingerprint: "chrome",
+        allowInsecure: false,
+        isDisabled: false,
+        securityLayer: "DEFAULT"
+    }')
 
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$panel_domain" "$host_data")
+    local response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$panel_domain" "$request_body")
 
-    if [ -z "$host_response" ]; then
+    if [ -z "$response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
     fi
 
-    if echo "$host_response" | jq -e '.response.uuid' > /dev/null; then
+    if echo "$response" | jq -e '.response.uuid' > /dev/null; then
         echo -e "${COLOR_GREEN}${LANG[HOST_CREATED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_RED}${LANG[ERROR_CREATE_HOST]}${COLOR_RESET}"
     fi
 }
 
-get_inbounds() {
+get_default_squad() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
 
-    local inbounds_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$panel_domain")
-
-    if [ -z "$inbounds_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_INBOUNDS]}${COLOR_RESET}"
-        return 1
+    local response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token" "$panel_domain")
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.internalSquads' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $response${COLOR_RESET}"
     fi
 
-    echo "$inbounds_response"
+    echo "$response" | jq -r '.response.internalSquads[].uuid'
 }
 
-update_node() {
+update_squad() {
     local domain_url=$1
     local token=$2
     local panel_domain=$3
-    local node_uuid=$4
-    local node_name=$5
-    local node_address=$6
-    local node_port=$7
-    local traffic_tracking=$8
-    local traffic_limit=$9
-    local notify_percent=${10}
-    local reset_day=${11}
-    local excluded_inbounds=${12}
-    local country_code=${13}
-    local consumption_multiplier=${14}
+    local squad_uuid=$4
+    local inbound_uuid=$5
 
-    printf "${COLOR_YELLOW}${LANG[UPDATE_NODE_UUID]}${COLOR_RESET}\n" "$node_uuid"
-
-    local node_data=$(cat <<EOF
-{
-    "uuid": "$node_uuid",
-    "name": "$node_name",
-    "address": "$node_address",
-    "port": $node_port,
-    "isTrafficTrackingActive": $traffic_tracking,
-    "trafficLimitBytes": $traffic_limit,
-    "notifyPercent": $notify_percent,
-    "trafficResetDay": $reset_day,
-    "excludedInbounds": $excluded_inbounds,
-    "countryCode": "$country_code",
-    "consumptionMultiplier": $consumption_multiplier
-}
-EOF
-)
-
-    local update_response=$(make_api_request "PATCH" "http://$domain_url/api/nodes" "$token" "$panel_domain" "$node_data")
-
-    if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.response.uuid' > /dev/null; then
-        printf "${COLOR_RED}${LANG[FAILED_TO_UPDATE_NODE]}${COLOR_RESET}\n" "$node_uuid"
-        return 1
+    local squad_response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token" "$panel_domain")
+    if [ -z "$squad_response" ] || ! echo "$squad_response" | jq -e '.response.internalSquads' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $squad_response${COLOR_RESET}"
+    fi
+    local existing_inbounds=$(echo "$squad_response" | jq -r --arg uuid "$squad_uuid" '.response.internalSquads[] | select(.uuid == $uuid) | .inbounds[].uuid')
+    if [ -z "$existing_inbounds" ]; then
+        existing_inbounds="[]"
+    else
+        existing_inbounds=$(echo "$existing_inbounds" | jq -R . | jq -s .)
     fi
 
-    echo -e "${COLOR_GREEN}${LANG[NODE_UPDATED]}${COLOR_RESET}"
+    local inbounds_array=$(jq -n --argjson existing "$existing_inbounds" --arg new "$inbound_uuid" '$existing + [$new] | unique')
+
+    local request_body=$(jq -n --arg uuid "$squad_uuid" --argjson inbounds "$inbounds_array" '{
+        uuid: $uuid,
+        inbounds: $inbounds
+    }')
+
+    local response=$(make_api_request "PATCH" "http://$domain_url/api/internal-squads" "$token" "$panel_domain" "$request_body")
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null; then
+        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_SQUAD]}: $response${COLOR_RESET}"
+    fi
 }
 
 ### API Functions ###
@@ -3143,6 +3234,7 @@ handle_certificates() {
         cert_method="1"
     fi
 
+    declare -A cert_domains_added
     if [ "$need_certificates" = true ] && [ "$cert_method" == "1" ]; then
         for domain in "${!domains_to_check_ref[@]}"; do
             local base_domain=$(extract_domain "$domain")
@@ -3156,8 +3248,11 @@ handle_certificates() {
                 return 1
             fi
             min_days_left=90
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+            if [ -z "${cert_domains_added[$domain]}" ]; then
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+                cert_domains_added["$domain"]="1"
+            fi
         done
     elif [ "$need_certificates" = true ] && [ "$cert_method" == "2" ]; then
         for domain in "${!domains_to_check_ref[@]}"; do
@@ -3166,15 +3261,17 @@ handle_certificates() {
                 echo -e "${COLOR_RED}${LANG[CERT_GENERATION_FAILED]} $domain${COLOR_RESET}"
                 continue
             fi
-            echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
-            echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+            if [ -z "${cert_domains_added[$domain]}" ]; then
+                echo "      - /etc/letsencrypt/live/$domain/fullchain.pem:/etc/nginx/ssl/$domain/fullchain.pem:ro" >> "$target_dir/docker-compose.yml"
+                echo "      - /etc/letsencrypt/live/$domain/privkey.pem:/etc/nginx/ssl/$domain/privkey.pem:ro" >> "$target_dir/docker-compose.yml"
+                cert_domains_added["$domain"]="1"
+            fi
         done
     else
-        declare -A cert_domains_added
         for domain in "${!domains_to_check_ref[@]}"; do
             local base_domain=$(extract_domain "$domain")
             local cert_domain="$domain"
-            if ! [ -d "/etc/letsencrypt/live/$domain" ] && [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
+            if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
                 cert_domain="$base_domain"
             fi
             if [ -z "${cert_domains_added[$cert_domain]}" ]; then
@@ -3354,11 +3451,6 @@ HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
 
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
-
 ### Bandwidth usage reached notifications
 BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
 # Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
@@ -3409,7 +3501,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:latest
+    image: remnawave/backend:dev
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -3473,6 +3565,8 @@ installation() {
     domains_to_check["$SUB_DOMAIN"]=1
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -3481,8 +3575,6 @@ installation() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -3609,7 +3701,6 @@ ssl_session_tickets off;
 server {
     server_name $PANEL_DOMAIN;
     listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
-    listen 8443 ssl;
     http2 on;
 
     ssl_certificate "/etc/nginx/ssl/$PANEL_CERT_DOMAIN/fullchain.pem";
@@ -3738,20 +3829,28 @@ EOL
     local keys=$(generate_xray_keys)
     local private_key=$(echo "$keys" | awk '{print $1}')
     local public_key=$(echo "$keys" | awk '{print $2}')
-    printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}"
+    printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
-    # Create and update Xray configuration
-    update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key"
+    # Create config profile
+    echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$PANEL_DOMAIN" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
-    # Create node
-    create_node "$domain_url" "$token" "$PANEL_DOMAIN"
-
-    # Get UUID for inbound
-    local inbound_uuid=$(get_inbound_uuid "$domain_url" "$token" "$PANEL_DOMAIN")
-    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}$inbound_uuid${COLOR_RESET}"
+    # Create node with config profile binding
+    echo -e "${COLOR_YELLOW}${LANG[CREATING_NODE]}${COLOR_RESET}"
+    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid"
 
     # Create host
-    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
+    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid"
+
+    # Get UUID default squad
+    echo -e "${COLOR_YELLOW}${LANG[GET_DEFAULT_SQUAD]}${COLOR_RESET}"
+    local squad_uuid=$(get_default_squad "$domain_url" "$token" "$PANEL_DOMAIN")
+
+    # Update squad
+    update_squad "$domain_url" "$token" "$PANEL_DOMAIN" "$squad_uuid" "$inbound_uuid"
+    echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
 
     # Stop and start Remnawave
     echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}${COLOR_RESET}"
@@ -3907,11 +4006,6 @@ HWID_DEVICE_LIMIT_ENABLED=false
 HWID_FALLBACK_DEVICE_LIMIT=5
 HWID_MAX_DEVICES_ANNOUNCE="You have reached the maximum number of devices for your subscription."
 
-### HWID DEVICE DETECTION PROVIDER ID ###
-# Apps, which currently support this feature:
-# - Happ
-PROVIDER_ID="123456"
-
 ### Bandwidth usage reached notifications
 BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
 # Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
@@ -3962,7 +4056,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:latest
+    image: remnawave/backend:dev
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -4024,6 +4118,8 @@ installation_panel() {
     domains_to_check["$PANEL_DOMAIN"]=1
     domains_to_check["$SUB_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+    
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4032,8 +4128,6 @@ installation_panel() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
@@ -4225,26 +4319,40 @@ EOL
     local token=$(register_remnawave "$domain_url" "$SUPERADMIN_USERNAME" "$SUPERADMIN_PASSWORD" "$PANEL_DOMAIN")
     echo -e "${COLOR_GREEN}${LANG[REGISTRATION_SUCCESS]}${COLOR_RESET}"
 
+    # Get public key
+    echo -e "${COLOR_YELLOW}${LANG[GET_PUBLIC_KEY]}${COLOR_RESET}"
+    sleep 1
+    local pubkey=$(get_public_key "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir")
+    echo -e "${COLOR_GREEN}${LANG[PUBLIC_KEY_SUCCESS]}${COLOR_RESET}"
+
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
     local keys=$(generate_xray_keys)
     local private_key=$(echo "$keys" | awk '{print $1}')
     local public_key=$(echo "$keys" | awk '{print $2}')
-    printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}"
+    printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
-    # Create and update Xray configuration
-    update_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key"
+    # Create config profile
+    echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$PANEL_DOMAIN" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
-    # Create node
-    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$SELFSTEAL_DOMAIN"
-
-    # Get UUID for inbound
-    local inbound_uuid=$(get_inbound_uuid "$domain_url" "$token" "$PANEL_DOMAIN")
-    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}$inbound_uuid${COLOR_RESET}"
+    # Create node with config profile binding
+    echo -e "${COLOR_YELLOW}${LANG[CREATING_NODE]}${COLOR_RESET}"
+    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid"
 
     # Create host
-    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
+    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid"
+
+    # Get UUID default squad
+    echo -e "${COLOR_YELLOW}${LANG[GET_DEFAULT_SQUAD]}${COLOR_RESET}"
+    local squad_uuid=$(get_default_squad "$domain_url" "$token" "$PANEL_DOMAIN")
+
+    # Update squad
+    update_squad "$domain_url" "$token" "$PANEL_DOMAIN" "$squad_uuid" "$inbound_uuid"
+    echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
 
     clear
 
@@ -4345,6 +4453,8 @@ installation_node() {
     declare -A domains_to_check
     domains_to_check["$SELFSTEAL_DOMAIN"]=1
 
+    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
+
     if [ -z "$CERT_METHOD" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         if [ -d "/etc/letsencrypt/live/$base_domain" ] && is_wildcard_cert "$base_domain"; then
@@ -4353,8 +4463,6 @@ installation_node() {
             CERT_METHOD="2"
         fi
     fi
-
-    handle_certificates domains_to_check "$CERT_METHOD" "$LETSENCRYPT_EMAIL"
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
@@ -4442,7 +4550,7 @@ EOL
     randomhtml
 
     printf "${COLOR_YELLOW}${LANG[NODE_CHECK]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-    local max_attempts=3
+    local max_attempts=5
     local attempt=1
     local delay=15
 
@@ -4529,9 +4637,9 @@ add_node_to_panel() {
     if [ -f "$TOKEN_FILE" ]; then
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
-        if ! echo "$test_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token" "$PANEL_DOMAIN")
+        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
             token=""
         fi
     fi
@@ -4548,9 +4656,9 @@ add_node_to_panel() {
                 exit 1
             fi
 
-            local test_response=$(make_api_request "GET" "http://$domain_url/api/inbounds" "$token" "$PANEL_DOMAIN")
-            if ! echo "$test_response" | jq -e '.response' > /dev/null; then
-                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token" "$PANEL_DOMAIN")
+            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
                 exit 1
             fi
         else
@@ -4558,10 +4666,9 @@ add_node_to_panel() {
             reading "${LANG[ENTER_PANEL_PASSWORD]}" password
 
             local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "$PANEL_DOMAIN" "{\"username\":\"$username\",\"password\":\"$password\"}")
-
             token=$(echo "$login_response" | jq -r '.response.accessToken')
             if [ -z "$token" ] || [ "$token" == "null" ]; then
-                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}${COLOR_RESET}"
+                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}: $login_response${COLOR_RESET}"
                 exit 1
             fi
         fi
@@ -4578,221 +4685,25 @@ add_node_to_panel() {
     local public_key=$(echo "$keys" | awk '{print $2}')
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
-    echo -e "${COLOR_YELLOW}${LANG[UPDATING_XRAY_CONFIG]}${COLOR_RESET}"
-    get_xray_config "$domain_url" "$token" "$PANEL_DOMAIN" "$target_dir"
-    local config_file="$target_dir/config.json"
-    if [ ! -f "$config_file" ]; then
-        echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_XRAY_CONFIG]}${COLOR_RESET}"
-        exit 1
-    fi
+    local entity_name=$(generate_pretty_name | cut -c 1-20)
 
-    local short_id=$(openssl rand -hex 8)
-    local entity_name=$(generate_pretty_name)
-    local new_tag="$entity_name"
-    local new_inbound=$(jq -n --arg tag "$new_tag" \
-                              --arg short_id "$short_id" \
-                              --arg public_key "$public_key" \
-                              --arg private_key "$private_key" \
-                              --arg domain "$SELFSTEAL_DOMAIN" \
-                              '{
-                                  "tag": $tag,
-                                  "port": 443,
-                                  "protocol": "vless",
-                                  "settings": {
-                                      "clients": [],
-                                      "decryption": "none"
-                                  },
-                                  "sniffing": {
-                                      "enabled": true,
-                                      "destOverride": ["http", "tls", "quic"]
-                                  },
-                                  "streamSettings": {
-                                      "network": "tcp",
-                                      "security": "reality",
-                                      "realitySettings": {
-                                          "show": false,
-                                          "xver": 1,
-                                          "dest": "/dev/shm/nginx.sock",
-                                          "spiderX": "",
-                                          "shortIds": [$short_id],
-                                          "publicKey": $public_key,
-                                          "privateKey": $private_key,
-                                          "serverNames": [$domain]
-                                      }
-                                  }
-                              }')
+    echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$PANEL_DOMAIN" "$entity_name" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key" "$entity_name")
+    echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}: $entity_name${COLOR_RESET}"
 
-    jq --argjson new_inbound "$new_inbound" '.inbounds += [$new_inbound]' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
+    printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}$SELFSTEAL_DOMAIN${COLOR_RESET}\n"
+    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$entity_name"
 
-    local new_config=$(cat "$config_file")
-    local update_response=$(make_api_request "PUT" "http://$domain_url/api/xray" "$token" "$PANEL_DOMAIN" "$new_config")
+    echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
+    create_host "$domain_url" "$token" "$PANEL_DOMAIN" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid" "$entity_name"
 
-    rm -f "$config_file"
+    echo -e "${COLOR_YELLOW}${LANG[GETTING_DEFAULT_SQUAD]}${COLOR_RESET}"
+    local squad_uuid=$(get_default_squad "$domain_url" "$token" "$PANEL_DOMAIN")
 
-    if [ -z "$update_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_CONFIG]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    if echo "$update_response" | jq -e '.response.config' > /dev/null; then
-        printf "${COLOR_GREEN}${LANG[XRAY_CONFIG_UPDATED]}${COLOR_RESET}\n"
-    else
-        echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_XRAY_CONFIG]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[GETTING_NEW_INBOUND_UUID]}${COLOR_RESET}"
-    local inbound_response=$(get_inbounds "$domain_url" "$token" "$PANEL_DOMAIN")
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
-
-    local new_inbound_uuid=$(echo "$inbound_response" | jq -r --arg tag "$new_tag" '.response[] | select(.tag == $tag) | .uuid')
-    if [ -z "$new_inbound_uuid" ] || [ "$new_inbound_uuid" == "null" ]; then
-        printf "${COLOR_RED}${LANG[FAILED_TO_GET_INBOUND_UUID]}${COLOR_RESET}\n" "$new_tag"
-        exit 1
-    fi
-
-    if ! echo "$new_inbound_uuid" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
-        echo -e "${COLOR_RED}${LANG[INVALID_INBOUND_UUID_FORMAT]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    echo -e "${COLOR_YELLOW}${LANG[GETTING_EXCLUDED_INBOUNDS]}${COLOR_RESET}"
-    excluded_inbounds=$(echo "$inbound_response" | jq -c --arg new_uuid "$new_inbound_uuid" '[.response[] | select(.uuid != $new_uuid) | .uuid]')
-
-    if [ "$excluded_inbounds" == "[]" ] || [ -z "$excluded_inbounds" ]; then
-        excluded_inbounds="[]"
-        echo -e "${COLOR_RED}${LANG[EMPTY_EXCLUDED_INBOUNDS_WARNING]}${COLOR_RESET}"
-    fi
-
-    if [ "$excluded_inbounds" == "[]" ] && [ "$(echo "$inbound_response" | jq '.response | length')" -gt 1 ]; then
-        echo -e "${COLOR_RED}${LANG[EMPTY_EXCLUDED_INBOUNDS_ERROR]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    for uuid in $(echo "$excluded_inbounds" | jq -r '.[]'); do
-        if ! echo "$uuid" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
-            echo -e "${COLOR_RED}${LANG[INVALID_EXCLUDED_INBOUNDS_UUID]}${COLOR_RESET}"
-            exit 1
-        fi
-    done
-
-    printf "${COLOR_YELLOW}${LANG[CHECKING_EXISTING_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-    local nodes_response=$(make_api_request "GET" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN")
-
-    if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
-        echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_LIST]}${COLOR_RESET}"
-        create_new_node=true
-    else
-        local existing_node=$(echo "$nodes_response" | jq --arg domain "$SELFSTEAL_DOMAIN" '.response[] | select(.address == $domain)')
-        if [ -z "$existing_node" ]; then
-            printf "${COLOR_YELLOW}${LANG[NODE_NOT_FOUND]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-            create_new_node=true
-        else
-            create_new_node=false
-            local node_uuid=$(echo "$existing_node" | jq -r '.uuid')
-            local node_name=$(echo "$existing_node" | jq -r '.name')
-            local node_address=$(echo "$existing_node" | jq -r '.address')
-            local node_port=$(echo "$existing_node" | jq -r '.port // 2222')
-            local node_traffic_tracking=$(echo "$existing_node" | jq -r '.isTrafficTrackingActive // false')
-            local node_traffic_limit=$(echo "$existing_node" | jq -r '.trafficLimitBytes // 0')
-            local node_notify_percent=$(echo "$existing_node" | jq -r '.notifyPercent // 0')
-            local node_traffic_reset_day=$(echo "$existing_node" | jq -r '.trafficResetDay // 31')
-            local node_country_code=$(echo "$existing_node" | jq -r '.countryCode // "XX"')
-            local node_consumption_multiplier=$(echo "$existing_node" | jq -r '.consumptionMultiplier // 1.0')
-
-            local current_excluded=$(echo "$existing_node" | jq -c '.excludedInbounds | if . then map(.uuid) else [] end')
-            if [ -z "$current_excluded" ] || [ "$current_excluded" == "[]" ]; then
-                current_excluded="[]"
-            fi
-            local updated_excluded="$current_excluded"
-
-            printf "${COLOR_YELLOW}${LANG[EXISTING_NODE_FOUND]}${COLOR_RESET}\n" "$node_uuid"
-            update_node "$domain_url" "$token" "$PANEL_DOMAIN" "$node_uuid" "$node_name" "$node_address" "$node_port" "$node_traffic_tracking" "$node_traffic_limit" "$node_notify_percent" "$node_traffic_reset_day" "$updated_excluded" "$node_country_code" "$node_consumption_multiplier" || exit 1
-        fi
-    fi
-
-    if [ "$create_new_node" = true ]; then
-        local node_name="$entity_name"
-        local node_address="$SELFSTEAL_DOMAIN"
-
-        printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}${COLOR_RESET}\n" "$SELFSTEAL_DOMAIN"
-        local node_response=$(make_api_request "POST" "http://$domain_url/api/nodes" "$token" "$PANEL_DOMAIN" "{\"name\": \"$node_name\", \"address\": \"$node_address\", \"port\": 2222, \"isTrafficTrackingActive\": false, \"trafficLimitBytes\": 0, \"notifyPercent\": 0, \"trafficResetDay\": 31, \"excludedInbounds\": $excluded_inbounds, \"countryCode\": \"XX\", \"consumptionMultiplier\": 1.0}")
-
-        if [ -z "$node_response" ] || ! echo "$node_response" | jq -e '.response.uuid' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
-            exit 1
-        fi
-        local node_uuid=$(echo "$node_response" | jq -r '.response.uuid')
-        echo -e "${COLOR_GREEN}${LANG[NODE_CREATED]}${COLOR_RESET}"
-
-        echo -e "${COLOR_YELLOW}${LANG[UPDATING_EXISTING_NODES]}${COLOR_RESET}"
-        if [ -z "$nodes_response" ] || ! echo "$nodes_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[FAILED_TO_GET_NODES_FOR_UPDATE]}${COLOR_RESET}"
-        else
-            echo "$nodes_response" | jq -r --arg new_node_uuid "$node_uuid" '.response[] | select(.uuid != $new_node_uuid) | [.uuid, .name, .address, (.port // 2222), (.isTrafficTrackingActive // false), (.trafficLimitBytes // 0), (.notifyPercent // 0), (.trafficResetDay // 31), (.countryCode // "XX"), (.consumptionMultiplier // 1.0), (.excludedInbounds | if . then map(.uuid) else [] end | tojson)] | join("|")' | while IFS='|' read -r uuid name address port traffic_tracking traffic_limit notify_percent reset_day country_code multiplier excluded; do
-                if [ -z "$excluded" ] || [ "$excluded" = "[]" ]; then
-                    current_excluded="[]"
-                else
-                    current_excluded="$excluded"
-                fi
-
-                updated_excluded=$(echo "$current_excluded" | jq --arg new_inbound_uuid "$new_inbound_uuid" '. + [$new_inbound_uuid] | unique')
-
-                for uuid_to_check in $(echo "$updated_excluded" | jq -r '.[]'); do
-                    if ! echo "$uuid_to_check" | grep -qE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
-                        echo -e "${COLOR_RED}${LANG[INVALID_EXCLUDED_INBOUNDS_UUID]}${COLOR_RESET}"
-                        exit 1
-                    fi
-                done
-
-                update_node "$domain_url" "$token" "$PANEL_DOMAIN" "$uuid" "$name" "$address" "$port" "$traffic_tracking" "$traffic_limit" "$notify_percent" "$reset_day" "$updated_excluded" "$country_code" "$multiplier" || exit 1
-            done
-
-            if [ "$(echo "$nodes_response" | jq --arg new_node_uuid "$node_uuid" '[.response[] | select(.uuid != $new_node_uuid)] | length')" -eq 0 ]; then
-                echo -e "${COLOR_YELLOW}${LANG[NO_NODES_TO_UPDATE]}${COLOR_RESET}"
-            else
-                echo -e "${COLOR_GREEN}${LANG[NODES_UPDATED_SUCCESS]}${COLOR_RESET}"
-            fi
-        fi
-    fi
-
-    printf "${COLOR_YELLOW}${LANG[CREATE_HOST]}%s${COLOR_RESET}\n" "$new_inbound_uuid"
-    local host_remark="$entity_name"
-    local host_data=$(cat <<EOF
-{
-    "inboundUuid": "$new_inbound_uuid",
-    "remark": "$host_remark",
-    "address": "$SELFSTEAL_DOMAIN",
-    "port": 443,
-    "path": "",
-    "sni": "$SELFSTEAL_DOMAIN",
-    "host": "$SELFSTEAL_DOMAIN",
-    "alpn": "h2",
-    "fingerprint": "chrome",
-    "allowInsecure": false,
-    "isDisabled": false
-}
-EOF
-)
-
-    local host_response=$(make_api_request "POST" "http://$domain_url/api/hosts" "$token" "$PANEL_DOMAIN" "$host_data")
-
-    if [ -z "$host_response" ]; then
-        echo -e "${COLOR_RED}${LANG[ERROR_EMPTY_RESPONSE_HOST]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    if echo "$host_response" | jq -e '.response.uuid' > /dev/null; then
-        echo -e "${COLOR_GREEN}${LANG[HOST_CREATED]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_RED}${LANG[ERROR_CREATE_HOST]}${COLOR_RESET}"
-        exit 1
-    fi
+    update_squad "$domain_url" "$token" "$PANEL_DOMAIN" "$squad_uuid" "$inbound_uuid"
+    echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
 
     echo -e "${COLOR_GREEN}${LANG[NODE_ADDED_SUCCESS]}${COLOR_RESET}"
-
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
     echo -e "${COLOR_RED}${LANG[POST_PANEL_INSTRUCTION]}${COLOR_RESET}"
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
@@ -4800,39 +4711,6 @@ EOF
 #Add Node to Panel
 
 log_entry
-check_root
-check_os
-
-install_script_if_missing() {
-    if [ ! -f "${DIR_REMNAWAVE}remnawave_reverse" ] || [ ! -f "/usr/local/bin/remnawave_reverse" ]; then
-        mkdir -p "${DIR_REMNAWAVE}"
-        if ! wget -q -O "${DIR_REMNAWAVE}remnawave_reverse" "$SCRIPT_URL"; then
-            exit 1
-        fi
-        chmod +x "${DIR_REMNAWAVE}remnawave_reverse"
-        ln -sf "${DIR_REMNAWAVE}remnawave_reverse" /usr/local/bin/remnawave_reverse
-    fi
-
-    local bashrc_file="/etc/bash.bashrc"
-    local alias_line="alias rr='remnawave_reverse'"
-
-    if [ ! -f "$bashrc_file" ]; then
-        touch "$bashrc_file"
-        chmod 644 "$bashrc_file"
-    fi
-
-    if [ -s "$bashrc_file" ] && [ "$(tail -c 1 "$bashrc_file")" != "" ]; then
-        echo >> "$bashrc_file"
-    fi
-
-    if ! grep -E "^[[:space:]]*alias rr='remnawave_reverse'[[:space:]]*$" "$bashrc_file" > /dev/null; then
-        echo "$alias_line" >> "$bashrc_file"
-        printf "${COLOR_GREEN}${LANG[ALIAS_ADDED]}${COLOR_RESET}\n" "$bashrc_file"
-        printf "${COLOR_YELLOW}${LANG[ALIAS_ACTIVATE_GLOBAL]}${COLOR_RESET}\n" "$bashrc_file"
-    else
-        printf "${COLOR_YELLOW}${LANG[ALIAS_EXISTS]}${COLOR_RESET}\n" "$bashrc_file"
-    fi
-}
 
 if ! load_language; then
     show_language
@@ -4845,8 +4723,9 @@ if ! load_language; then
     esac
 fi
 
+check_root
+check_os
 install_script_if_missing
-
 show_menu
 
 reading "${LANG[PROMPT_ACTION]}" OPTION
