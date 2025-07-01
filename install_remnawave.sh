@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.4a"
+SCRIPT_VERSION="1.7.4b"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -683,8 +683,8 @@ set_language() {
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
                 [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
                 [SUB_WITH_APPCONFIG_ASK]="Добавить файл конфигурации app-config.json?"
-                [SUB_WITH_APPCONFIG_OPTION1]="Да, использовать конфигурацию из пункта 1 (Простой список приложений clash&sing)"
-                [SUB_WITH_APPCONFIG_OPTION2]="Да, использовать конфигурацию из пункта 1 (МНожественный список приложений)"
+                [SUB_WITH_APPCONFIG_OPTION1]="Простой список приложений clash&sing"
+                [SUB_WITH_APPCONFIG_OPTION2]="Множественный список приложений"
                 [SUB_WITH_APPCONFIG_SKIP]="Нет, пропустить добавление конфигурации"
                 [SUB_WITH_APPCONFIG_INVALID]="Неверный выбор, конфигурация не будет добавлена"
                 [SUB_WITH_APPCONFIG_INPUT]="Введите ваш выбор: "
@@ -1914,6 +1914,7 @@ manage_sub_page_upload() {
 
         4)
             [ -f "$config_file" ] && rm -f "$config_file"
+            [ -f "$index_file" ] && rm -f "$index_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
             if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/material-remnawave-subscription-page/refs/heads/main/index.html"; then
@@ -1925,8 +1926,10 @@ manage_sub_page_upload() {
 
             # Пользовательский выбор app-config.json
             echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
+            echo -e ""
             echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}2. ${LANG[SUB_WITH_APPCONFIG_OPTION2]}${COLOR_RESET}"
+            echo -e ""
             echo -e "${COLOR_YELLOW}0. ${LANG[SUB_WITH_APPCONFIG_SKIP]}${COLOR_RESET}"
 
             reading "${LANG[SUB_WITH_APPCONFIG_INPUT]}" SUB_WITH_APPCONFIG
@@ -1952,6 +1955,7 @@ manage_sub_page_upload() {
                     ;;
                 0)
                     [ -f "$config_file" ] && rm -f "$config_file"
+                    [ -f "$index_file" ] && rm -f "$index_file"
                     ;;
                 *)
                     echo -e "${COLOR_RED}${LANG[SUB_WITH_APPCONFIG_INVALID]}${COLOR_RESET}"
