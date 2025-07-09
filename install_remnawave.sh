@@ -2921,6 +2921,7 @@ make_api_request() {
         -H "Host: $panel_domain"
         -H "X-Forwarded-For: ${url#http://}"
         -H "X-Forwarded-Proto: https"
+        -H "X-Remnawave-Client-Type: browser"
     )
 
     if [ -n "$data" ]; then
@@ -2929,6 +2930,7 @@ make_api_request() {
         curl -s -X "$method" "$url" "${headers[@]}"
     fi
 }
+
 
 register_remnawave() {
     local domain_url=$1
