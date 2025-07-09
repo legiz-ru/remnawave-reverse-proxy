@@ -2921,6 +2921,7 @@ make_api_request() {
         -H "Host: $panel_domain"
         -H "X-Forwarded-For: ${url#http://}"
         -H "X-Forwarded-Proto: https"
+        -H "X-Remnawave-Client-Type: browser"
     )
 
     if [ -n "$data" ]; then
@@ -2929,6 +2930,7 @@ make_api_request() {
         curl -s -X "$method" "$url" "${headers[@]}"
     fi
 }
+
 
 register_remnawave() {
     local domain_url=$1
@@ -4340,7 +4342,7 @@ EOL
 
     # Create node with config profile binding
     echo -e "${COLOR_YELLOW}${LANG[CREATING_NODE]}${COLOR_RESET}"
-    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid"
+    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
 
     # Create host
     echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
