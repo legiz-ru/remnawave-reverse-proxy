@@ -4342,7 +4342,7 @@ EOL
 
     # Create node with config profile binding
     echo -e "${COLOR_YELLOW}${LANG[CREATING_NODE]}${COLOR_RESET}"
-    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid"
+    create_node "$domain_url" "$token" "$PANEL_DOMAIN" "$config_profile_uuid" "$inbound_uuid" "$SELFSTEAL_DOMAIN"
 
     # Create host
     echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
