@@ -1,9 +1,4 @@
-<div align="center">
-  <a href="https://remna.st">
-    <img src="https://cdn.remna.st/logos/logo.svg" alt="Logo" width="160" height="160">
-  </a>
-     <h1 align="center">REMNAWAVE REVERSE-PROXY</h3>
-</div>
+<p align="center"><a href="#"><img src="./media/logo.png" alt="Image"></a></p>
 
 Русский | [English](/README.md)
 
