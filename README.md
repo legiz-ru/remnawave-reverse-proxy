@@ -1,8 +1,8 @@
-<p aling="center"><a href="https://github.com/eGames/remnawave-reverse-proxy">
+<p aling="center"><a href="https://github.com/eGamesAPI/remnawave-reverse-proxy">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="./media/logo.png" />
    <source media="(prefers-color-scheme: light)" srcset="./media/logo-black.png" />
-   <img alt="Remnawave Reverse Proxy" src="https://github.com/eGames/remnawave-reverse-proxy" />
+   <img alt="Remnawave Reverse Proxy" src="https://github.com/eGamesAPI/remnawave-reverse-proxy" />
  </picture>
 </a></p>
 
