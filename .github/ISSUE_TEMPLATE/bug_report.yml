@@ -10,9 +10,9 @@ body:
       label: Preconditions
       description: Before creating a new issue, make sure you've done the following:
       options:
-        - label: I have read the [README](https://github.com/eGamesAPI/remnawave-reverse-proxy/blob/main/README.md)
-        - label: I have checked existing [Issues](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues)
-        - label: I have updated to the [latest release](https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest)
+        - label: "I have read the [README](https://github.com/eGamesAPI/remnawave-reverse-proxy/blob/main/README.md)"
+        - label: "I have checked existing [Issues](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues)"
+        - label: "I have updated to the [latest release](https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest)"
 
   - type: input
     id: os
