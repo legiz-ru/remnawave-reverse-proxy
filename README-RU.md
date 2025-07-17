@@ -80,6 +80,12 @@ nano /etc/docker/daemon.json
 }
 ```
 
+3. Перезапустите службу Docker для применения изменений
+
+```bash
+systemctl restart docker
+```
+
 -----
 
 ### Защита панели с помощью URL-параметра

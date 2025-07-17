@@ -80,6 +80,12 @@ nano /etc/docker/daemon.json
 }
 ```
 
+3. Restart Docker service to apply made changes
+
+```bash
+systemctl restart docker
+```
+
 -----
 
 ### Panel Protection via URL Parameter
