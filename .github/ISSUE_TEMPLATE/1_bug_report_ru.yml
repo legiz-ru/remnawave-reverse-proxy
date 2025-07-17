@@ -1,7 +1,7 @@
 name: '🐛 Сообщение о проблеме'
 title: '[Bug-report] '
 description: Сообщите о проблеме или нестандартном поведении
-labels: ['type: bug', 'status: to be sorted']
+labels: ['bug']
 
 body:
   - type: checkboxes

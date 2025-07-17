@@ -1,7 +1,7 @@
 name: '🐛 Bug Report'
 title: '[Bug-report] '
 description: Report a bug or unexpected behavior
-labels: ['type: bug', 'status: to be sorted']
+labels: ['bug']
 
 body:
   - type: checkboxes
