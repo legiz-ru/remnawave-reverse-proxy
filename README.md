@@ -57,6 +57,37 @@ The script supports two methods of domain configuration: via Cloudflare or using
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
 -----
+
+### Adding mirrors for Docker
+In some cases like #40 servers can't pull the images, especially which are located in Russia.  
+To fix this issue, you can add mirrors:
+
+1. Create `daemon.json` file:
+
+```bash
+nano /etc/docker/daemon.json
+```
+
+2. Import mirrors
+
+```json
+{
+   "log-driver": "local",
+   "registry-mirrors": [
+      "https://mirror.gcr.io/",
+      "https://dockerhub.timeweb.cloud"
+   ]
+}
+```
+
+3. Restart Docker service to apply made changes
+
+```bash
+systemctl restart docker
+```
+
+-----
+
 ### Panel Protection via URL Parameter
 To enhance the security of the panel, an additional layer of protection against detection has been implemented in the NGINX configuration:
 - To access the panel, you must navigate to a URL in the following format:

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.4b"
+SCRIPT_VERSION="1.7.4c"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -1868,16 +1868,16 @@ manage_sub_page_upload() {
     local index_file="/opt/remnawave/index.html"
     local docker_compose_file="/opt/remnawave/docker-compose.yml"
 
-    if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-        echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-        sleep 2
-        log_clear
-        manage_sub_page_upload
-        return 1
-    fi
-
     case $SUB_PAGE_OPTION in
         1|2)
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+
             [ -f "$index_file" ] && rm -f "$index_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
@@ -1897,6 +1897,14 @@ manage_sub_page_upload() {
             ;;
 
         3)
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+
             [ -f "$config_file" ] && rm -f "$config_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
@@ -1913,6 +1921,14 @@ manage_sub_page_upload() {
             ;;
 
         4)
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
@@ -1972,6 +1988,14 @@ manage_sub_page_upload() {
             ;;
         
         5)
+            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                manage_sub_page_upload
+                return 1
+            fi
+
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
