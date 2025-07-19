@@ -843,8 +843,8 @@ stop_panel_node() {
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
         sleep 1
-        docker compose down #> /dev/null 2>&1 &
-        #spinner $! "${LANG[WAITING]}"
+        docker compose down > /dev/null 2>&1 &
+        spinner $! "${LANG[WAITING]}"
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOP]}${COLOR_RESET}"
     fi
 }
