@@ -824,7 +824,16 @@ run_remnawave_cli() {
 }
 
 start_panel_node() {
-    cd /opt/remnawave
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
     if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
@@ -837,7 +846,15 @@ start_panel_node() {
 }
 
 stop_panel_node() {
-    cd /opt/remnawave
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
     if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
@@ -850,7 +867,15 @@ stop_panel_node() {
 }
 
 update_panel_node() {
-    cd /opt/remnawave
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
     echo -e "${COLOR_YELLOW}${LANG[UPDATING]}${COLOR_RESET}"
     sleep 1
 
@@ -1204,16 +1229,24 @@ manage_panel_access() {
 }
 
 open_panel_access() {
-    cd /opt/remnawave
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
 
     if [ ! -f "nginx.conf" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
         exit 1
     fi
 
-    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "/opt/remnawave/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
 
-    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "/opt/remnawave/nginx.conf" | grep "~*\w\+.*=")
+    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "$dir/nginx.conf" | grep "~*\w\+.*=")
     cookies_random1=$(echo "$cookie_line" | grep -oP '~*\K\w+(?==)')
     cookies_random2=$(echo "$cookie_line" | grep -oP '=\K\w+(?=")')
 
@@ -1237,8 +1270,8 @@ open_panel_access() {
         exit 1
     fi
 
-    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "/opt/remnawave/nginx.conf"
-    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "/opt/remnawave/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "$dir/nginx.conf"
     if [ $? -ne 0 ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
         exit 1
@@ -1264,23 +1297,32 @@ open_panel_access() {
 }
 
 close_panel_access() {
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+
     echo -e "${COLOR_YELLOW}${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
-    cd /opt/remnawave
 
     if [ ! -f "nginx.conf" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
         exit 1
     fi
 
-    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "/opt/remnawave/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
 
     if [ -z "$PANEL_DOMAIN" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
         exit 1
     fi
 
-    if grep -A 10 "server_name $PANEL_DOMAIN;" "/opt/remnawave/nginx.conf" | grep -q "listen 8443 ssl;"; then
-        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "/opt/remnawave/nginx.conf"
+    if grep -A 10 "server_name $PANEL_DOMAIN;" "$dir/nginx.conf" | grep -q "listen 8443 ssl;"; then
+        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
         if [ $? -ne 0 ]; then
             echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
             exit 1
@@ -1311,7 +1353,15 @@ close_panel_access() {
 }
 
 view_logs() {
-    cd /opt/remnawave
+    local dir=""
+    if [ -d "/opt/remnawave" ]; then
+        dir="/opt/remnawave"
+    else
+        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
+        exit 1
+    fi
+
+    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
 
     if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
