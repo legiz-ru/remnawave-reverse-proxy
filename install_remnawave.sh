@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.7 DEV"
+SCRIPT_VERSION="1.7.8 DEV"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -87,8 +87,8 @@ set_language() {
                 [MENU_7]="Manage certificates domain"
                 [MENU_8]="Check for updates script"
                 [MENU_9]="Remove script"
-                [PROMPT_ACTION]="Select action (0-9):"
-                [INVALID_CHOICE]="Invalid choice. Please select 0-9"
+                [PROMPT_ACTION]="Select action (0-10):"
+                [INVALID_CHOICE]="Invalid choice. Please select 0-10"
                 [WARNING_LABEL]="WARNING:"
                 [CONFIRM_PROMPT]="Enter 'y' to continue or 'n' to exit (y/n):"
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
@@ -100,6 +100,29 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="All script and panel/node data will be removed from the server. Are you sure? (y/n): "
                 [SCRIPT_REMOVED]="Script and its local files successfully removed!"
                 [ALL_REMOVED]="Script and panel/node data successfully removed!"
+                #Warp by distillium
+                [WARP_MENU]="WARP Native by distillium"
+                [WARP_MENU_TITLE]="Manage WARP Native by distillium\nOnly run on server with node"
+                [WARP_INSTALL]="Install WARP Native"
+                [WARP_ADD_CONFIG]="Add WARP-configuration to node configuration"
+                [WARP_DELETE_WARP_SETTINGS]="Remove WARP-configuration from node configuration"
+                [WARP_CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?\nAdding WARP-configuration should only be done on the server where the panel is installed, not on the node server"
+                [WARP_UNINSTALL]="Uninstall WARP Native"
+                [WARP_PROMPT]="Select action (0-4):"
+                [WARP_PROMPT1]="Select action:"
+                [WARP_INVALID_CHOICE]="Invalid choice. Please select 0-4."
+                [WARP_NO_NODE]="Node Remnawave not found. First install the node."
+                [WARP_SELECT_CONFIG]="Select node to add WARP-configuration?"
+                [WARP_SELECT_CONFIG_DELETE]="Select node to remove WARP-configuration?"
+                [WARP_NO_CONFIGS]="No configurations found."
+                [WARP_UPDATE_SUCCESS]="Configuration successfully updated!"
+                [WARP_UPDATE_FAIL]="Failed to update configuration."
+                [WARP_WARNING]="warp-out already exists in outbounds."
+                [WARP_WARNING2]="warp rule already exists in routing rules."
+                [WARP_REMOVED_WARP_SETTINGS1]="Removed warp-out from outbounds"
+                [WARP_NO_WARP_SETTINGS1]="warp-out not found in outbounds"
+                [WARP_REMOVED_WARP_SETTINGS2]="Removed warp rule from routing rules"
+                [WARP_NO_WARP_SETTINGS2]="warp rule not found in routing rules"
                 #Manage Panel/Node
                 [START_PANEL_NODE]="Start panel/node"
                 [STOP_PANEL_NODE]="Stop panel/node"
@@ -176,7 +199,7 @@ set_language() {
                 [UPDATE_SQUAD]="Squad successfully updated"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Failed to change to directory %s"
-                [DIR_NOT_FOUND]="Directory /root/remnawave or /opt/remnawave not found"
+                [DIR_NOT_FOUND]="Directory /opt/remnawave not found"
                 [PANEL_RUNNING]="Panel/node already running"
                 [PANEL_RUN]="Panel/node running"
                 [PANEL_STOP]="Panel/node stopped"
@@ -246,6 +269,9 @@ set_language() {
                 [TOKEN_USED_SUCCESSFULLY]="Token successfully used"
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 [CREATE_NEW_NODE]="Creating new node for %s..."
+                [CF_INVALID_NAME]="Error: The name of the configuration profile %s is already in use.\nPlease choose another name."
+                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should not exceed 20 characters."
+                [CF_INVALID_CHARS]="Error: The name of the configuration profile should contain only English letters, numbers, and hyphens."
                 #check
                 [CHECK_UPDATE]="Check for updates"
                 [GENERATING_CERTS]="Generating certificates for %s"
@@ -321,7 +347,7 @@ set_language() {
                 [SELECT_SUB_PAGE_CUSTOM2]="Custom Sub Page Templates\nOnly run on panel server"
                 [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-4."
                 [RESTORE_SUB_PAGE]="Restore default sub page"
-                [CONTAINER_NOT_FOUND]="Container remnawave-subscription-page not found"
+                [CONTAINER_NOT_FOUND]="Container %s not found"
                 [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
                 [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
@@ -420,8 +446,8 @@ set_language() {
                 [MENU_7]="Управление сертификатами домена"
                 [MENU_8]="Проверить обновления скрипта"
                 [MENU_9]="Удалить скрипт"
-                [PROMPT_ACTION]="Выберите действие (0-9):"
-                [INVALID_CHOICE]="Неверный выбор. Выберите 0-9."
+                [PROMPT_ACTION]="Выберите действие (0-10):"
+                [INVALID_CHOICE]="Неверный выбор. Выберите 0-10."
                 [WARNING_LABEL]="ВНИМАНИЕ:"
                 [CONFIRM_PROMPT]="Введите 'y' для продолжения или 'n' для выхода (y/n):"
                 [WARNING_NODE_PANEL]="Добавление ноды должно выполняться только на сервере, где установлена панель, а не на сервере ноды."
@@ -433,6 +459,29 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="Все данные скрипта и панели/ноды будут удалены с сервера. Вы уверены? (y/n): "
                 [SCRIPT_REMOVED]="Скрипт и его локальные файлы успешно удалены!"
                 [ALL_REMOVED]="Скрипт и данные панели/ноды успешно удалены!"
+                #Warp by distillium
+                [WARP_MENU]="WARP Native от distillium"
+                [WARP_MENU_TITLE]="Управление WARP Native от distillium"
+                [WARP_INSTALL]="Установить WARP Native"
+                [WARP_ADD_CONFIG]="Добавить WARP-настройки в конфигурацию ноды"
+                [WARP_DELETE_WARP_SETTINGS]="Удалить WARP-настройки из конфигурации ноды"
+                [WARP_CONFIRM_SERVER_PANEL]="Вы уверены, что находитесь на сервере с установленной панелью?\nДобавление WARP-настроек должно выполняться только на сервере, где установлена панель, а не на сервере ноды"
+                [WARP_UNINSTALL]="Удалить WARP Native"
+                [WARP_PROMPT]="Выберите действие (0-4):"
+                [WARP_PROMPT1]="Выберите действие:"
+                [WARP_INVALID_CHOICE]="Неверный выбор. Выберите 0-4."
+                [WARP_NO_NODE]="Нода Remnawave не найдена. Сначала установите ноду."
+                [WARP_SELECT_CONFIG]="На какую ноду добавить WARP-настройки?"
+                [WARP_SELECT_CONFIG_DELETE]="На какой ноде удалить WARP-настройки?"
+                [WARP_NO_CONFIGS]="Конфигурации не найдены."
+                [WARP_UPDATE_SUCCESS]="Конфигурация успешно обновлена!"
+                [WARP_UPDATE_FAIL]="Не удалось обновить конфигурацию."
+                [WARP_WARNING]="warp-out уже существует в outbounds."
+                [WARP_WARNING2]="warp rule уже существует в routing rules."
+                [WARP_REMOVED_WARP_SETTINGS1]="Удален warp-out из outbounds"
+                [WARP_NO_WARP_SETTINGS1]="warp-out не найден в outbounds"
+                [WARP_REMOVED_WARP_SETTINGS2]="Удален warp rule из routing rules"
+                [WARP_NO_WARP_SETTINGS2]="warp rule не найден в routing rules"
                 #Manage Panel/Node
                 [START_PANEL_NODE]="Запустить панель/ноду"
                 [STOP_PANEL_NODE]="Остановить панель/ноду"
@@ -509,7 +558,7 @@ set_language() {
                 [UPDATE_SQUAD]="Squad успешно обновлен"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Не удалось перейти в директорию %s"
-                [DIR_NOT_FOUND]="Директория /root/remnawave или /opt/remnawave не найдена"
+                [DIR_NOT_FOUND]="Директория /opt/remnawave не найдена"
                 [PANEL_RUNNING]="Панель/нода уже запущена"
                 [PANEL_RUN]="Панель/нода запущена"
                 [PANEL_STOP]="Панель/нода остановлена"
@@ -570,6 +619,7 @@ set_language() {
                 [CHECK_CONFIG]="Проверьте конфигурацию или перезапустите панель."
                 #Add node to panel
                 [ADD_NODE_TO_PANEL]="Добавить ноду в панель"
+                [ENTER_NODE_NAME]="Введите имя для вашей ноды (например, Germany):"
                 [USING_SAVED_TOKEN]="Используем сохранённый токен..."
                 [INVALID_SAVED_TOKEN]="Сохранённый токен недействителен. Запрашиваем новый..."
                 [ENTER_PANEL_USERNAME]="Введите логин панели: "
@@ -578,6 +628,9 @@ set_language() {
                 [TOKEN_USED_SUCCESSFULLY]="Токен успешно использован"
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 [CREATE_NEW_NODE]="Создаём новую ноду для %s"
+                [CF_INVALID_NAME]="Ошибка: Имя конфигурационного профиля %s уже используется.\nПожалуйста, выберите другое имя."
+                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля не должно превышать 20 символов."
+                [CF_INVALID_CHARS]="Ошибка: Имя конфигурационного профиля должно содержать только английские буквы, цифры и дефис."
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
                 [GENERATING_CERTS]="Генерируем сертификаты для %s"
@@ -653,7 +706,7 @@ set_language() {
                 [SELECT_SUB_PAGE_CUSTOM2]="Шаблоны страниц подписки\nЗапускать только на сервере с панелью"
                 [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 4."
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
-                [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
+                [CONTAINER_NOT_FOUND]="Контейнер %s не найден"
                 [SUB_WITH_APPCONFIG_ASK]="Добавить файл конфигурации app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Простой список приложений clash&sing"
                 [SUB_WITH_APPCONFIG_OPTION2]="Множественный список приложений"
@@ -771,17 +824,7 @@ run_remnawave_cli() {
 }
 
 start_panel_node() {
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    cd /opt/remnawave
     if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
@@ -794,40 +837,20 @@ start_panel_node() {
 }
 
 stop_panel_node() {
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    cd /opt/remnawave
     if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
         sleep 1
-        docker compose down > /dev/null 2>&1 &
-        spinner $! "${LANG[WAITING]}"
+        docker compose down #> /dev/null 2>&1 &
+        #spinner $! "${LANG[WAITING]}"
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOP]}${COLOR_RESET}"
     fi
 }
 
 update_panel_node() {
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    cd /opt/remnawave
     echo -e "${COLOR_YELLOW}${LANG[UPDATING]}${COLOR_RESET}"
     sleep 1
 
@@ -1052,12 +1075,13 @@ show_menu() {
     echo -e ""
     echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}" # Custom Templates legiz
+    echo -e "${COLOR_YELLOW}6. ${LANG[WARP_MENU]}${COLOR_RESET}" # Manage Warp by distilium
     echo -e ""
-    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}" # Manage IPv6
-    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage certificates domain
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}" # Manage IPv6
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_7]}${COLOR_RESET}" # Manage certificates domain
     echo -e ""
-    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Check for updates
-    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Remove script
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_8]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_9]}${COLOR_RESET}" # Remove script
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}- ${LANG[FAST_START]//remnawave_reverse/${COLOR_GREEN}remnawave_reverse${COLOR_RESET}}"
@@ -1180,27 +1204,16 @@ manage_panel_access() {
 }
 
 open_panel_access() {
-    echo -e "${COLOR_YELLOW}${LANG[PORT_8443_OPEN]}${COLOR_RESET}"
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    cd /opt/remnawave
 
     if [ ! -f "nginx.conf" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
         exit 1
     fi
 
-    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "/opt/remnawave/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
 
-    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "$dir/nginx.conf" | grep "~*\w\+.*=")
+    cookie_line=$(grep -A 2 "map \$http_cookie \$auth_cookie" "/opt/remnawave/nginx.conf" | grep "~*\w\+.*=")
     cookies_random1=$(echo "$cookie_line" | grep -oP '~*\K\w+(?==)')
     cookies_random2=$(echo "$cookie_line" | grep -oP '=\K\w+(?=")')
 
@@ -1224,8 +1237,8 @@ open_panel_access() {
         exit 1
     fi
 
-    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
-    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "$dir/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "/opt/remnawave/nginx.conf"
+    sed -i "/server_name $PANEL_DOMAIN;/a \    listen 8443 ssl;" "/opt/remnawave/nginx.conf"
     if [ $? -ne 0 ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
         exit 1
@@ -1252,32 +1265,22 @@ open_panel_access() {
 
 close_panel_access() {
     echo -e "${COLOR_YELLOW}${LANG[PORT_8443_CLOSE]}${COLOR_RESET}"
-    local dir=""
-    if [ -d "/root/remnawave" ]; then
-        dir="/root/remnawave"
-    elif [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
-
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
+    cd /opt/remnawave
 
     if [ ! -f "nginx.conf" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_NOT_FOUND]} $dir${COLOR_RESET}"
         exit 1
     fi
 
-    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "$dir/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
+    PANEL_DOMAIN=$(grep -B 20 "proxy_pass http://remnawave" "/opt/remnawave/nginx.conf" | grep "server_name" | grep -v "server_name _" | awk '{print $2}' | sed 's/;//' | head -n 1)
 
     if [ -z "$PANEL_DOMAIN" ]; then
         echo -e "${COLOR_RED}${LANG[NGINX_CONF_ERROR]}${COLOR_RESET}"
         exit 1
     fi
 
-    if grep -A 10 "server_name $PANEL_DOMAIN;" "$dir/nginx.conf" | grep -q "listen 8443 ssl;"; then
-        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "$dir/nginx.conf"
+    if grep -A 10 "server_name $PANEL_DOMAIN;" "/opt/remnawave/nginx.conf" | grep -q "listen 8443 ssl;"; then
+        sed -i "/server_name $PANEL_DOMAIN;/,/}/{/^[[:space:]]*$/d; s/listen 8443 ssl;//}" "/opt/remnawave/nginx.conf"
         if [ $? -ne 0 ]; then
             echo -e "${COLOR_RED}${LANG[NGINX_CONF_MODIFY_FAILED]}${COLOR_RESET}"
             exit 1
@@ -1308,25 +1311,15 @@ close_panel_access() {
 }
 
 view_logs() {
-    local dir=""
-    if [ -d "/opt/remnawave" ]; then
-        dir="/opt/remnawave"
-    else
-        echo -e "${COLOR_RED}${LANG[DIR_NOT_FOUND]}${COLOR_RESET}"
-        exit 1
-    fi
+    cd /opt/remnawave
 
-    cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
         exit 1
     fi
 
     echo -e "${COLOR_YELLOW}${LANG[VIEW_LOGS]}${COLOR_RESET}"
-    docker compose logs
-    echo -e "${COLOR_YELLOW}${LANG[PRESS_ENTER_RETURN_MENU]}${COLOR_RESET}"
-    read
+    docker compose logs -f -t
 }
 #Manage Panel Access
 
@@ -1453,6 +1446,263 @@ show_panel_node_menu() {
     esac
 }
 #Manage Panel Node Menu
+
+manage_warp() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[WARP_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[WARP_INSTALL]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[WARP_UNINSTALL]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}3. ${LANG[WARP_ADD_CONFIG]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[WARP_DELETE_WARP_SETTINGS]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[WARP_PROMPT]}" WARP_OPTION
+
+    case $WARP_OPTION in
+        1)
+            if [ ! -f "/opt/remnawave/.env-node" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_NODE]}${COLOR_RESET}"
+                exit 1
+            fi
+            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/install.sh | bash
+            ;;
+        2)
+            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/uninstall.sh | bash
+            ;;
+        3)
+            local domain_url="127.0.0.1:3000"
+            
+            echo -e ""
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[WARP_CONFIRM_SERVER_PANEL]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CONFIRM_PROMPT]}${COLOR_RESET}"
+            read confirm
+            echo
+
+            if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                exit 0
+            fi
+            
+            get_panel_token
+            token=$(cat "$TOKEN_FILE")
+
+            local config_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+            if [ -z "$config_response" ] || ! echo "$config_response" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Invalid response${COLOR_RESET}"
+            fi
+
+            if ! echo "$config_response" | jq -e '.response.configProfiles | type == "array"' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Response does not contain configProfiles array${COLOR_RESET}"
+            fi
+
+            local config_count=$(echo "$config_response" | jq '.response.configProfiles | length')
+            if [ "$config_count" -eq 0 ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Empty configuration list${COLOR_RESET}"
+            fi
+            local configs=$(echo "$config_response" | jq -r '.response.configProfiles[] | select(.uuid and .name) | "\(.name) \(.uuid)"' 2>/dev/null)
+            if [ -z "$configs" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: No valid configurations found in response${COLOR_RESET}"
+            fi
+
+            echo -e ""
+            echo -e "${COLOR_YELLOW}${LANG[WARP_SELECT_CONFIG]}${COLOR_RESET}"
+            echo -e ""
+            local i=1
+            declare -A config_map
+            while IFS=' ' read -r name uuid; do
+                echo -e "${COLOR_YELLOW}$i. $name${COLOR_RESET}"
+                config_map[$i]="$uuid"
+                ((i++))
+            done <<< "$configs"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+            echo -e ""
+            reading "${LANG[WARP_PROMPT1]}" CONFIG_OPTION
+
+            if [ "$CONFIG_OPTION" == "0" ]; then
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            fi
+
+            if [ -z "${config_map[$CONFIG_OPTION]}" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE]}${COLOR_RESET}"
+            fi
+
+            local selected_uuid=${config_map[$CONFIG_OPTION]}
+
+            local config_data=$(make_api_request "GET" "${domain_url}/api/config-profiles/$selected_uuid" "$token")
+            if [ -z "$config_data" ] || ! echo "$config_data" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: Invalid response${COLOR_RESET}"
+            fi
+
+            local config_json
+            if echo "$config_data" | jq -e '.response.config' > /dev/null 2>&1; then
+                config_json=$(echo "$config_data" | jq -r '.response.config')
+            else
+                config_json=$(echo "$config_data" | jq -r '.config // ""')
+            fi
+
+            if [ -z "$config_json" ] || [ "$config_json" == "null" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: No config found in response${COLOR_RESET}"
+            fi
+
+            if echo "$config_json" | jq -e '.outbounds[] | select(.tag == "warp-out")' > /dev/null 2>&1; then
+                echo -e "${COLOR_YELLOW}${LANG[WARP_WARNING]}${COLOR_RESET}"
+            else
+                local warp_outbound='{
+                    "tag": "warp-out",
+                    "protocol": "freedom",
+                    "settings": {},
+                    "streamSettings": {
+                        "sockopt": {
+                            "interface": "warp",
+                            "tcpFastOpen": true
+                        }
+                    }
+                }'
+                config_json=$(echo "$config_json" | jq --argjson warp_out "$warp_outbound" '.outbounds += [$warp_out]' 2>/dev/null)
+            fi
+
+            if echo "$config_json" | jq -e '.routing.rules[] | select(.outboundTag == "warp-out")' > /dev/null 2>&1; then
+                echo -e "${COLOR_YELLOW}${LANG[WARP_WARNING2]}${COLOR_RESET}"
+            else
+                local warp_rule='{
+                    "type": "field",
+                    "domain": ["whoer.net", "browserleaks.com", "2ip.io", "2ip.ru"],
+                    "outboundTag": "warp-out"
+                }'
+                config_json=$(echo "$config_json" | jq --argjson warp_rule "$warp_rule" '.routing.rules += [$warp_rule]' 2>/dev/null)
+            fi
+
+            local update_response=$(make_api_request "PATCH" "${domain_url}/api/config-profiles" "$token" "{\"uuid\": \"$selected_uuid\", \"config\": $config_json}")
+            if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: Invalid response${COLOR_RESET}"
+            fi
+
+            echo -e "${COLOR_GREEN}${LANG[WARP_UPDATE_SUCCESS]}${COLOR_RESET}"
+            log_clear
+            manage_warp
+            ;;
+        4)
+            local domain_url="127.0.0.1:3000"
+            
+            echo -e ""
+            echo -e "${COLOR_YELLOW}${LANG[WARP_CONFIRM_SERVER_PANEL]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CONFIRM_PROMPT]}${COLOR_RESET}"
+            read confirm
+            echo
+
+            if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                exit 0
+            fi
+            
+            get_panel_token
+            token=$(cat "$TOKEN_FILE")
+
+            local config_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+            if [ -z "$config_response" ] || ! echo "$config_response" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Invalid response${COLOR_RESET}"
+                return 1
+            fi
+
+            if ! echo "$config_response" | jq -e '.response.configProfiles | type == "array"' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Response does not contain configProfiles array${COLOR_RESET}"
+                return 1
+            fi
+
+            local config_count=$(echo "$config_response" | jq '.response.configProfiles | length')
+            if [ "$config_count" -eq 0 ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: Empty configuration list${COLOR_RESET}"
+                return 1
+            fi
+
+            local configs=$(echo "$config_response" | jq -r '.response.configProfiles[] | select(.uuid and .name) | "\(.name) \(.uuid)"' 2>/dev/null)
+            if [ -z "$configs" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_NO_CONFIGS]}: No valid configurations found in response${COLOR_RESET}"
+                return 1
+            fi
+
+            echo -e ""
+            echo -e "${COLOR_YELLOW}${LANG[WARP_SELECT_CONFIG_DELETE]}${COLOR_RESET}"
+            echo -e ""
+            local i=1
+            declare -A config_map
+            while IFS=' ' read -r name uuid; do
+                echo -e "${COLOR_YELLOW}$i. $name${COLOR_RESET}"
+                config_map[$i]="$uuid"
+                ((i++))
+            done <<< "$configs"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+            echo -e ""
+            reading "${LANG[WARP_PROMPT1]}" CONFIG_OPTION
+
+            if [ "$CONFIG_OPTION" == "0" ]; then
+                echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                return 0
+            fi
+
+            if [ -z "${config_map[$CONFIG_OPTION]}" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE]}${COLOR_RESET}"
+                return 1
+            fi
+
+            local selected_uuid=${config_map[$CONFIG_OPTION]}
+
+            local config_data=$(make_api_request "GET" "${domain_url}/api/config-profiles/$selected_uuid" "$token")
+            if [ -z "$config_data" ] || ! echo "$config_data" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: Invalid response${COLOR_RESET}"
+                return 1
+            fi
+
+            local config_json
+            if echo "$config_data" | jq -e '.response.config' > /dev/null 2>&1; then
+                config_json=$(echo "$config_data" | jq -r '.response.config')
+            else
+                config_json=$(echo "$config_data" | jq -r '.config // ""')
+            fi
+
+            if [ -z "$config_json" ] || [ "$config_json" == "null" ]; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: No config found in response${COLOR_RESET}"
+                return 1
+            fi
+            
+            if echo "$config_json" | jq -e '.outbounds[] | select(.tag == "warp-out")' > /dev/null 2>&1; then
+                config_json=$(echo "$config_json" | jq 'del(.outbounds[] | select(.tag == "warp-out"))' 2>/dev/null)
+                echo -e "${COLOR_YELLOW}${LANG[WARP_REMOVED_WARP_SETTINGS1]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_YELLOW}${LANG[WARP_NO_WARP_SETTINGS1]}${COLOR_RESET}"
+            fi
+
+            if echo "$config_json" | jq -e '.routing.rules[] | select(.outboundTag == "warp-out")' > /dev/null 2>&1; then
+                config_json=$(echo "$config_json" | jq 'del(.routing.rules[] | select(.outboundTag == "warp-out"))' 2>/dev/null)
+                echo -e "${COLOR_YELLOW}${LANG[WARP_REMOVED_WARP_SETTINGS2]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_YELLOW}${LANG[WARP_NO_WARP_SETTINGS2]}${COLOR_RESET}"
+            fi
+
+            local update_response=$(make_api_request "PATCH" "${domain_url}/api/config-profiles" "$token" "{\"uuid\": \"$selected_uuid\", \"config\": $config_json}")
+            if [ -z "$update_response" ] || ! echo "$update_response" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[WARP_UPDATE_FAIL]}: Invalid response${COLOR_RESET}"
+                return 1
+            fi
+
+            echo -e "${COLOR_GREEN}${LANG[WARP_DELETE_SUCCESS]}${COLOR_RESET}"
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE]}${COLOR_RESET}"
+            ;;
+    esac
+}
 
 #Manage IPv6
 show_ipv6_menu() {
@@ -1631,6 +1881,13 @@ show_template_menu() {
 }
 
 manage_template_upload() {
+    if ! docker ps -a --filter "name=remnawave" --format '{{.Names}}' | grep -q "^remnawave$"; then
+        printf "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}\n" "remnawave"
+        sleep 2
+        log_clear
+        exit 1
+    fi
+    
     show_template_menu
     reading "${LANG[SELECT_TEMPLATE_CUSTOM]}" TEMPLATE_OPTION
     case $TEMPLATE_OPTION in
@@ -1673,40 +1930,14 @@ manage_template_upload() {
 
 restore_default_templates() {
     echo -e "${COLOR_YELLOW}${LANG[RESTORING_DEFAULT_TEMPLATES]}${COLOR_RESET}"
-    sleep 1
 
     local domain_url="127.0.0.1:3000"
-    TOKEN_FILE="${DIR_REMNAWAVE}token"
     TEMP_DIR="/tmp/remnawave_templates"
 
+    get_panel_token
+    token=$(cat "$TOKEN_FILE")
+
     mkdir -p "$TEMP_DIR"
-
-    if [ -f "$TOKEN_FILE" ]; then
-        token=$(cat "$TOKEN_FILE")
-        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
-            token=""
-        fi
-    fi
-
-    if [ -z "$token" ]; then
-        reading "${LANG[ENTER_PANEL_USERNAME]}" username
-        reading "${LANG[ENTER_PANEL_PASSWORD]}" password
-
-        local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "{\"username\":\"$username\",\"password\":\"$password\"}")
-        token=$(echo "$login_response" | jq -r '.response.accessToken')
-        if [ -z "$token" ] || [ "$token" == "null" ]; then
-            echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}: $login_response${COLOR_RESET}"
-            exit 1
-        fi
-
-        echo "$token" > "$TOKEN_FILE"
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
-    fi
 
     local template_configs=(
         "CLASH|https://raw.githubusercontent.com/remnawave/templates/refs/heads/main/remnawave-default/subscription-templates/clash.yaml|yaml"
@@ -1828,63 +2059,11 @@ update_subscription_template() {
     local template_url="$2"
     local is_yaml_template="$3" # "true" for YAML, "false" for JSON
     local domain_url="127.0.0.1:3000"
-    TOKEN_FILE="${DIR_REMNAWAVE}token"
-    ENV_FILE="/opt/remnawave/.env"
 
     echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
-    sleep 1
 
-        local telegram_oauth_enabled=false
-    if [ -f "$ENV_FILE" ]; then
-        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
-            telegram_oauth_enabled=true
-        fi
-    fi
-
-    if [ -f "$TOKEN_FILE" ]; then
-        token=$(cat "$TOKEN_FILE")
-        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
-            token=""
-        fi
-    fi
-
-    if [ -z "$token" ]; then
-        if [ "$telegram_oauth_enabled" = true ]; then
-            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
-            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
-            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
-            reading "${LANG[ENTER_API_TOKEN]}" token
-            if [ -z "$token" ]; then
-                echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
-                exit 1
-            fi
-
-            local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
-            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
-                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
-                exit 1
-            fi
-        else
-            reading "${LANG[ENTER_PANEL_USERNAME]}" username
-            reading "${LANG[ENTER_PANEL_PASSWORD]}" password
-
-            local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "{\"username\":\"$username\",\"password\":\"$password\"}")
-            token=$(echo "$login_response" | jq -r '.response.accessToken')
-            if [ -z "$token" ] || [ "$token" == "null" ]; then
-                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}: $login_response${COLOR_RESET}"
-                exit 1
-            fi
-        fi
-
-        echo "$token" > "$TOKEN_FILE"
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
-    fi
+    get_panel_token
+    token=$(cat "$TOKEN_FILE")
 
     local template_content=$(curl -s "$template_url")
     if [ -z "$template_content" ]; then
@@ -1974,20 +2153,19 @@ show_sub_page_menu() {
 }
 
 manage_sub_page_upload() {
+    if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+        printf "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}\n" "remnawave-subscription-page"
+        sleep 2
+        log_clear
+        exit 1
+    fi
+    
     show_sub_page_menu
     reading "${LANG[SELECT_SUB_PAGE_CUSTOM]}" SUB_PAGE_OPTION
 
     local config_file="/opt/remnawave/app-config.json"
     local index_file="/opt/remnawave/index.html"
     local docker_compose_file="/opt/remnawave/docker-compose.yml"
-
-    if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-        echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-        sleep 2
-        log_clear
-        manage_sub_page_upload
-        return 1
-    fi
 
     case $SUB_PAGE_OPTION in
         1|2)
@@ -2037,7 +2215,6 @@ manage_sub_page_upload() {
                 return 1
             fi
 
-            # Пользовательский выбор app-config.json
             echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
             echo -e ""
             echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
@@ -2093,7 +2270,8 @@ manage_sub_page_upload() {
 
         0)
             echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
-            return 0
+            log_clear
+            manage_custom_legiz
             ;;
 
         *)
@@ -3016,6 +3194,64 @@ register_remnawave() {
     fi
 }
 
+get_panel_token() {
+    TOKEN_FILE="${DIR_REMNAWAVE}/token"
+    ENV_FILE="/opt/remnawave/.env"
+    local domain_url="127.0.0.1:3000"
+    
+    local telegram_oauth_enabled=false
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
+            telegram_oauth_enabled=true
+        fi
+    fi
+    
+    if [ -f "$TOKEN_FILE" ]; then
+        token=$(cat "$TOKEN_FILE")
+        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
+        local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
+            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+            token=""
+        fi
+    fi
+    
+    if [ -z "$token" ]; then
+        if [ "$telegram_oauth_enabled" = true ]; then
+            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
+            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
+            reading "${LANG[ENTER_API_TOKEN]}" token
+            if [ -z "$token" ]; then
+                echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
+                return 1
+            fi
+            
+            local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+                return 1
+            fi
+        else
+            reading "${LANG[ENTER_PANEL_USERNAME]}" username
+            reading "${LANG[ENTER_PANEL_PASSWORD]}" password
+            
+            local login_response=$(make_api_request "POST" "${domain_url}/api/auth/login" "" "{\"username\":\"$username\",\"password\":\"$password\"}")
+            token=$(echo "$login_response" | jq -r '.response.accessToken // .accessToken // ""')
+            if [ -z "$token" ] || [ "$token" == "null" ]; then
+                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}: $login_response${COLOR_RESET}"
+                return 1
+            fi
+        fi
+        
+        echo "$token" > "$TOKEN_FILE"
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+}
+
 get_public_key() {
     local domain_url=$1
     local token=$2
@@ -3486,6 +3722,7 @@ TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 # Only set if you want to use topics
 TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
+TELEGRAM_NOTIFY_CRM_THREAD_ID=
 
 ### FRONT_END ###
 # Used by CORS, you can leave it as * or place your domain there
@@ -3596,7 +3833,7 @@ services:
         max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1.1-alpine
+    image: valkey/valkey:8.1.3-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -3616,7 +3853,7 @@ services:
         max-file: '5'
 
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     network_mode: host
@@ -4040,6 +4277,7 @@ TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 # Only set if you want to use topics
 TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
+TELEGRAM_NOTIFY_CRM_THREAD_ID=
 
 ### FRONT_END ###
 # Used by CORS, you can leave it as * or place your domain there
@@ -4150,7 +4388,7 @@ services:
         max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1.1-alpine
+    image: valkey/valkey:8.1.3-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -4170,7 +4408,7 @@ services:
         max-file: '5'
 
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -4500,7 +4738,7 @@ unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 cat > docker-compose.yml <<EOL
 services:
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -4641,24 +4879,14 @@ EOL
 #Install Node
 
 #Add Node to Panel
-generate_pretty_name() {
-    local adjectives=("Fast" "Silent" "Shadow" "Ghost" "Swift" "Hidden" "Clever" "Bright")
-    local nouns=("Node" "Wave" "Link" "Port" "Stream" "Hub" "Gate" "Core")
-    local rand_adj=${adjectives[$RANDOM % ${#adjectives[@]}]}
-    local rand_noun=${nouns[$RANDOM % ${#nouns[@]}]}
-    local rand_num=$(printf "%03d" $((RANDOM % 1000)))
-    echo "Steal-${rand_adj}${rand_noun}${rand_num}"
-}
-
 add_node_to_panel() {
-    TOKEN_FILE="${DIR_REMNAWAVE}token"
-    ENV_FILE="/opt/remnawave/.env"
-
-    echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+    local domain_url="127.0.0.1:3000"
+    
+    echo -e ""
     echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[WARNING_NODE_PANEL]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}${LANG[CONFIRM_SERVER_PANEL]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
+    echo -e ""
     echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CONFIRM_PROMPT]}${COLOR_RESET}"
     read confirm
     echo
@@ -4672,68 +4900,33 @@ add_node_to_panel() {
     sleep 1
 
     reading "${LANG[ENTER_NODE_DOMAIN]}" SELFSTEAL_DOMAIN
-    local target_dir="/opt/remnawave"
-    local domain_url="127.0.0.1:3000"
-
-    local telegram_oauth_enabled=false
-    if [ -f "$ENV_FILE" ]; then
-        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
-            telegram_oauth_enabled=true
-        fi
-    fi
-
-    if [ -f "$TOKEN_FILE" ]; then
-        token=$(cat "$TOKEN_FILE")
-        echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
-        local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
-            token=""
-        fi
-    fi
-
-    if [ -z "$token" ]; then
-        if [ "$telegram_oauth_enabled" = true ]; then
-            echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
-            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
-            printf "${COLOR_YELLOW}${LANG[CREATE_API_TOKEN_INSTRUCTION]}${COLOR_RESET}\n" "$PANEL_DOMAIN"
-            reading "${LANG[ENTER_API_TOKEN]}" token
-            if [ -z "$token" ]; then
-                echo -e "${COLOR_RED}${LANG[EMPTY_TOKEN_ERROR]}${COLOR_RESET}"
-                exit 1
-            fi
-
-            local test_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
-            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response' > /dev/null; then
-                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
-                exit 1
+    
+        while true; do
+        reading "${LANG[ENTER_NODE_NAME]}" entity_name
+        if [[ "$entity_name" =~ ^[a-zA-Z0-9-]+$ ]]; then
+            if [ ${#entity_name} -le 20 ]; then
+                get_panel_token
+                token=$(cat "$TOKEN_FILE")
+                local response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
+                
+                if echo "$response" | jq -e ".response.configProfiles[] | select(.name == \"$entity_name\")" > /dev/null; then
+                    echo -e "${COLOR_RED}$(printf "${LANG[CF_INVALID_NAME]}" "$entity_name")${COLOR_RESET}"
+                else
+                    break
+                fi
+            else
+                echo -e "${COLOR_RED}${LANG[CF_INVALID_LENGTH]}${COLOR_RESET}"
             fi
         else
-            reading "${LANG[ENTER_PANEL_USERNAME]}" username
-            reading "${LANG[ENTER_PANEL_PASSWORD]}" password
-
-            local login_response=$(make_api_request "POST" "http://$domain_url/api/auth/login" "" "{\"username\":\"$username\",\"password\":\"$password\"}")
-            token=$(echo "$login_response" | jq -r '.response.accessToken')
-            if [ -z "$token" ] || [ "$token" == "null" ]; then
-                echo -e "${COLOR_RED}${LANG[ERROR_TOKEN]}: $login_response${COLOR_RESET}"
-                exit 1
-            fi
+            echo -e "${COLOR_RED}${LANG[CF_INVALID_CHARS]}${COLOR_RESET}"
         fi
-
-        echo "$token" > "$TOKEN_FILE"
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
-    else
-        echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
-    fi
+    done
 
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     local keys=$(generate_xray_keys)
     local private_key=$(echo "$keys" | awk '{print $1}')
     local public_key=$(echo "$keys" | awk '{print $2}')
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
-
-    local entity_name=$(generate_pretty_name | cut -c 1-20)
 
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
     read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$entity_name" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key" "$entity_name")
@@ -4789,8 +4982,7 @@ case $OPTION in
         show_panel_node_menu
         ;;
     4)
-        if [ ! -d "/opt/remnawave" ] && [ ! -d "/root/remnawave" ]; then
-            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
+        if [ ! -d "/opt/remnawave" ]; then
             echo -e "${COLOR_YELLOW}${LANG[NO_PANEL_NODE_INSTALLED]}${COLOR_RESET}"
             exit 1
         else
@@ -4827,24 +5019,30 @@ case $OPTION in
         remnawave_reverse
         ;;
     6)
-        manage_ipv6
+        manage_warp
         sleep 2
         log_clear
         remnawave_reverse
         ;;
     7)
-        manage_certificates
+        manage_ipv6
         sleep 2
         log_clear
         remnawave_reverse
         ;;
     8)
-        update_remnawave_reverse
+        manage_certificates
         sleep 2
         log_clear
         remnawave_reverse
         ;;
     9)
+        update_remnawave_reverse
+        sleep 2
+        log_clear
+        remnawave_reverse
+        ;;
+    10)
         remove_script
         ;;
     0)
