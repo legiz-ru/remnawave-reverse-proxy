@@ -84,7 +84,7 @@
 Для настройки сервера запустите на нём эту команду:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy.png" alt="Image"></a></p>
 
