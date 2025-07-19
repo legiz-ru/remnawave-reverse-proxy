@@ -111,6 +111,7 @@ set_language() {
                 [WARP_PROMPT]="Select action (0-4):"
                 [WARP_PROMPT1]="Select action:"
                 [WARP_INVALID_CHOICE]="Invalid choice. Please select 0-4."
+                [WARP_INVALID_CHOICE2]="Invalid choice."
                 [WARP_NO_NODE]="Node Remnawave not found. First install the node."
                 [WARP_SELECT_CONFIG]="Select node to add WARP-configuration?"
                 [WARP_SELECT_CONFIG_DELETE]="Select node to remove WARP-configuration?"
@@ -470,6 +471,7 @@ set_language() {
                 [WARP_PROMPT]="Выберите действие (0-4):"
                 [WARP_PROMPT1]="Выберите действие:"
                 [WARP_INVALID_CHOICE]="Неверный выбор. Выберите 0-4."
+                [WARP_INVALID_CHOICE2]="Неверный выбор."
                 [WARP_NO_NODE]="Нода Remnawave не найдена. Сначала установите ноду."
                 [WARP_SELECT_CONFIG]="На какую ноду добавить WARP-настройки?"
                 [WARP_SELECT_CONFIG_DELETE]="На какой ноде удалить WARP-настройки?"
@@ -1576,10 +1578,12 @@ manage_warp() {
 
             if [ "$CONFIG_OPTION" == "0" ]; then
                 echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+                return 0
             fi
 
             if [ -z "${config_map[$CONFIG_OPTION]}" ]; then
-                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE]}${COLOR_RESET}"
+                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE2]}${COLOR_RESET}"
+                return 1
             fi
 
             local selected_uuid=${config_map[$CONFIG_OPTION]}
@@ -1641,6 +1645,7 @@ manage_warp() {
             local domain_url="127.0.0.1:3000"
             
             echo -e ""
+            echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[WARP_CONFIRM_SERVER_PANEL]}${COLOR_RESET}"
             echo -e ""
             echo -e "${COLOR_GREEN}[?]${COLOR_RESET} ${COLOR_YELLOW}${LANG[CONFIRM_PROMPT]}${COLOR_RESET}"
@@ -1699,7 +1704,7 @@ manage_warp() {
             fi
 
             if [ -z "${config_map[$CONFIG_OPTION]}" ]; then
-                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE]}${COLOR_RESET}"
+                echo -e "${COLOR_RED}${LANG[WARP_INVALID_CHOICE2]}${COLOR_RESET}"
                 return 1
             fi
 
