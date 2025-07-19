@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.8 DEV"
+SCRIPT_VERSION="1.7.9 DEV"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
@@ -271,7 +271,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 [CREATE_NEW_NODE]="Creating new node for %s..."
                 [CF_INVALID_NAME]="Error: The name of the configuration profile %s is already in use.\nPlease choose another name."
-                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should not exceed 20 characters."
+                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should contain from 5 to 20 characters."
                 [CF_INVALID_CHARS]="Error: The name of the configuration profile should contain only English letters, numbers, and hyphens."
                 #check
                 [CHECK_UPDATE]="Check for updates"
@@ -591,6 +591,10 @@ set_language() {
                 [ERROR_PUBLIC_KEY]="Не удалось получить публичный ключ."
                 [ERROR_EXTRACT_PUBLIC_KEY]="Не удалось извлечь публичный ключ из ответа."
                 [ERROR_GENERATE_KEYS]="Не удалось сгенерировать ключи."
+                [ERROR_NO_CONFIGS]="Не найдены профили конфигураций"
+                [NO_DEFAULT_PROFILE]="Default-Profile не найден"
+                [ERROR_DELETE_PROFILE]="Не удалось удалить профиль"
+                [DELETE_PROFILE_SUCCESS]="Конфигурационный профиль успешно удалён"
                 [ERROR_EMPTY_RESPONSE_NODE]="Пустой ответ от сервера при создании ноды."
                 [ERROR_CREATE_NODE]="Не удалось создать ноду."
                 [ERROR_EMPTY_RESPONSE_HOST]="Пустой ответ от сервера при создании хоста."
@@ -631,7 +635,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 [CREATE_NEW_NODE]="Создаём новую ноду для %s"
                 [CF_INVALID_NAME]="Ошибка: Имя конфигурационного профиля %s уже используется.\nПожалуйста, выберите другое имя."
-                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля не должно превышать 20 символов."
+                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля должно содержать от 5 до 20 символов."
                 [CF_INVALID_CHARS]="Ошибка: Имя конфигурационного профиля должно содержать только английские буквы, цифры и дефис."
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
@@ -2915,6 +2919,7 @@ show_manage_certificates() {
     echo -e "${COLOR_YELLOW}2. ${LANG[CERT_GENERATE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
 }
 
 manage_certificates() {
@@ -3392,6 +3397,47 @@ EOF
     else
         echo -e "${COLOR_RED}${LANG[ERROR_CREATE_NODE]}${COLOR_RESET}"
     fi
+}
+
+get_config_profiles() {
+    local domain_url="$1"
+    local token="$2"
+
+    local config_response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
+    if [ -z "$config_response" ] || ! echo "$config_response" | jq -e '.' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_NO_CONFIGS]}${COLOR_RESET}"
+        return 1
+    fi
+
+    local profile_uuid=$(echo "$config_response" | jq -r '.response.configProfiles[] | select(.name == "Default-Profile") | .uuid' 2>/dev/null)
+    if [ -z "$profile_uuid" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_DEFAULT_PROFILE]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo "$profile_uuid"
+    return 0
+}
+
+delete_config_profile() {
+    local domain_url="$1"
+    local token="$2"
+    local profile_uuid="$3"
+
+    if [ -z "$profile_uuid" ]; then
+        profile_uuid=$(get_config_profiles "$domain_url" "$token")
+        if [ $? -ne 0 ] || [ -z "$profile_uuid" ]; then
+            return 0
+        fi
+    fi
+
+    local delete_response=$(make_api_request "DELETE" "http://$domain_url/api/config-profiles/$profile_uuid" "$token")
+    if [ -z "$delete_response" ] || ! echo "$delete_response" | jq -e '.' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_DELETE_PROFILE]}${COLOR_RESET}"
+        return 1
+    fi
+
+    return 0
 }
 
 create_config_profile() {
@@ -4195,6 +4241,9 @@ EOL
     local public_key=$(echo "$keys" | awk '{print $2}')
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
+    # Delete default config profile
+    delete_config_profile "$domain_url" "$token"
+
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
     read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
@@ -4692,6 +4741,9 @@ EOL
     local public_key=$(echo "$keys" | awk '{print $2}')
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
+    # Delete default config profile
+    delete_config_profile "$domain_url" "$token"
+
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
     read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
@@ -4959,7 +5011,7 @@ add_node_to_panel() {
         while true; do
         reading "${LANG[ENTER_NODE_NAME]}" entity_name
         if [[ "$entity_name" =~ ^[a-zA-Z0-9-]+$ ]]; then
-            if [ ${#entity_name} -le 20 ]; then
+            if [ ${#entity_name} -ge 5 ] && [ ${#entity_name} -le 20 ]; then
                 get_panel_token
                 token=$(cat "$TOKEN_FILE")
                 local response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
