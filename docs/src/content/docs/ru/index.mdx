@@ -1,0 +1,36 @@
+---
+title: Remnawave Reverse-Proxy
+description: The script for deploying Remnawave and reverse-proxy server using Nginx
+template: splash
+hero:
+  tagline: The script for deploying Remnawave and reverse-proxy server using Nginx
+  image:
+    file: ../../../assets/logo.png
+  actions:
+    - text: Get Started
+      link: /introduction/overview
+      icon: right-arrow
+    - text: View releases
+      link: https://github.com/eGamesAPI/remnawave-reverse-proxy/releases
+      icon: github
+      variant: secondary
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Next steps
+
+<CardGrid stagger>
+	<Card title="Caution" icon="error">
+		This repository is an educational example for learning Nginx, Reverse-proxy and network security basics. This script demonstrates Nginx configuration as a reverse-proxy.
+	</Card>
+	<Card title="Server Uses Nginx Reverse-Proxy" icon="seti:powershell">
+		This script is designed to streamline the setup of a reverse proxy server using NGINX and Xray, as well as to automate the installation of the Remnawave control panel and node.
+	</Card>
+	<Card title="Script's configuration" icon="seti:config">
+		In this configuration, Xray operates directly on port 443, forwarding traffic through a socket that NGINX listens to. This approach minimizes unnecessary TCP overhead, delivering improved performance and connection reliability.
+	</Card>
+	<Card title="Attention!" icon="warning">
+		Not for prod and not for production use! If you don't understand how the control panel works - that's your problem, not the script author's. Use at your own risk!
+	</Card>
+</CardGrid>

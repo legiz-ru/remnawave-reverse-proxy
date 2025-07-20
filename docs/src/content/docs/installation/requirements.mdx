@@ -1,0 +1,75 @@
+---
+title: Requirements
+description: Getting things ready before installing Remnawave components
+---
+
+## Domain Configuration
+The script supports two methods of domain configuration: via [Cloudflare](https://dash.cloudflare.com/) or using ACME with your hosting provider.
+
+### DNS Records Setup for Panel + Node on the Same Server
+
+| Type  | Name              | Content          | Proxy status  |
+| ----- | ----------------- | ---------------- | ------------- |
+| A     | example.com       | your_server_ip   | DNS only      |
+| CNAME | panel.example.com | example.com      | DNS only      |
+| CNAME | sub.example.com   | example.com      | DNS only      |
+| CNAME | node.example.com  | example.com      | DNS only      |
+
+:::tip
+The node.example.com record is not mandatory for a selfsteal node — you can also use example.com for selfsteal.
+:::
+
+### DNS Records Setup for Panel and Node on Separate Servers
+
+| Type  | Name              | Content                 | Proxy status  |
+| ----- | ----------------- | ----------------------- | ------------- |
+| A     | example.com       | your_server_ip          | DNS only      |
+| CNAME | panel.example.com | example.com             | DNS only      |
+| CNAME | sub.example.com   | example.com             | DNS only      |
+| A     | node.example.com  | your_server_ip_vps_node | DNS only      |
+
+## Adding mirrors for Docker :badge[New]
+
+:::note
+This step is **optional** and only needed if you encounter [issues with pulling images](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40).
+:::
+
+In some cases like [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40) servers can't pull the images, especially which are located in Russia.
+To fix this issue, you can add mirrors:
+
+1. Create `daemon.json` file:
+
+```bash
+nano /etc/docker/daemon.json
+```
+
+2. Import mirrors
+
+```json
+{
+   "log-driver": "local",
+   "registry-mirrors": [
+      "https://mirror.gcr.io/",
+      "https://dockerhub.timeweb.cloud"
+   ]
+}
+```
+
+3. Restart Docker service to apply made changes
+
+```bash
+systemctl restart docker
+```
+
+## Server Setup
+
+To set up the server, run this command on it:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+<p align="center">
+  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
+</p>
+
+Follow the instructions in the next pages to complete the setup.

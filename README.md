@@ -100,6 +100,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 >
 >**If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.**
 
+## Telegram chat
+
+Join our [Telegram chat](https://t.me/remnawave_reverse) to ask questions and discuss the project with other users.
+
 ## Donations
 
 If you enjoy this project and want to support its ongoing development, please consider making a donation. Your contribution helps fund future updates and enhancements!
