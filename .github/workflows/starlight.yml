@@ -37,3 +37,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+# https://github.com/30DaysOf/astro-starlight-ghpages/
+# https://docs.astro.build/en/guides/deploy/github/
