@@ -1,0 +1,75 @@
+---
+title: Обязательные требования
+description: Подготовка к установке компонентов Remnawave
+---
+
+## Настройка домена
+Скрипт поддерживает два метода настройки домена: через [Cloudflare](https://dash.cloudflare.com/) или с использованием ACME с вашим хостинг-провайдером.
+
+### DNS записи для панели и ноды на одном сервере
+
+| Type  | Name              | Content          | Proxy status  |
+| ----- | ----------------- | ---------------- | ------------- |
+| A     | example.com       | your_server_ip   | DNS only      |
+| CNAME | panel.example.com | example.com      | DNS only      |
+| CNAME | sub.example.com   | example.com      | DNS only      |
+| CNAME | node.example.com  | example.com      | DNS only      |
+
+:::tip
+Запись node.example.com не является обязательной для узла самостийного — вы также можете использовать example.com для selfsteal.
+:::
+
+### DNS записи для панели и ноды на разных серверах
+
+| Type  | Name              | Content                 | Proxy status  |
+| ----- | ----------------- | ----------------------- | ------------- |
+| A     | example.com       | your_server_ip          | DNS only      |
+| CNAME | panel.example.com | example.com             | DNS only      |
+| CNAME | sub.example.com   | example.com             | DNS only      |
+| A     | node.example.com  | your_server_ip_vps_node | DNS only      |
+
+## Добавление зеркал для Docker :badge[New]
+
+:::note
+Этот шаг является **необязательным** и нужен только в том случае, если вы столкнулись с [проблемами с загрузкой образов](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40).
+:::
+
+В некоторых случаях, таких как [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40), серверы не могут загрузить образы, особенно те, которые расположены в России.
+Чтобы исправить эту проблему, вы можете добавить зеркала:
+
+1. Создайте файл `daemon.json`:
+
+```bash
+nano /etc/docker/daemon.json
+```
+
+2. Импортируйте зеркала
+
+```json
+{
+   "log-driver": "local",
+   "registry-mirrors": [
+      "https://mirror.gcr.io/",
+      "https://dockerhub.timeweb.cloud"
+   ]
+}
+```
+
+3. Перезапустите службу Docker, чтобы применить внесенные изменения
+
+```bash
+systemctl restart docker
+```
+
+## Настройка сервера
+
+Чтобы настроить сервер, выполните эту команду на нем:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+<p align="center">
+  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
+</p>
+
+Следуйте инструкциям на следующих страницах, чтобы завершить настройку.

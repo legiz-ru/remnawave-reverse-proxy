@@ -44,25 +44,25 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
-					label: 'Introduction',
+					label: 'Introduction', translations: { ru: 'Введение' },
 					items: [
-						{ label: 'Overview', slug: 'introduction/overview' },
+						{ label: 'Overview', slug: 'introduction/overview', translations: { ru: 'Обзор' } },
 					],
 				},
 				{
-					label: 'Installation',
+					label: 'Installation', translations: { ru: 'Установка' },
 					items: [
-						{ label: 'Requirements', slug: 'installation/requirements' },
-						{ label: 'Panel and node', slug: 'installation/panel-and-node' },
-						{ label: 'Panel only', slug: 'installation/panel-only' },
-						{ label: 'Node only', slug: 'installation/node-only' },
+						{ label: 'Requirements', slug: 'installation/requirements', translations: { ru: 'Обязательные условия' } },
+						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' } },
+						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' } },
+						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' } },
 					],
 				},
 				{
-					label: 'Contribution',
+					label: 'Contribution', translations: { ru: 'Помощь в разработке' },
 					items: [
-						{ label: 'Contributors', slug: 'contribution/contributors' },
-						{ label: 'Contribution Guide', slug: 'contribution/guide', badge: {text: 'New', variant: 'success'} },
+						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' } },
+						{ label: 'Contribution Guide', slug: 'contribution/guide', badge: {text: 'New', variant: 'success'}, translations: { ru: 'Руководство по внесению изменений' } },
 					],
 				},
 			],
