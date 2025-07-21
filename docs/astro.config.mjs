@@ -3,10 +3,11 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightHeadingBadges from 'starlight-heading-badges';
 import starlightScrollToTop from 'starlight-scroll-to-top';
-import starlightCoolerCredit from 'starlight-cooler-credit'; // This plugin is not used in the current configuration
+import starlightCoolerCredit from 'starlight-cooler-credit'; // This plugin is not used in the current configuration, but supposed to shown on Contribution guide page
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://wiki.egam.es',
 	integrations: [
 		starlight({
 			plugins: [
@@ -35,7 +36,7 @@ export default defineConfig({
 				},
 			},
 			editLink: {
-				baseUrl: "https://github.com/eGamesAPI/remnawave-reverse-proxy/edit/main/",
+				baseUrl: "https://github.com/eGamesAPI/remnawave-reverse-proxy/edit/main/docs/",
 			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/eGamesAPI/remnawave-reverse-proxy/' },
@@ -68,7 +69,7 @@ export default defineConfig({
 				{
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
-						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: 'New', variant: 'success'} },
+						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: 'WIP', variant: 'caution'} },
 						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
