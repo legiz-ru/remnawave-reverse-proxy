@@ -1,0 +1,42 @@
+---
+title: Node only
+description: Instructions for installing the RemnaWave node on your server.
+---
+
+import { LinkButton } from '@astrojs/starlight/components';
+
+## Running the script
+
+:::danger
+You must **always** run the script only as root, not under sudo privileges.
+:::
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+<p align="center">
+  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
+</p>
+
+Right after first run of script you'll be able to access the script with easy shortcut:
+
+```bash
+rr
+```
+
+## Updating the script
+
+Make sure to update the script before running things in it. You can do this by selecting `Check for updates` in the script menu or by viewing the GitHub repository for updates.
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+    icon="github"
+    iconPlacement="start"
+>
+    View latest release
+</LinkButton>
+
+## Installing node only
+
+To install the node, run the script and select the `Node only` option. The script will guide you through the installation process.

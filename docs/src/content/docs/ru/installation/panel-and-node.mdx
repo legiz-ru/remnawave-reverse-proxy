@@ -1,0 +1,47 @@
+---
+title: Панель и нода
+description: Инструкции по установке панели и ноды RemnaWave на вашем сервере.
+---
+
+import { LinkButton } from '@astrojs/starlight/components';
+
+## Запуск скрипта
+
+:::danger
+Вы должны **всегда** запускать скрипт только от имени root, не с правами sudo.
+:::
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+<p align="center">
+  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
+</p>
+
+После первого запуска скрипта вы сможете получить доступ к скрипту с помощью простой команды:
+
+```bash
+rr
+```
+
+## Обновление скрипта
+
+Убедитесь, что вы обновили скрипт перед выполнением каких-либо действий в нем. Вы можете сделать это, выбрав `Проверить обновления` в меню скрипта или просмотрев репозиторий GitHub на наличие обновлений.
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+    icon="github"
+    iconPlacement="start"
+>
+    Посмотреть последнее обновление
+</LinkButton>
+
+## Установка панели и ноды
+
+:::danger
+Этот метод установки не рекомендуется для производственных сред, так как он даже не документирован в документации Remnawave.  
+Для лучшего опыта, пожалуйста, используйте методы установки `Только панель` и `Только нода`, в зависимости от того, хотите ли вы установить панель или ноду.
+:::
+
+Чтобы установить панель и ноду, запустите скрипт и выберите опцию `Панель и нода`. Скрипт проведет вас через процесс установки.
