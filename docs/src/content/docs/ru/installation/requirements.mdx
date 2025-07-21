@@ -37,29 +37,33 @@ description: Подготовка к установке компонентов R
 В некоторых случаях, таких как [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40), серверы не могут загрузить образы, особенно те, которые расположены в России.
 Чтобы исправить эту проблему, вы можете добавить зеркала:
 
+<Steps>
+
 1. Создайте файл `daemon.json`:
 
-```bash
-nano /etc/docker/daemon.json
-```
+   ```bash
+   nano /etc/docker/daemon.json
+   ```
 
 2. Импортируйте зеркала
 
-```json
-{
-   "log-driver": "local",
-   "registry-mirrors": [
-      "https://mirror.gcr.io/",
-      "https://dockerhub.timeweb.cloud"
-   ]
-}
-```
+   ```json
+   {
+      "log-driver": "local",
+      "registry-mirrors": [
+         "https://mirror.gcr.io/",
+         "https://dockerhub.timeweb.cloud"
+      ]
+   }
+   ```
 
 3. Перезапустите службу Docker, чтобы применить внесенные изменения
 
-```bash
-systemctl restart docker
-```
+   ```bash
+   systemctl restart docker
+   ```
+
+</Steps>
 
 ## Настройка сервера
 

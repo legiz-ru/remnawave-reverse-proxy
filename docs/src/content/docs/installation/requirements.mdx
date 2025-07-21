@@ -3,6 +3,8 @@ title: Requirements
 description: Getting things ready before installing Remnawave components
 ---
 
+import { Steps } from '@astrojs/starlight/components';
+
 ## Domain Configuration
 The script supports two methods of domain configuration: via [Cloudflare](https://dash.cloudflare.com/) or using ACME with your hosting provider.
 
@@ -37,29 +39,33 @@ This step is **optional** and only needed if you encounter [issues with pulling 
 In some cases like [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40) servers can't pull the images, especially which are located in Russia.
 To fix this issue, you can add mirrors:
 
+<Steps>
+
 1. Create `daemon.json` file:
 
-```bash
-nano /etc/docker/daemon.json
-```
+   ```bash
+   nano /etc/docker/daemon.json
+   ```
 
 2. Import mirrors
 
-```json
-{
-   "log-driver": "local",
-   "registry-mirrors": [
-      "https://mirror.gcr.io/",
-      "https://dockerhub.timeweb.cloud"
-   ]
-}
-```
+   ```json
+   {
+      "log-driver": "local",
+      "registry-mirrors": [
+         "https://mirror.gcr.io/",
+         "https://dockerhub.timeweb.cloud"
+      ]
+   }
+   ```
 
 3. Restart Docker service to apply made changes
 
-```bash
-systemctl restart docker
-```
+   ```bash
+   systemctl restart docker
+   ```
+
+</Steps>
 
 ## Server Setup
 

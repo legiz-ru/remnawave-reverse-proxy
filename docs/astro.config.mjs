@@ -53,16 +53,30 @@ export default defineConfig({
 					label: 'Installation', translations: { ru: 'Установка' },
 					items: [
 						{ label: 'Requirements', slug: 'installation/requirements', translations: { ru: 'Обязательные условия' } },
-						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' } },
-						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' } },
-						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' } },
+						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: 'WIP', variant: 'caution'} },
+						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: 'WIP', variant: 'caution'} },
+						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: 'WIP', variant: 'caution'} },
+					],
+				},
+				{
+					label: 'Configuration', translations: { ru: 'Настройка' },
+					items: [
+						{ label: 'Prometheus access for metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Настройка доступа Prometheus для метрик' } },
+						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Настройка внешнего доступа к API' } },
+					],
+				},
+				{
+					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
+					items: [
+						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Общие проблемы' } },
+						{ label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
 				{
 					label: 'Contribution', translations: { ru: 'Помощь в разработке' },
 					items: [
 						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' } },
-						{ label: 'Contribution Guide', slug: 'contribution/guide', badge: {text: 'New', variant: 'success'}, translations: { ru: 'Руководство по внесению изменений' } },
+						{ label: 'Contribution Guide', slug: 'contribution/guide', translations: { ru: 'Руководство по внесению изменений' }, badge: {text: 'New', variant: 'success'} },
 					],
 				},
 			],
