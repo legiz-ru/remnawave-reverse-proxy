@@ -26,6 +26,6 @@ location ^~ /api/ {
 
 This opens access to the API from the outside, while the API will still be protected by an authorization token.
 
-:::danger[Важно]
+:::danger
 Right after this, in the `.env` file, replace the line `IS_DOCS_ENABLED=true` with `IS_DOCS_ENABLED=false` to avoid "exposing" the documentation to the external internet.
 :::
