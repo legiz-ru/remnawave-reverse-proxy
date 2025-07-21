@@ -83,3 +83,11 @@ export default defineConfig({
 		}),
 	],
 });
+
+
+
+// TODO:
+// 1. complete all pages marked as WIP
+// 2. add more content to the "Common Issues" page
+// 3. make the design of welcome page more comfortable? reference: https://pls.cli.rs/
+// 4. add repository stars at the right top corner of the page
