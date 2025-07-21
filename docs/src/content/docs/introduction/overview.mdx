@@ -3,7 +3,14 @@ title: Overview
 description: An introduction containing description about the script and its content
 ---
 
-![Banner](../../../assets/banner.png)
+import { Image } from 'astro:assets';
+import darkBanner from '../../../assets/banner.png';
+import lightBanner from '../../../assets/banner-black.png';
+
+<p align="center"><a href="https://github.com/eGamesAPI/remnawave-reverse-proxy">
+    <img src={lightBanner.src} alt="Remnawave Reverse Proxy" class="light-banner" />
+    <img src={darkBanner.src} alt="Remnawave Reverse Proxy" class="dark-banner" />
+</a></p>
 
 :::danger
 THIS REPOSITORY IS AN EDUCATIONAL EXAMPLE FOR LEARNING NGINX, REVERSE PROXY AND NETWORK SECURITY BASICS. THIS SCRIPT DEMONSTRATES NGINX CONFIGURATION AS A REVERSE PROXY. NOT FOR PROD AND NOT FOR PRODUCTION USE! IF YOU DON'T UNDERSTAND HOW THE CONTROL PANEL WORKS - THAT'S YOUR PROBLEM, NOT THE SCRIPT AUTHOR'S. USE AT YOUR OWN RISK!
