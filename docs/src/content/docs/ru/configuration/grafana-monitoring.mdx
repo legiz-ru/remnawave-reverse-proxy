@@ -6,7 +6,7 @@ description: Как настроить мониторинг через Grafana �
 import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
-Автор: **[OMchik33](../contribution/resources#omchik33)**  
+Автор: **[OMchik33](../../contribution/resources#omchik33)**  
 Полная инструкция по настройке мониторинга панели [Remnawave](https://remna.st) с помощью Prometheus, Grafana и Node Exporter, а также безопасного доступа к метрикам через SSH-туннель* и Nginx.
 
 **Туннель нужен если метрики закрыты по куки авторизации, например при установке Remnawave по скрипту eGames)*
@@ -238,127 +238,86 @@ remnawave:
 
 ## 🌐 Настройка Nginx и SSL
 
-:::caution{icon="setting"}
-Если вы используете `remnawave-nginx`, то этапы ниже не являются обязательными.  
-Установленный через скрипт eGames'а, `remnawave-nginx` уже включает в себя настроенный Nginx и SSL-сертификаты, отредактируйте существующий файл конфигурации в директории.
-:::
-
-<Steps>
-
-1. Установка Nginx
-
-    ```bash
-    apt install nginx
-    ```
-
-2. Получение SSL-сертификатов
-
-    ```bash
-    sudo apt install certbot python3-certbot-nginx
-    sudo certbot --nginx -d sub.mydomain.com
-    ```
-
-3. Автообновление
-
-    ```bash
-    0 5 * * * root certbot renew --quiet
-    ```
-
-</Steps>
-
-
-<details>
-  <summary>Пример конфигурации nginx</summary>
+Пример конфигурации Nginx
 
 ```
-# Проверка по cookie
+upstream grafana {
+    server 127.0.0.1:3020;
+}
+
+upstream prometheus {
+    server 127.0.0.1:9100;
+}
+
+upstream xray-checker {
+    server 127.0.0.1:2113;
+}
+
 map $http_cookie $auth_cookie {
     default 0;
     "~*fd4gd54fg2dfg4241=1" 1;
 }
 
-# Проверка по GET-параметру
 map $arg_fd4gd54fg2dfg4241 $auth_query {
     default 0;
     "1" 1;
 }
 
-# Общий флаг авторизации
 map "$auth_cookie$auth_query" $authorized {
     "~1" 1;
     default 0;
 }
 
-# Установка куки, если есть параметр
 map $arg_fd4gd54fg2dfg4241 $set_cookie_header {
     "1" "fd4gd54fg2dfg4241=1; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=31536000";
     default "";
 }
 
-# HTTP редирект на HTTPS
 server {
-    listen 80;
     server_name sub.mydomain.com;
-    return 301 https://$server_name$request_uri;
-}
+    listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
+    http2 on;
 
-# HTTPS сервер блок
-server {
-    listen 443 ssl http2;
-    server_name sub.mydomain.com;
-    
-    # SSL конфигурация
-    ssl_certificate /etc/letsencrypt/live/sub.mydomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/sub.mydomain.com/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
+    ssl_certificate "/etc/nginx/ssl/mydomain.com/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/mydomain.com/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/mydomain.com/fullchain.pem";
 
-    # Устанавливаем куку, если пользователь авторизуется по ссылке
     add_header Set-Cookie $set_cookie_header;
 
-    # Редирект с основного домена сразу на нужный открытый дашбоард в Графане
     location = / {
         return 301 /grafana/public-dashboards/f5g4df4g5df4gd5f4g63d4834379e;
     }
 
-    # Grafana конфигурация
+    location /grafana/api/live/ {
+        proxy_pass http://grafana/api/live/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
     location /grafana {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://grafana;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $server_name;
-        
-        # WebSocket поддержка
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-
-        # Убираем Authorization header
         proxy_set_header Authorization "";
     }
 
-    # Grafana Live WebSocket
-    location /grafana/api/live/ {
-        proxy_pass http://localhost:3000/api/live/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # Prometheus
     location /prometheus/ {
         if ($authorized = 0) {
             return 404;
         }
 
-        proxy_pass http://localhost:9090/;
+        proxy_pass http://prometheus/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -367,13 +326,12 @@ server {
         proxy_set_header Authorization "";
     }
 
-    # Xray Checker
     location /checker/ {
         if ($authorized = 0) {
             return 404;
         }
 
-        proxy_pass http://localhost:2112/;
+        proxy_pass http://xray-checker/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -384,7 +342,6 @@ server {
 ```
 
 Здесь `sub.mydomain.com` - адрес домена, прикрепленного к тестовому VPS, на котором устанавливаются Графана и Прометей
-</details>
 
 ## 📊 Проверка и настройка Grafana
 
