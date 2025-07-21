@@ -7,7 +7,7 @@ description: Как настроить внешний доступ к API
 
 Добавляем в `nginx.conf` в блок сервера с доменом панели `server_name panel.domen.com;`
 
-```conf
+```
 location ^~ /api/ {
     proxy_http_version 1.1;
     proxy_pass http://remnawave;
