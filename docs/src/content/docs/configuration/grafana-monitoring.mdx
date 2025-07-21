@@ -1,0 +1,433 @@
+---
+title: Monitoring with Prometheus and Grafana
+description: How to set up monitoring with Grafana and Prometheus
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { LinkButton } from '@astrojs/starlight/components';
+
+Author: **[OMchik33](../contribution/resources#omchik33)**  
+Full guide on setting up monitoring for the [Remnawave](https://remna.st) panel using Prometheus, Grafana, and Node Exporter, as well as secure access to metrics via SSH tunnel and Nginx.
+
+**The tunnel is needed if the metrics are closed by authorization cookies, for example when installing Remnawave using the eGames script**
+
+## 📦 Setting up `docker-compose.yml` on the server with Remnawave
+
+Make sure that port `3001` is open in the `docker-compose.yml` file for Remnawave, through which the metrics are served:
+
+```yaml
+ports:
+  - '127.0.0.1:3001:3001'
+```
+
+<details>
+  <summary>Example configuration (installation option using the eGames script):</summary>
+
+```yaml
+remnawave:
+  image: remnawave/backend:latest
+  container_name: remnawave
+  hostname: remnawave
+  restart: always
+  env_file:
+    - .env
+  ports:
+    - '127.0.0.1:3000:3000'
+    - '127.0.0.1:3001:3001'
+  networks:
+    - remnawave-network
+  depends_on:
+    remnawave-db:
+      condition: service_healthy
+    remnawave-redis:
+      condition: service_healthy
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '30m'
+      max-file: '5'
+```
+
+</details>
+
+## 🔐 Setting up SSH tunnel
+
+:::note
+The setup is performed on the monitoring server
+:::
+
+<Steps>
+
+1. Generating a key without a password
+
+    ```bash
+    ssh-keygen -t ed25519 -f ~/.ssh/remna_tunnel_key
+    ```
+
+2. Adding the public key on the server with Remnawave, in the file `~/.ssh/authorized_keys`. Instead of `AAAAC3...`, insert the contents of `remna_tunnel_key.pub`, starting with `AAAAC3`
+
+    ```bash
+    from="IP_monitoring_server",no-pty,no-agent-forwarding,no-X11-forwarding,command="/bin/false" ssh-ed25519 AAAAC3... remna_tunnel_key
+    ```
+
+3. Installation of `autossh`: (continue on the monitoring server)
+
+    ```bash
+    sudo apt install autossh
+    ```
+
+4. Creating a systemd service `/etc/systemd/system/remna-tunnel.service`. Replace `remnauser@REMNA_SERVER_IP`, this is the ssh login and address of the Remnawave panel server
+
+    ```ini
+    [Unit]
+    Description=SSH tunnel to Remnawave for Prometheus and Node Exporter
+    After=network.target
+
+    [Service]
+    User=root
+    Environment="AUTOSSH_GATETIME=0"
+    ExecStart=/usr/bin/autossh -N \
+    -o "ServerAliveInterval 60" \
+    -o "ServerAliveCountMax 3" \
+    -i /root/.ssh/remna_tunnel_key \
+    -L 9001:localhost:3001 \
+    -L 9002:localhost:9100 \
+    remnauser@REMNA_SERVER_IP
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+5. Starting the service
+
+    ```bash
+    sudo systemctl daemon-reexec
+    sudo systemctl enable remna-tunnel
+    sudo systemctl start remna-tunnel
+    ```
+
+</Steps>
+
+Now the metrics of Remnawave and Node Exporter are available at `http://localhost:9001/metrics` and `http://localhost:9002/metrics`.
+
+## 📈 Installing Prometheus and Grafana
+
+<Steps>
+
+1. Creating directories
+
+    ```bash
+    mkdir -p /opt/monitoring/{grafana,prometheus}
+    ```
+
+2. Create the file `/opt/monitoring/docker-compose.yml`
+
+    ```yaml
+    services:
+    #  uptime-kuma:
+    #    image: louislam/uptime-kuma
+    #    container_name: uptime-kuma
+    #    restart: always
+    #    ports:
+    #      - "3001:3001"
+    #    volumes:
+    #      - ./uptime-kuma-data:/app/data
+    #    network_mode: host
+        
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        restart: unless-stopped
+        ports:
+        - "9090:9090"
+        volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - prometheus-data:/prometheus
+        command:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--web.console.libraries=/etc/prometheus/console_libraries'
+        - '--web.console.templates=/etc/prometheus/consoles'
+        - '--web.external-url=https://sub.mydomain.com/prometheus/'
+        - '--web.route-prefix=/'
+        network_mode: host
+
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana
+        restart: unless-stopped
+        ports:
+        - "3000:3000"
+        volumes:
+        - grafana-data:/var/lib/grafana
+        - ./grafana/provisioning:/etc/grafana/provisioning
+        environment:
+        - GF_SERVER_DOMAIN=yourdomain.com
+        - GF_SERVER_ROOT_URL=https://sub.mydomain.com/grafana
+        - GF_SERVER_SERVE_FROM_SUB_PATH=true
+        - GF_SERVER_HTTP_PORT=3000
+        - GF_SERVER_PROTOCOL=http
+        - GF_SECURITY_ADMIN_USER=admin
+        - GF_SECURITY_ADMIN_PASSWORD=admin
+        - GF_ANALYTICS_REPORTING_ENABLED=false
+        network_mode: host
+        
+    xray-checker:
+        image: kutovoys/xray-checker
+        environment:
+        - "SUBSCRIPTION_URL=https://sub.mydomain.com/user-id/"
+        - "PROXY_STATUS_CHECK_URL=http://google.com/generate_204"
+        - "PROXY_CHECK_INTERVAL=60"
+        ports:
+        - "2112:2112"
+        network_mode: host
+
+    volumes:
+    prometheus-data:
+    grafana-data:
+    ```
+
+</Steps>
+
+Where `sub.mydomain.com` is the domain name attached to the test VPS where Grafana and Prometheus are installed.
+
+`https://sub.mydomain.com/user-id/` is the profile/subscription, create a separate user for this role.
+
+## ⚙️ Configuring Prometheus
+
+<Steps>
+
+1. The file `/opt/monitoring/prometheus/prometheus.yml`. `username` and `password` from the `.env` file of Remnawave (section `### PROMETHEUS ###`)
+
+    ```yaml
+    global:
+    scrape_interval: 15s
+
+    scrape_configs:
+    - job_name: 'node_exporter'
+        static_configs:
+        - targets: ['127.0.0.1:9002']
+            labels:
+            label: "Remnaserver"
+    - job_name: 'integrations/node_exporter'
+        static_configs:
+        - targets: ['127.0.0.1:9001']
+            labels:
+            cluster: "test"
+            job: "integrations/node_exporter"
+            instance: "127.0.0.1:9001"
+        basic_auth:
+        username: "XXXXXXXXXXXXXXX"
+        password: "XXXXXXXXXXXXXXX"
+    - job_name: "xray-checker"
+        metrics_path: "/metrics"
+        static_configs:
+        - targets: ["localhost:2112"]
+        scrape_interval: 1m
+    ```
+
+2. Launch
+
+    ```bash
+    cd /opt/monitoring
+    docker compose up -d
+    ```
+
+</Steps>
+
+## 🌐 Configuring Nginx and SSL
+
+:::caution{icon="setting"}
+If you are using `remnawave-nginx`, the steps below are not mandatory.  
+Installed via the eGames script, `remnawave-nginx` already includes a configured Nginx and SSL certificates, edit the existing configuration file in the directory.
+:::
+
+<Steps>
+
+1. Installing Nginx
+
+    ```bash
+    apt install nginx
+    ```
+
+2. Obtaining SSL certificates
+
+    ```bash
+    sudo apt install certbot python3-certbot-nginx
+    sudo certbot --nginx -d sub.mydomain.com
+    ```
+
+3. Auto-renewal
+
+    ```bash
+    0 5 * * * root certbot renew --quiet
+    ```
+
+</Steps>
+
+
+<details>
+  <summary>Example Nginx configuration</summary>
+
+```
+# Check by cookie
+map $http_cookie $auth_cookie {
+    default 0;
+    "~*fd4gd54fg2dfg4241=1" 1;
+}
+
+# Check by GET parameter
+map $arg_fd4gd54fg2dfg4241 $auth_query {
+    default 0;
+    "1" 1;
+}
+
+# General authorization flag
+map "$auth_cookie$auth_query" $authorized {
+    "~1" 1;
+    default 0;
+}
+
+# Set cookie if parameter exists
+map $arg_fd4gd54fg2dfg4241 $set_cookie_header {
+    "1" "fd4gd54fg2dfg4241=1; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=31536000";
+    default "";
+}
+
+# HTTP redirects to HTTPS
+server {
+    listen 80;
+    server_name sub.mydomain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS server block
+server {
+    listen 443 ssl http2;
+    server_name sub.mydomain.com;
+
+    # SSL configuration
+    ssl_certificate /etc/letsencrypt/live/sub.mydomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/sub.mydomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Set cookie if user authenticates via link
+    add_header Set-Cookie $set_cookie_header;
+
+    # Redirect from main domain to the desired public dashboard in Grafana
+    location = / {
+        return 301 /grafana/public-dashboards/f5g4df4g5df4gd5f4g63d4834379e;
+    }
+
+    # Grafana configuration
+    location /grafana {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    
+        # Убираем Authorization header
+        proxy_set_header Authorization "";
+    }
+
+    # Grafana Live WebSocket
+    location /grafana/api/live/ {
+        proxy_pass http://localhost:3000/api/live/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Prometheus
+    location /prometheus/ {
+        if ($authorized = 0) {
+            return 404;
+        }
+
+        proxy_pass http://localhost:9090/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header Authorization "";
+    }
+
+    # Xray Checker
+    location /checker/ {
+        if ($authorized = 0) {
+            return 404;
+        }
+
+        proxy_pass http://localhost:2112/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+    }
+}
+```
+
+Where `sub.mydomain.com` is the domain name attached to the test VPS where Grafana and Prometheus are installed
+</details>
+
+## 📊 Verify and Configure Grafana
+
+- Go to: `https://sub.mydomain.com/grafana`
+- Login: `admin / admin`, then change the password
+- Add data source: **Prometheus**
+  - URL: `http://localhost:9090`
+- Go to **Explore → Metrics → Grafana Drilldown → Metrics**
+
+## 🧠 Node Exporter
+
+<Steps>
+
+1. Installation on the server with Remnawave:
+
+    ```bash
+    . <(wget -qO- https://raw.githubusercontent.com/g7AzaZLO/NodeExporter-autoinstaller/main/NodeExporter-auto-install.sh)
+    ```
+
+2. Node Exporter is available at `localhost:9002` (via SSH tunnel). It can be installed on other servers and added to `prometheus.yml`:
+
+    ```yaml
+    - job_name: 'external_nodes'
+    static_configs:
+        - targets: ['1.2.3.4:9100']
+    ```
+
+</Steps>
+
+Here `1.2.3.4` is the address of the next node where we also installed Node Exporter
+
+Or use SSH tunnels similarly.
+
+For visualization:
+
+- Dashboard ID: **1860**
+- [https://grafana.com/grafana/dashboards/1860](https://grafana.com/grafana/dashboards/1860)
+
+## 📙 Useful Links
+
+- [Remnawave Telegram metrics post #1](https://t.me/c/2409638119/3118)
+- [Remnawave Telegram metrics post #2](https://t.me/c/2409638119/43140)
+
+:::tip[Feedback]{icon="comment"}
+Feedback, suggestions, and edits are welcome via issues or pull requests.
+:::

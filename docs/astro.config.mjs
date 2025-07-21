@@ -62,8 +62,9 @@ export default defineConfig({
 				{
 					label: 'Configuration', translations: { ru: 'Настройка' },
 					items: [
-						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к Prometheus метркам' } },
-						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
+						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к Prometheus метркам' }, badge: {text: 'New', variant: 'default'} },
+						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' }, badge: {text: 'New', variant: 'default'} },
+						{ label: 'Monitoring with Grafana', slug: 'configuration/grafana-monitoring', translations: { ru: 'Мониторинг через Grafana' }, badge: {text: 'New', variant: 'default'} },
 					],
 				},
 				{
@@ -77,7 +78,7 @@ export default defineConfig({
 					label: 'Contribution', translations: { ru: 'Помощь в разработке' },
 					items: [
 						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' } },
-						{ label: 'Contribution Guide', slug: 'contribution/guide', translations: { ru: 'Руководство по внесению изменений' }, badge: {text: 'New', variant: 'success'} },
+						{ label: 'Contribution Guide', slug: 'contribution/guide', translations: { ru: 'Руководство по внесению изменений' }, badge: {text: 'New', variant: 'default'} },
 					],
 				},
 			],
