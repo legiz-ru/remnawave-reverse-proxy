@@ -1,0 +1,42 @@
+---
+title: Только панель
+description: Инструкции по установке панели RemnaWave на вашем сервере.
+---
+
+import { LinkButton } from '@astrojs/starlight/components';
+
+## Запуск скрипта
+
+:::danger
+Вы должны **всегда** запускать скрипт только от имени root, не с правами sudo.
+:::
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+<p align="center">
+  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
+</p>
+
+После первого запуска скрипта вы сможете получить доступ к скрипту с помощью простой команды:
+
+```bash
+rr
+```
+
+## Обновление скрипта
+
+Убедитесь, что вы обновили скрипт перед выполнением каких-либо действий в нем. Вы можете сделать это, выбрав `Проверить обновления` в меню скрипта или просмотрев репозиторий GitHub на наличие обновлений.
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+    icon="github"
+    iconPlacement="start"
+>
+    Посмотреть последнее обновление
+</LinkButton>
+
+## Установка только панель
+
+Чтобы установить панель, запустите скрипт и выберите опцию `Только панель`. Скрипт проведет вас через процесс установки.
