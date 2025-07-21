@@ -61,15 +61,15 @@ export default defineConfig({
 				{
 					label: 'Configuration', translations: { ru: 'Настройка' },
 					items: [
-						{ label: 'Prometheus access for metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Настройка доступа Prometheus для метрик' } },
-						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Настройка внешнего доступа к API' } },
+						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к Prometheus метркам' } },
+						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
 					],
 				},
 				{
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
-						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Общие проблемы' } },
-						{ label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
+						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: 'New', variant: 'success'} },
+						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
 				{
