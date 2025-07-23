@@ -7,14 +7,13 @@ import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
 Автор: **[OMchik33](../../contribution/resources#omchik33)**  
-Полная инструкция по настройке мониторинга панели [Remnawave](https://remna.st) с помощью Prometheus, Grafana и Node Exporter, а также безопасного доступа к метрикам через SSH-туннель* и Nginx.
+Полная инструкция по настройке мониторинга панели [Remnawave](https://remna.st) с помощью Prometheus, Grafana и Node Exporter, а также безопасного доступа к метрикам через SSH-туннель и Nginx.
 
-<blockquote>
-<strong>⚠️ Внимание:</strong><br>
-Инструкция описывает установку сервисов на отдельный мониторинговый VPS сервер. Описан вариант действий из-под пользователя root
-</blockquote>
+:::danger[Важно]
+Инструкция описывает установку сервисов на __отдельный__ мониторинговый VPS сервер. Описан вариант действий из-под пользователя root
+:::
 
-## 📦 1. Настройка `docker-compose.yml` на сервере с Remnawave
+## 📦 Настройка `docker-compose.yml` на сервере с Remnawave
 
 Убедитесь, что в `docker-compose.yml` Remnawave открыт порт `3001`, по которому отдаются метрики:
 
@@ -53,244 +52,221 @@ remnawave:
 
 </details>
 
----
+## 🔐 Настройка SSH-туннеля
 
-## 🔐 2. Настройка SSH-туннеля
+:::note
+Туннель нужен если метрики закрыты по куки авторизации, например при установке Remnawave по скрипту eGames
+:::
 
-**Туннель нужен если метрики закрыты по куки авторизации, например при установке Remnawave по скрипту eGames*
+:::caution
+Выполняется на мониторинговом сервере
+:::
 
-### На мониторинговом сервере:
+<Steps>
 
-1. Генерация ключа:
+1. Генерация ключа, пароль не задаем:
 
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/remna_tunnel_key
-```
+    ```bash
+    ssh-keygen -t ed25519 -f ~/.ssh/remna_tunnel_key
+    ```
 
-> Пароль не задаем!
+2. Добавление публичного ключа на сервере с Remnawave, в файл `~/.ssh/authorized_keys`. Вместо `AAAAC3...` вставьте содержимое `remna_tunnel_key.pub`, начинающееся на `AAAAC3`:
 
-2. Добавление публичного ключа на сервере с Remnawave:
+    ```bash
+    from="IP_мониторингового_сервера",no-pty,no-agent-forwarding,no-X11-forwarding,command="/bin/false" ssh-ed25519 AAAAC3... remna_tunnel_key
+    ```
 
-В файл `~/.ssh/authorized_keys`:
+3. Установка `autossh` (продолжаем на мониторинговом сервере):
 
-```bash
-from="IP_мониторингового_сервера",no-pty,no-agent-forwarding,no-X11-forwarding,command="/bin/false" ssh-ed25519 AAAAC3... remna_tunnel_key
-```
+    ```bash
+    sudo apt install autossh
+    ```
 
-> Вместо `AAAAC3...` вставьте содержимое `remna_tunnel_key.pub`, начинающееся на `AAAAC3`.
+4. Создание systemd-сервиса `/etc/systemd/system/remna-tunnel.service`. Замените `remnauser@REMNA_SERVER_IP`, это ssh логин и адрес сервера панели Remnawave.
 
-3. Установка `autossh`: (продолжаем на мониторинговом сервере)
+    ```ini
+    [Unit]
+    Description=SSH tunnel to Remnawave for Prometheus and Node Exporter
+    After=network.target
 
-```bash
-sudo apt install autossh
-```
+    [Service]
+    User=root
+    Environment="AUTOSSH_GATETIME=0"
+    ExecStart=/usr/bin/autossh -N \
+    -o "ServerAliveInterval 60" \
+    -o "ServerAliveCountMax 3" \
+    -i /root/.ssh/remna_tunnel_key \
+    -L 9001:localhost:3001 \
+    -L 9002:localhost:9100 \
+    remnauser@REMNA_SERVER_IP
+    Restart=always
 
-4. Создание systemd-сервиса `/etc/systemd/system/remna-tunnel.service`:
+    [Install]
+    WantedBy=multi-user.target
+    ```
 
-```ini
-[Unit]
-Description=SSH tunnel to Remnawave for Prometheus and Node Exporter
-After=network.target
+5. На первом сервере (где запускается autossh) важно добавить ключ второго сервера в known_hosts, где 12.345.678.91 - IP адрес панели Remnawave, чтобы избежать ошибки проверки подлинности хоста, иначе служба просто не будет подключаться к серверу с панелью.
 
-[Service]
-User=root
-Environment="AUTOSSH_GATETIME=0"
-ExecStart=/usr/bin/autossh -N \
- -o "ServerAliveInterval 60" \
- -o "ServerAliveCountMax 3" \
- -i /root/.ssh/remna_tunnel_key \
- -L 9001:localhost:3001 \
- -L 9002:localhost:9100 \
- remnauser@REMNA_SERVER_IP
-Restart=always
+    ```bash
+    ssh-keyscan -H 12.345.678.91 >> ~/.ssh/known_hosts
+    ```
 
-[Install]
-WantedBy=multi-user.target
-```
+6. Запуск сервиса:
 
-> Замените `remnauser@REMNA_SERVER_IP`, это ssh логин и адрес сервера панели Remnawave.
+    ```bash
+    sudo systemctl daemon-reexec
+    sudo systemctl enable remna-tunnel
+    sudo systemctl start remna-tunnel
+    ```
 
-*На первом сервере (где запускается autossh) важно добавить ключ второго сервера в known_hosts, чтобы избежать ошибки проверки подлинности хоста:* (иначе служба просто не будет подключаться к серверу с панелью)
+7. Проверка успешности запуска:
 
-```
-ssh-keyscan -H 12.345.678.91 >> ~/.ssh/known_hosts
-```
+    ```bash
+    sudo systemctl status remna-tunnel
+    ```
 
-> где 12.345.678.91 - IP адрес панели Remnawave
-
-
-5. Запуск сервиса:
-
-```bash
-sudo systemctl daemon-reexec
-sudo systemctl enable remna-tunnel
-sudo systemctl start remna-tunnel
-```
-
-6. Проверка успешности запуска:
-
-```
-sudo systemctl status remna-tunnel
-```
+</Steps>
 
 Теперь метрики Remnawave и Node Exporter доступны по `http://localhost:9001/metrics` и `http://localhost:9002/metrics` на мониторинговом сервере.
 
----
+## 📈 Установка Prometheus и Grafana
 
-## 📈 3. Установка Prometheus и Grafana
+<Steps>
 
-Создание директорий:
+1. Создание директорий:
 
-```bash
-mkdir -p /opt/monitoring/{grafana,prometheus}
-```
+    ```bash
+    mkdir -p /opt/monitoring/{grafana,prometheus}
+    ```
 
-Файл `/opt/monitoring/docker-compose.yml`:
-
-<details>
-  <summary>Открыть пример файла</summary>
+2. Создание файл `/opt/monitoring/docker-compose.yml`
   
-```yaml
-services:
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.external-url=https://sub.mydomain.com/prometheus/'
-      - '--web.route-prefix=/'
-    network_mode: host
+    ```yaml
+    services:
+      prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        restart: unless-stopped
+        volumes:
+          - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+          - prometheus-data:/prometheus
+        command:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--web.console.libraries=/etc/prometheus/console_libraries'
+          - '--web.console.templates=/etc/prometheus/consoles'
+          - '--web.external-url=https://sub.mydomain.com/prometheus/'
+          - '--web.route-prefix=/'
+        network_mode: host
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: unless-stopped
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SERVER_DOMAIN=mydomain.com
-      - GF_SERVER_ROOT_URL=https://sub.mydomain.com/grafana
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-      - GF_SERVER_HTTP_PORT=3000
-      - GF_SERVER_PROTOCOL=http
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_ANALYTICS_REPORTING_ENABLED=false
-    network_mode: host
-    
-  xray-checker:
-    image: kutovoys/xray-checker
-    environment:
-      - "SUBSCRIPTION_URL=https://podpiska.mydomain.com/6f5g46df46g45f54"
-      - "PROXY_STATUS_CHECK_URL=http://google.com/generate_204"
-      - "PROXY_CHECK_INTERVAL=60"
-    network_mode: host
+      grafana:
+        image: grafana/grafana:latest
+        container_name: grafana
+        restart: unless-stopped
+        volumes:
+          - grafana-data:/var/lib/grafana
+          - ./grafana/provisioning:/etc/grafana/provisioning
+        environment:
+          - GF_SERVER_DOMAIN=mydomain.com
+          - GF_SERVER_ROOT_URL=https://sub.mydomain.com/grafana
+          - GF_SERVER_SERVE_FROM_SUB_PATH=true
+          - GF_SERVER_HTTP_PORT=3000
+          - GF_SERVER_PROTOCOL=http
+          - GF_SECURITY_ADMIN_USER=admin
+          - GF_SECURITY_ADMIN_PASSWORD=admin
+          - GF_ANALYTICS_REPORTING_ENABLED=false
+        network_mode: host
+        
+      xray-checker:
+        image: kutovoys/xray-checker
+        environment:
+          - "SUBSCRIPTION_URL=https://podpiska.mydomain.com/6f5g46df46g45f54"
+          - "PROXY_STATUS_CHECK_URL=http://google.com/generate_204"
+          - "PROXY_CHECK_INTERVAL=60"
+        network_mode: host
 
-volumes:
-  prometheus-data:
-  grafana-data:
-```
+    volumes:
+      prometheus-data:
+      grafana-data:
+    ```
+
+</Steps>
 
 Здесь `sub.mydomain.com` - адрес домена, прикрепленного к мониторинговому VPS, на котором устанавливаются Grafana и Prometheus
 
 `https://podpiska.mydomain.com/6f5g46df46g45f54` - ВПН подписка, сделайте отдельного пользователя для этой роли.
 
-</details>
+## ⚙️ Конфигурация Prometheus
 
+<Steps>
 
----
+1. Файл `/opt/monitoring/prometheus/prometheus.yml`. `username` и `password` из `.env` файла Remnawave (секция `### PROMETHEUS ###`)
 
-## ⚙️ 4. Конфигурация Prometheus
+    ```yaml
+    global:
+      scrape_interval: 15s
 
-Файл `/opt/monitoring/prometheus/prometheus.yml`:
+    scrape_configs:
+      - job_name: 'node_exporter'
+        static_configs:
+          - targets: ['127.0.0.1:9002']
+            labels:
+              label: "Remnaserver"
+      - job_name: 'integrations/node_exporter'
+        static_configs:
+          - targets: ['127.0.0.1:9001']
+            labels:
+              cluster: "test"
+              job: "integrations/node_exporter"
+              instance: "127.0.0.1:9001"
+        basic_auth:
+          username: "XXXXXXXXXXXXXXX"
+          password: "XXXXXXXXXXXXXXX"
+      - job_name: "xray-checker"
+        metrics_path: "/metrics"
+        static_configs:
+          - targets: ["localhost:2112"]
+        scrape_interval: 1m
+    ```
 
-```yaml
-global:
-  scrape_interval: 15s
+2. Запуск всех контейнеров:
 
-scrape_configs:
-  - job_name: 'node_exporter'
-    static_configs:
-      - targets: ['127.0.0.1:9002']
-        labels:
-          label: "Remnaserver"
-  - job_name: 'integrations/node_exporter'
-    static_configs:
-      - targets: ['127.0.0.1:9001']
-        labels:
-          cluster: "test"
-          job: "integrations/node_exporter"
-          instance: "127.0.0.1:9001"
-    basic_auth:
-      username: "XXXXXXXXXXXXXXX"
-      password: "XXXXXXXXXXXXXXX"
-  - job_name: "xray-checker"
-    metrics_path: "/metrics"
-    static_configs:
-      - targets: ["localhost:2112"]
-    scrape_interval: 1m
-```
+    ```bash
+    cd /opt/monitoring && docker compose up -d
+    ```
 
-> username и password из `.env` файла панели Remnawave (секция `### PROMETHEUS ###`)
+</Steps>
 
-### Примечание: 
+## 🌐 Настройка Nginx и SSL
 
-**Докер должен быть установлен.** Если нет - установите его сейчас (Docker и Docker Compose)
+<Steps>
 
-Пример установки Докера:
+1. Установка nginx (локальная установка, не в контейнере Docker):
 
-```
-curl -L -o /root/docker_install.sh https://raw.githubusercontent.com/OMchik33/Remnawave-scripts/refs/heads/main/docker_install.sh && chmod +x /root/docker_install.sh && bash /root/docker_install.sh
-```
+    ```bash
+    apt install nginx
+    ```
 
+2. Получение SSL-сертификатов, домен 3 уровня уже должен быть настроен на IP адрес мониторингового сервера:
 
-### Запуск всех контейнеров:
+    ```bash
+    sudo apt install certbot python3-certbot-nginx
+    sudo certbot --nginx -d sub.mydomain.com
+    ```
 
-```bash
-cd /opt/monitoring && docker compose up -d
-```
+3. Добавляем автообновление сертификатов в crontab:
 
-<img width="423" height="126" alt="image" src="https://github.com/user-attachments/assets/320f6a65-435b-4d27-b23b-491592e5a03e" />
+    ```bash
+    0 5 * * * root certbot renew --quiet
+    ```
 
+4. Настройка конфига nginx
 
----
+    ```bash
+    nano /etc/nginx/sites-available/default
+    ```
 
-## 🌐 5. Настройка Nginx и SSL
-
-Установка nginx (локальная установка, не в контейнере Docker):
-
-```bash
-apt install nginx
-```
-
-Получение SSL-сертификатов:
-
-> Домен 3 уровня уже должен быть настроен на IP адрес мониторингового сервера
-
-```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d sub.mydomain.com
-```
-
-Добавляем автообновление сертификатов в crontab:
-
-```bash
-0 5 * * * root certbot renew --quiet
-```
-
-### Настройка конфига nginx
-
-```
-nano /etc/nginx/sites-available/default
-````
+</Steps>
 
 <details>
   <summary>Пример конфигурации nginx</summary>
@@ -415,25 +391,31 @@ server {
 `/grafana/public-dashboards/f5g4df4g5df4gd5f4g63d4834379e;` - уникальная ссылка на общедоступный Dashboard в Grafana. Вы получите его после выполнения всей инструкции и самостоятельной сборки нужного Dashboard. После этого сможете получить ссылку для внешнего подключения, вставить сюда и перезапустить nginx. Ссылка в конфиге nginx задается для того, чтобы пользователи при переходе по домену sub.mydomain.com сразу перенаправлялись на общедоступный Dashboard
 </details>
 
-### Еще немного настроек nginx
+<Steps>
 
-Редактируем `/etc/nginx/nginx.conf`
+1. Редактируем `/etc/nginx/nginx.conf`, добавляем туда:
 
-добавляем туда:
+    ```
+            # Карта для WebSocket соединений Grafana
+            map $http_upgrade $connection_upgrade {
+            default upgrade;
+            '' close;
+            }
+    ```
 
-```
-        # Карта для WebSocket соединений Grafana
-        map $http_upgrade $connection_upgrade {
-        default upgrade;
-        '' close;
-        }
-```
+2. Применение конфигурации nginx
+
+    ```
+    nginx -t && systemctl restart nginx
+    ```
+
+</Steps>
 
 Пример дефолтного `nginx.conf` с добавлением нужной `map`
 
 <details>
   <summary>Открыть пример</summary>
-  
+
 ```
 user www-data;
 worker_processes auto;
@@ -501,41 +483,39 @@ http {
         include /etc/nginx/conf.d/*.conf;
         include /etc/nginx/sites-enabled/*;
 }
-
 ```
+
 </details>
 
-### Применение конфигурации nginx
+## 🧠 Node Exporter
 
-```
-nginx -t && systemctl restart nginx
-```
+<Steps>
 
----
+1. Установка на сервер с Remnawave:
 
-## 🧠 6. Node Exporter
+    ```bash
+    . <(wget -qO- https://raw.githubusercontent.com/g7AzaZLO/NodeExporter-autoinstaller/main/NodeExporter-auto-install.sh)
+    ```
 
-Установка на сервер с Remnawave:
+2. Можно установить на другие ноды и добавить в `prometheus.yml`:
 
-```bash
-. <(wget -qO- https://raw.githubusercontent.com/g7AzaZLO/NodeExporter-autoinstaller/main/NodeExporter-auto-install.sh)
-```
+    ```yaml
+    - job_name: 'external_nodes'
+      static_configs:
+        - targets: ['1.2.3.4:9100']
+    ```
+
+</Steps>
 
 Node Exporter доступен на мониторинговом сервере по `localhost:9002` (через SSH-туннель).
-
-Можно установить на другие ноды и добавить в `prometheus.yml`:
-
-```yaml
-- job_name: 'external_nodes'
-  static_configs:
-    - targets: ['1.2.3.4:9100']
-```
 
 Здесь `1.2.3.4` - адрес очередной ноды, на которую мы также установили Node Exporter
 
 Или использовать SSH-туннели по аналогии с данной инструкцией.
 
-## 📊 7. Проверка и настройка Grafana
+## 📊 Проверка и настройка Grafana
+
+### Аутентифицкация в Grafana
 
 - Перейдите: `https://sub.mydomain.com/grafana`
 - Вход: `admin / admin`, затем смените пароль
@@ -543,53 +523,34 @@ Node Exporter доступен на мониторинговом сервере 
   - URL: `http://localhost:9090`
 - Перейдите в **Explore → Metrics → Grafana Drilldown → Metrics**
 
-<details>
-  <summary>Открыть скриншот с примером</summary>
+После всех манипуляций мы добавили в Grafana новый источник данных - Prometheus. Теперь необходимо самостоятельно создать новый Dashboard, добавляя в него необходимые визуализации и подключая к ним нужные источники данных из Prometheus
 
-<img width="1012" height="768" alt="image" src="https://github.com/user-attachments/assets/522e1076-7c8d-4864-a4ea-d91404a64ee8" />
+### Проверка работоспособности источников данных (метрик) в Prometheus
 
+<Steps>
 
-</details>
+1. Зайдите по ссылке `https://sub.mydomain.com/prometheus/graph?fd4gd54fg2dfg4241=1`
 
-## ИТОГИ
+2. Откройте меню `Status` - `Target Health` и убедитесь, что напротив каждого источника данных стоит `UP`.
 
-После всех манипуляций мы добавили в Grafana новый источник данных - Prometheus. Тепень необходимо самостоятельно создать новый Dashboard, добавляя в него необходимые визуализации и подключая к ним нужные источники данных из Prometheus
+3. Открыть Prometheus `https://sub.mydomain.com/prometheus/graph?fd4gd54fg2dfg4241=1`
 
-**Проверить работоспособность источников данных (метрик) в Prometheus можно так:**
+4. Открыть Grafana `https://sub.mydomain.com/grafana/`
 
-Зайдите по ссылке `https://sub.mydomain.com/prometheus/graph?fd4gd54fg2dfg4241=1`
+5. Открыть xray checker `https://sub.mydomain.com/checker/?fd4gd54fg2dfg4241=1`
 
-Откройте меню `Status` - `Target Health` и убедитесь, что напротив каждого источника данных стоит `UP`
+</Steps>
 
-<details>
-  <summary>Открыть скриншот с примером</summary>
-
-<img width="1011" height="687" alt="image" src="https://github.com/user-attachments/assets/7c5c6b2b-fe97-41e2-aa9d-830f46bcec1e" />
-
-
-</details>
-
----
-
-Открыть Prometheus `https://sub.mydomain.com/prometheus/graph?fd4gd54fg2dfg4241=1`
-
-Открыть Grafana `https://sub.mydomain.com/grafana/`
-
-Открыть xray checker `https://sub.mydomain.com/checker/?fd4gd54fg2dfg4241=1`
-
+:::note
 Если меняли код куки в настройках `nginx`, тогда и в ссылках выше требуется его изменить
+:::
 
----
-
-Можно скачать пример визуализации node exporter:
-
-- Dashboard ID: **1860**
+:::tip[Рекомендация]
+Можно скачать пример визуализации node exporter  
+- Dashboard ID: `1860`
 - [https://grafana.com/grafana/dashboards/1860](https://grafana.com/grafana/dashboards/1860)
+:::
 
----
+## 📙 Полезные ссылки
 
-## 📙 Полезные ссылки (примеры Dashboard Remnawave)
-
-- [Remnawave метрики](https://t.me/c/2409638119/3118)
-
-
+- [Пример метриков](https://t.me/c/2409638119/3118)
