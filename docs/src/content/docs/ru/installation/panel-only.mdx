@@ -5,29 +5,46 @@ description: Инструкции по установке панели RemnaWave
 
 import { LinkButton } from '@astrojs/starlight/components';
 
-## Запуск скрипта
+## Установка скрипта
 
-:::danger
+:::danger[Внимание]
 Скрипт нужно запускать с правами root.
 :::
+
+Введите данную команду на вашем сервере:
 
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
 
-<p align="center">
-  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
-</p>
+## Установка панели
 
-После первого запуска скрипта вы сможете получить доступ к скрипту с помощью простой команды:
+Выберите пункт "Установка компонентов Remnawave"
 
-```bash
-rr
+![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/main_menu.ru.png)
+
+Затем выберите пункт "Установить только панель"
+
+![Install panel RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/install_panel.ru.png)
+
+После завершения процесса скрипт предоставит все необходимые данные для входа в неё.
+
+![Menu panel end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_panel_end_ru.png)
+
+:::danger[Сохраните ваши учетные данные]
+После завершения установки скрипт отобразит уникальный URL-адрес для входа в панель управления.  
+**Обязательно сохраните этот URL-адрес.** Он содержит секретный ключ, необходимый для доступа.
+
+Пример ссылки для входа:
 ```
+https://p.example.com/auth/login?SECRET_KEY=SECRET_KEY
+```
+Без этого URL-адреса **вы не сможете** войти в панель.
+:::
 
 ## Обновление скрипта
 
-Убедитесь, что вы обновили скрипт перед выполнением каких-либо действий в нем. Вы можете сделать это, выбрав `Проверить обновления` в меню скрипта или просмотрев репозиторий GitHub на наличие обновлений.
+Убедитесь, что вы обновили скрипт перед выполнением каких-либо действий в нем. Вы можете сделать это, выбрав `Проверить обновления скрипта` в меню скрипта или просмотрев репозиторий GitHub на наличие обновлений.
 
 <LinkButton
     href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
@@ -36,7 +53,3 @@ rr
 >
     Посмотреть последнее обновление
 </LinkButton>
-
-## Установка только панель
-
-Чтобы установить панель, запустите скрипт и выберите опцию `Только панель`. Скрипт проведет вас через процесс установки.
