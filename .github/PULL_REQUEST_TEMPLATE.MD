@@ -1,9 +1,9 @@
-#### 🔀 Description of Change
+## 🔀 Description of Change
 
 wtd:summary
 
 <!-- Thank you for your Pull Request. -->
-DO NOT remove the wtd:summary tag above if you want your PR to be summarized by AI.
+<!-- DO NOT remove the wtd:summary tag above if you want your PR to be summarized by AI. -->
 
 <!-- #### 📝 Additional Information
 
