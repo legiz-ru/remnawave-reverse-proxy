@@ -3,6 +3,7 @@ title: Только нода
 description: Инструкции по установке ноды RemnaWave на вашем сервере.
 ---
 
+import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
 ## Установка скрипта
@@ -19,25 +20,29 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 
 ## Установка ноды
 
-Выберите пункт "Установка компонентов Remnawave"
+<Steps>
 
-![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/main_menu.ru.png)
+1. Выберите пункт "Установка компонентов Remnawave"
 
-Затем выберите пункт "Установить только ноду"
+    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/main_menu.ru.png)
 
-![Install node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/install_node.ru.png)
+2. Затем выберите пункт "Установить только ноду"
 
-Скрипт запросит у Вас домен selfsteal, который вы указали при установке панели или через пункт "Добавить ноду в панель", ip-адрес панели и сертификат SSL с панели.
+    ![Install node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/install_node.ru.png)
 
-![Menu node end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_node_end.ru.png)
+3. Скрипт запросит у Вас домен selfsteal, который вы указали при установке панели или через пункт "Добавить ноду в панель", ip-адрес панели и сертификат SSL с панели.
 
-Зайдите в панель управления, перейдите в раздел "Ноды" → "Управление", выберите нужную ноду и нажмите на кнопку "Важная информация". В появившемся окне вы увидите иконку для копирования сертификата (SSL_CERT) — нажмите на неё.
+    ![Menu node end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_node_end.ru.png)
 
-![SSL_CERT RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ssl_cert.ru.png)
+4. Зайдите в панель управления, перейдите в раздел "Ноды" → "Управление", выберите нужную ноду и нажмите на кнопку "Важная информация". В появившемся окне вы увидите иконку для копирования сертификата (SSL_CERT) — нажмите на неё.
 
-Затем скрипт запустит ноду и подключит её к панели.
+    ![SSL_CERT RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ssl_cert.ru.png)
 
-![Menu node end2 RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_node_end2.ru.png)
+5. Затем скрипт запустит ноду и подключит её к панели.
+
+    ![Menu node end2 RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_node_end2.ru.png)
+
+</Steps>
 
 ## Обновление скрипта
 

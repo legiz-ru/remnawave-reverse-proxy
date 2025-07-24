@@ -3,6 +3,7 @@ title: Панель и нода
 description: Инструкции по установке панели и ноды RemnaWave на вашем сервере.
 ---
 
+import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
 ## Установка скрипта
@@ -23,17 +24,21 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 Для лучшего опыта, пожалуйста, используйте методы установки `Только панель` и `Только нода`, в зависимости от того, хотите ли вы установить панель или ноду.
 :::
 
-Выберите пункт "Установка компонентов Remnawave"
+<Steps>
 
-![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/main_menu.ru.png)
+1. Выберите пункт "Установка компонентов Remnawave"
 
-Затем выберите пункт "Установить панель и ноду на один сервер"
+    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/main_menu.ru.png)
 
-![Install panel and node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/install_panel_node.ru.png)
+2. Затем выберите пункт "Установить панель и ноду на один сервер"
 
-После завершения процесса скрипт автоматически перезапустит панель и предоставит все необходимые данные для входа в неё.
+    ![Install panel and node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/install_panel_node.ru.png)
 
-![Menu end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_end_ru.png)
+3. После завершения процесса скрипт автоматически перезапустит панель и предоставит все необходимые данные для входа в неё.
+
+    ![Menu end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/menu_end_ru.png)
+
+</Steps>
 
 :::danger[Сохраните ваши учетные данные]
 После завершения установки скрипт отобразит уникальный URL-адрес для входа в панель управления.  
