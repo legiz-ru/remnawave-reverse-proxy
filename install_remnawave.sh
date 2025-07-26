@@ -809,7 +809,7 @@ start_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if docker ps -q --filter "ancestor=remnawave/backend:1.6.16" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:1.6.4" | grep -q .; then
+    if docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
@@ -832,7 +832,7 @@ stop_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if ! docker ps -q --filter "ancestor=remnawave/backend:1.6.16" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:1.6.4" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
@@ -3557,7 +3557,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:1.6.16
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -3677,7 +3677,7 @@ installation() {
         max-file: '5'
 
   remnanode:
-    image: remnawave/node:1.6.4
+    image: remnawave/node:latest
     container_name: remnanode
     hostname: remnanode
     restart: always
@@ -4104,7 +4104,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:1.6.16
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -4519,7 +4519,7 @@ installation_node() {
         max-file: '5'
 
   remnanode:
-    image: remnawave/node:1.6.4
+    image: remnawave/node:latest
     container_name: remnanode
     hostname: remnanode
     restart: always

@@ -115,8 +115,14 @@ systemctl restart docker
 
 Для настройки сервера запустите на нём эту команду:
 
+Для последней версии Remnawave
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+Для версии 1.7.5 (совместима с панелью 1.6.16):
+```
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy.png" alt="Image"></a></p>
 
