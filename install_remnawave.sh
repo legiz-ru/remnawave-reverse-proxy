@@ -945,6 +945,8 @@ update_remnawave_reverse() {
 
         printf "${COLOR_GREEN}${LANG[UPDATE_SUCCESS]}${COLOR_RESET}\n" "$remote_version"
         echo -e "${COLOR_YELLOW}${LANG[RESTART_REQUIRED]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_RESET}"
+        echo -e "${COLOR_GREEN}remnawave_reverse${COLOR_RESET}"
         exit 0
     else
         echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
