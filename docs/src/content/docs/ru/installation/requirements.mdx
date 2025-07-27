@@ -5,6 +5,29 @@ description: Подготовка к установке компонентов R
 
 import { Steps } from '@astrojs/starlight/components';
 
+## Remnawave Panel
+
+### Системные требования
+
+- **OS**: Рекомендуется **Ubuntu** или **Debian**.
+- **RAM**: Минимум 2GB, рекомендуется 4GB.
+- **CPU**: Минимум 2 ядра, рекомендуется 4 ядра.
+- **Storage**: Минимум и рекомендуется 20GB.
+
+## Remnawave Node
+
+### Системные требования
+
+- **OS**: Рекомендуется **Ubuntu** или **Debian**.
+- **RAM**: Минимум 1GB.
+- **CPU**: Минимум 1 ядро.
+
+:::tip
+`Remnawave` может работать с меньшими системными требованиями, но это не рекомендуется. Некоторые фоновые процессы могут быть ресурсоемкими.
+
+`Remnawave Node` сам по себе не требует много ресурсов, но Xray-core может потреблять много CPU и RAM под нагрузкой.
+:::
+
 ## Настройка домена
 Скрипт поддерживает два метода настройки домена: через [Cloudflare](https://dash.cloudflare.com/) или с использованием ACME с вашим хостинг-провайдером.
 
@@ -29,53 +52,3 @@ import { Steps } from '@astrojs/starlight/components';
 | CNAME | panel.example.com | example.com             | DNS only      |
 | CNAME | sub.example.com   | example.com             | DNS only      |
 | A     | node.example.com  | your_server_ip_vps_node | DNS only      |
-
-## Добавление зеркал для Docker :badge[New]
-
-:::note
-Этот шаг является **необязательным** и нужен только в том случае, если вы столкнулись с [проблемами с загрузкой образов](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40).
-:::
-
-В некоторых случаях, таких как [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40), серверы, особенно те, которые расположены в России, не могут загрузить образы.  
-Чтобы исправить эту проблему, вы можете добавить зеркала:
-
-<Steps>
-
-1. Создайте файл `daemon.json`:
-
-   ```bash
-   nano /etc/docker/daemon.json
-   ```
-
-2. Импортируйте зеркала
-
-   ```json
-   {
-      "log-driver": "local",
-      "registry-mirrors": [
-         "https://mirror.gcr.io/",
-         "https://dockerhub.timeweb.cloud"
-      ]
-   }
-   ```
-
-3. Перезапустите службу Docker, чтобы применить внесенные изменения
-
-   ```bash
-   systemctl restart docker
-   ```
-
-</Steps>
-
-## Настройка сервера
-
-Чтобы настроить сервер, выполните эту команду на нем:
-
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
-```
-<p align="center">
-  <img src="https://github.com/eGamesAPI/remnawave-reverse-proxy/raw/main/media/remnawave-reverse-proxy_en.png" alt="Image" />
-</p>
-
-Следуйте инструкциям на следующих страницах, чтобы завершить настройку.

@@ -12,7 +12,7 @@ import lightBanner from '../../../assets/banner-black.png';
     <img src={darkBanner.src} alt="Remnawave Reverse Proxy" class="dark-banner" />
 </a></p>
 
-:::danger
+:::danger[Warning]
 THIS REPOSITORY IS AN EDUCATIONAL EXAMPLE FOR LEARNING NGINX, REVERSE PROXY AND NETWORK SECURITY BASICS. THIS SCRIPT DEMONSTRATES NGINX CONFIGURATION AS A REVERSE PROXY. NOT FOR PROD AND NOT FOR PRODUCTION USE! IF YOU DON'T UNDERSTAND HOW THE CONTROL PANEL WORKS - THAT'S YOUR PROBLEM, NOT THE SCRIPT AUTHOR'S. USE AT YOUR OWN RISK!
 :::
 
@@ -57,40 +57,9 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
     - BBR optimization for TCP connections.
     - Selecting a random website template from an array.
 
-## Features and restrictions on access to API :badge[New]
-
-### Local API Access
-
-In the eGames's script, the Remnawave panel runs locally on port `3000`. For local API access, you can use:
-
-* **Direct connection:** `http://127.0.0.1:3000/api/`
-* **SDK connection:** Using the Remnawave SDK with the base URL `http://127.0.0.1:3000`
-
-### External API Access
-
-The eGames's script implements a panel protection system via cookie-based authorization, which introduces the following restrictions:
-
-* **Required special cookie:** External access to the panel requires a cookie named `<SECRET_KEY>` with the value `<SECRET_KEY>`.
-* **URL parameter for initial access:** The first access must be made through a URL containing a secret parameter, which sets the required cookie.
-* **Direct API access blocked:** Without the correct cookie, all API requests will return either a blank page or a 404 error.
-
-## Legal Notice
-
-:::note[Important]
-This repository is intended solely for educational purposes and for studying the principles of reverse proxy servers and network security. The script demonstrates the setup of a proxy server using NGINX for reverse proxy, traffic management, and attack protection.
-
-We strongly remind you that using this tool to bypass network restrictions or censorship is illegal in certain countries that have laws regulating the use of technologies to circumvent internet restrictions.
-
-This project is not intended for use in ways that violate information protection laws or interfere with censorship mechanisms. We take no responsibility for any legal consequences arising from the use of this script.
-
-Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.
-
-If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.
-:::
-
 ## Issues
 
-Found an issue? Let us know by [creating an Issue](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose) on [repository](https://github.com/eGamesAPI/remnawave-reverse-proxy/) page or discuss it in [Telegram chat](https://t.me/remnawave_reverse).
+Found an issue? Let us know by [creating an issue](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose) on [repository](https://github.com/eGamesAPI/remnawave-reverse-proxy/) page or discuss it in [Telegram chat](https://t.me/remnawave_reverse).
 
 ## Donations
 
