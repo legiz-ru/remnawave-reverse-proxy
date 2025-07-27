@@ -1,0 +1,51 @@
+---
+title: Add node to panel
+description: Instructions for adding a Remnawave node to your panel.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { LinkButton } from '@astrojs/starlight/components';
+
+## Running the script
+
+:::danger[Warning]
+Script must be run as **root**.
+:::
+
+Enter the command on your server:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+## Add node to panel
+
+<Steps>
+
+1. Select `Install Remnawave components`
+
+    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/main_menu.png)
+
+2. Then select `Add node to panel`
+
+    ![Add node to panel RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/add_node_to_panel.png)
+
+3. Enter your new domain `selfsteal` which will be used to connect the node to the panel, as well as the name for the node.
+
+    ![Add node to panel2 RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/add_node_to_panel2.png)
+
+4. After successfully adding the node to the panel, run the script on your new server, select `Install Remnawave components`, and then [`Install only the node`](https://wiki.egam.es/ru/installation/node-only/).
+
+</Steps>
+
+## Updating the script
+
+Make sure to update the script before running things in it. You can do this by selecting `Check for updates script` in the script menu or by viewing the GitHub repository for updates.
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+    icon="github"
+    iconPlacement="start"
+>
+    View latest release
+</LinkButton>
