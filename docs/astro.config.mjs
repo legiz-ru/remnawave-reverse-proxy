@@ -70,6 +70,7 @@ export default defineConfig({
 						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: 'New', variant: 'default'} },
 						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: 'New', variant: 'default'} },
 						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: 'New', variant: 'default'} },
+						{ label: 'Add node to panel', slug: 'installation/add_node_to_panel', translations: { ru: 'Добавление ноды в панель' }, badge: {text: 'New', variant: 'default'} },
 					],
 				},
 				{
