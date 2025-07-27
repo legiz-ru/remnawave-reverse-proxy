@@ -265,6 +265,7 @@ set_language() {
                 [CHECK_CONFIG]="Check the configuration or restart the panel."
                 #Add node to panel
                 [ADD_NODE_TO_PANEL]="Adding node to panel"
+		[ENTER_NODE_NAME]="Enter node name (e.g., Germany):"
                 [USING_SAVED_TOKEN]="Using saved token..."
                 [INVALID_SAVED_TOKEN]="Saved token is invalid. Requesting a new one..."
                 [ENTER_PANEL_USERNAME]="Enter panel username: "
