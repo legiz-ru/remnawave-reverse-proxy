@@ -3,10 +3,11 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightHeadingBadges from 'starlight-heading-badges';
 import starlightScrollToTop from 'starlight-scroll-to-top';
-import starlightCoolerCredit from 'starlight-cooler-credit'; // This plugin is not used in the current configuration, but supposed to shown on Contribution guide page
+import starlightCoolerCredit from 'starlight-cooler-credit';
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightKbd from 'starlight-kbd';
+import starlightThemeRapide from 'starlight-theme-rapide'
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			plugins: [
+				starlightThemeRapide(),
 				starlightHeadingBadges(),
 				starlightScrollToTop({
 					showTooltip: false,
