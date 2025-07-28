@@ -1,4 +1,4 @@
-// @ts-check1
+// @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightHeadingBadges from 'starlight-heading-badges';
@@ -40,7 +40,7 @@ export default defineConfig({
 					]
 				})
 			],
-			title: 'eGamesAPI',
+			title: 'Remnawave Reverse-Proxy',
 			logo: {
 				src: './src/assets/logo.png',
 			},
