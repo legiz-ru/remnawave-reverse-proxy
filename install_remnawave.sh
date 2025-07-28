@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.4c"
+SCRIPT_VERSION="1.7.5"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -88,7 +88,7 @@ set_language() {
                 [MENU_8]="Install random template for selfsteal node"
                 [MENU_9]="Manage panel access (Only for panel + node)"
                 [MENU_10]="Custom Templates and Extensions by legiz"
-                [MENU_11]="Certificates"
+                [MENU_11]="Manage certificates domain"
                 [MENU_12]="Check for updates script"
                 [PROMPT_ACTION]="Select action (0-12):"
                 [INVALID_CHOICE]="Invalid choice. Please select 0-12."
@@ -97,7 +97,6 @@ set_language() {
                 [WARNING_NODE_PANEL]="Adding a node should only be done on the server where the panel is installed, not on the node server."
                 [CONFIRM_SERVER_PANEL]="Are you sure you are on the server with the installed panel?"
                 #Cert Submenu
-                [CERT_MENU_TITLE]="Manage Certificates"
                 [CERT_UPDATE]="Update current certificates"
                 [CERT_GENERATE]="Generate new certificates for another domain"
                 [CERT_PROMPT1]="Select action (0-2):"
@@ -335,7 +334,7 @@ set_language() {
                 [SELECT_SUB_PAGE_CUSTOM2]="Custom Sub Page Templates\nOnly run on panel server"
                 [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-5."
                 [RESTORE_SUB_PAGE]="Restore default sub page"
-                [CONTAINER_NOT_FOUND]="Container remnawave-subscription-page not found"
+                [CONTAINER_NOT_FOUND]="Container %s not found"
                 [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
                 [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
@@ -435,7 +434,7 @@ set_language() {
                 [MENU_8]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_9]="Управление доступом к панели (Только для панели + нода)"
                 [MENU_10]="Кастомные шаблоны и расширения от legiz"
-                [MENU_11]="Управление сертификатами"
+                [MENU_11]="Управление сертификатами домена"
                 [MENU_12]="Проверить обновления скрипта"
                 [PROMPT_ACTION]="Выберите действие (0-12):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 0-12."
@@ -681,7 +680,7 @@ set_language() {
                 [SELECT_SUB_PAGE_CUSTOM2]="Шаблоны страниц подписки\nЗапускать только на сервере с панелью"
                 [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 5."
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
-                [CONTAINER_NOT_FOUND]="Контейнер remnawave-subscription-page не найден"
+                [CONTAINER_NOT_FOUND]="Контейнер %s не найден"
                 [SUB_WITH_APPCONFIG_ASK]="Добавить файл конфигурации app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Простой список приложений clash&sing"
                 [SUB_WITH_APPCONFIG_OPTION2]="Множественный список приложений"
@@ -944,9 +943,9 @@ update_remnawave_reverse() {
         hash -r
 
         printf "${COLOR_GREEN}${LANG[UPDATE_SUCCESS]}${COLOR_RESET}\n" "$remote_version"
+        echo -e ""
         echo -e "${COLOR_YELLOW}${LANG[RESTART_REQUIRED]}${COLOR_RESET}"
-        echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_RESET}"
-        echo -e "${COLOR_GREEN}remnawave_reverse${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_GREEN} remnawave_reverse${COLOR_RESET}"
         exit 0
     else
         echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
@@ -1485,6 +1484,13 @@ show_template_menu() {
 }
 
 manage_template_upload() {
+    if ! docker ps -a --filter "name=remnawave" --format '{{.Names}}' | grep -q "^remnawave$"; then
+        printf "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}\n" "remnawave"
+        sleep 2
+        log_clear
+        exit 1
+    fi
+    
     show_template_menu
     reading "${LANG[SELECT_TEMPLATE_CUSTOM]}" TEMPLATE_OPTION
     case $TEMPLATE_OPTION in
@@ -1863,6 +1869,13 @@ show_sub_page_menu() {
 }
 
 manage_sub_page_upload() {
+    if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
+        printf "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}\n" "remnawave-subscription-page"
+        sleep 2
+        log_clear
+        exit 1
+    fi
+    
     show_sub_page_menu
     reading "${LANG[SELECT_SUB_PAGE_CUSTOM]}" SUB_PAGE_OPTION
 
@@ -1872,14 +1885,6 @@ manage_sub_page_upload() {
 
     case $SUB_PAGE_OPTION in
         1|2)
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-
             [ -f "$index_file" ] && rm -f "$index_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
@@ -1899,14 +1904,6 @@ manage_sub_page_upload() {
             ;;
 
         3)
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-
             [ -f "$config_file" ] && rm -f "$config_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
@@ -1923,14 +1920,6 @@ manage_sub_page_upload() {
             ;;
 
         4)
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
@@ -1942,7 +1931,6 @@ manage_sub_page_upload() {
                 return 1
             fi
 
-            # Пользовательский выбор app-config.json
             echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
             echo -e ""
             echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
@@ -1990,14 +1978,6 @@ manage_sub_page_upload() {
             ;;
         
         5)
-            if ! docker ps -a --filter "name=remnawave-subscription-page" --format '{{.Names}}' | grep -q "^remnawave-subscription-page$"; then
-                echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_FOUND]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                manage_sub_page_upload
-                return 1
-            fi
-
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
@@ -2588,7 +2568,7 @@ EOL
 
 #Manage Certificates
 show_manage_certificates() {
-    echo -e "${COLOR_GREEN}${LANG[CERT_MENU_TITLE]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_11]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[CERT_UPDATE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[CERT_GENERATE]}${COLOR_RESET}"
@@ -3436,7 +3416,7 @@ install_remnawave() {
     cookies_random2=$(generate_user)
 
     METRICS_USER=$(generate_user)
-    METRICS_PASS=$(generate_password)
+    METRICS_PASS=$(generate_user)
 
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
@@ -3599,7 +3579,7 @@ services:
         max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1.1-alpine
+    image: valkey/valkey:8.1.3-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -3619,7 +3599,7 @@ services:
         max-file: '5'
 
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     network_mode: host
@@ -4146,7 +4126,7 @@ services:
         max-file: '5'
 
   remnawave-redis:
-    image: valkey/valkey:8.1.1-alpine
+    image: valkey/valkey:8.1.3-alpine
     container_name: remnawave-redis
     hostname: remnawave-redis
     restart: always
@@ -4166,7 +4146,7 @@ services:
         max-file: '5'
 
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always
@@ -4488,7 +4468,7 @@ unique_domains["$SELFSTEAL_BASE_DOMAIN"]=1
 cat > docker-compose.yml <<EOL
 services:
   remnawave-nginx:
-    image: nginx:1.26
+    image: nginx:1.28
     container_name: remnawave-nginx
     hostname: remnawave-nginx
     restart: always

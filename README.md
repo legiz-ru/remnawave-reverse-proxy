@@ -115,8 +115,14 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
 
 To set up the server, run this command on it:
 
+For the latest version of Remnawave
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
+```
+
+For version 1.7.5 (compatible with panel 1.6.16):
+```
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy_en.png" alt="Image"></a></p>
 
