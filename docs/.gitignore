@@ -20,5 +20,5 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# contributors cache files
+# contributor list cache
 .cache/eleventy-fetch-*

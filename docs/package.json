@@ -1,7 +1,7 @@
 {
   "name": "docs",
   "type": "module",
-  "version": "0.0.1",
+  "version": "v.1.7.5",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -12,14 +12,18 @@
   "dependencies": {
     "@astrojs/starlight": "^0.35.1",
     "@lorenzo_lewis/starlight-utils": "^0.3.2",
-    "astro": "^5.12.0",
+    "astro": "^5.12.4",
+    "astro-auto-import": "^0.4.4",
     "sharp": "^0.34.2",
     "starlight-contributor-list": "^0.3.0",
-    "starlight-cooler-credit": "^0.4.0",
     "starlight-heading-badges": "^0.6.0",
     "starlight-kbd": "^0.2.0",
+    "starlight-links-validator": "^0.17.0",
+    "starlight-package-managers": "^0.11.0",
     "starlight-scroll-to-top": "^0.1.1",
+    "starlight-showcases": "^0.3.0",
     "starlight-sidebar-topics": "^0.6.0",
-    "starlight-sidebar-topics-dropdown": "^0.5.1"
+    "starlight-sidebar-topics-dropdown": "^0.5.1",
+    "starlight-theme-rapide": "^0.5.1"
   }
 }
