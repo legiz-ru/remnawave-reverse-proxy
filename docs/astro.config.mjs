@@ -3,17 +3,27 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightHeadingBadges from 'starlight-heading-badges';
 import starlightScrollToTop from 'starlight-scroll-to-top';
-import starlightCoolerCredit from 'starlight-cooler-credit';
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
+import starlightLinksValidator from 'starlight-links-validator'
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightKbd from 'starlight-kbd';
-import starlightThemeRapide from 'starlight-theme-rapide'
+import starlightThemeRapide from 'starlight-theme-rapide';
+import autoImport from 'astro-auto-import';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://wiki.egam.es',
 	integrations: [
+		autoImport({
+			imports: [
+				'.src/components/TryItOut.astro',
+				'.src/components/TryItOut_ru.astro',
+			],
+		}),
 		starlight({
+			components: {
+				SiteTitle: './src/components/SiteTitle.astro',
+			},
 			plugins: [
 				starlightThemeRapide(),
 				starlightHeadingBadges(),
@@ -21,8 +31,6 @@ export default defineConfig({
 					showTooltip: false,
 					borderRadius: '25',
 				}),
-				starlightUtils(),
-				// starlightSidebarTopics(),
 				starlightKbd({
 					globalPicker: false,
 					types: [
@@ -104,6 +112,6 @@ export default defineConfig({
 
 
 // TODO:
-// 2. add more content to the "Common Issues" page
-// 4. add repository stars at the right top corner of the page
-// 5. https://starlight-sidebar-topics-dropdown.trueberryless.org/docs/getting-started/
+// add more content to the "Common Issues" page
+// https://www.create.bingo/
+// https://octo.guide/
