@@ -2,18 +2,8 @@
 import { LinkButton, Code, Card } from '@astrojs/starlight/components';
 ---
 
-<div class="scroll-down-container" id="scroll-btn">
-    <button class="scroll-down-button">
-        Scroll Down
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-        </svg>
-    </button>
-</div>
-
-<div class="try-it-out-container" id="try-it-out-content">
-    <Card title="Try it out today" icon="download">
+<div class="try-it-out-container">
+    <Card title="Try it out now" icon="download">
         <p>Get started by running the following command in your terminal:</p>
         <Code
             lang="bash"
@@ -31,56 +21,10 @@ import { LinkButton, Code, Card } from '@astrojs/starlight/components';
 </div>
 
 <style>
-    .scroll-down-container {
-        position: absolute;
-        bottom: 3rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-        animation: jump 2s ease-in-out infinite;
-    }
-
-    .scroll-down-button {
-        background: #0E1914;
-        border: 1px solid #2C9870;
-        color: #AED9C5;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-weight: normal;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
-        transition: filter 0.2s;
-    }
-
-    .scroll-down-button:hover {
-        filter: brightness(1.15);
-    }
-
-    @keyframes jump {
-        0%, 100% {
-            transform: translateX(-50%) translateY(0);
-        }
-        50% {
-            transform: translateX(-50%) translateY(-15px);
-        }
-    }
-
     .try-it-out-container {
         padding-top: 4rem;
         max-width: 49rem;
         margin: auto;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(30px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-
-    .try-it-out-container.visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
     }
 
     .more-info {
@@ -104,38 +48,10 @@ import { LinkButton, Code, Card } from '@astrojs/starlight/components';
         font-size: var(--sl-text-xl);
         margin-bottom: 1.5rem;
     }
+
+    .sl-card h3 {
+        background-color: var(--sl-color-accent-low);
+        padding: 0.75rem 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem;
+    }
 </style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const scrollBtn = document.getElementById('scroll-btn');
-        const content = document.getElementById('try-it-out-content');
-        let isContentVisible = false;
-
-        function showContent() {
-            if (isContentVisible) return;
-            isContentVisible = true;
-            if (scrollBtn) {
-                scrollBtn.style.display = 'none';
-            }
-            if (content) {
-                content.classList.add('visible');
-            }
-        }
-
-        if (scrollBtn) {
-            scrollBtn.addEventListener('click', () => {
-                showContent();
-                if (content) {
-                    content.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        }
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                showContent();
-            }
-        }, { once: true });
-    });
-</script>
