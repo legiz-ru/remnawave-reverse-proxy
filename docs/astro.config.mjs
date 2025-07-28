@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-check1
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightHeadingBadges from 'starlight-heading-badges';
