@@ -1,9 +1,10 @@
-<div align="center">
-  <a href="https://remna.st">
-    <img src="https://cdn.remna.st/logos/logo.svg" alt="Logo" width="160" height="160">
-  </a>
-     <h1 align="center">REMNAWAVE REVERSE-PROXY</h3>
-</div>
+<p aling="center"><a href="https://github.com/eGamesAPI/remnawave-reverse-proxy">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="./media/logo.png" />
+   <source media="(prefers-color-scheme: light)" srcset="./media/logo-black.png" />
+   <img alt="Remnawave Reverse Proxy" src="https://github.com/eGamesAPI/remnawave-reverse-proxy" />
+ </picture>
+</a></p>
 
 English | [Русский](/README-RU.md)
 
@@ -56,6 +57,37 @@ The script supports two methods of domain configuration: via Cloudflare or using
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
 -----
+
+### Adding mirrors for Docker
+In some cases like #40 servers can't pull the images, especially which are located in Russia.  
+To fix this issue, you can add mirrors:
+
+1. Create `daemon.json` file:
+
+```bash
+nano /etc/docker/daemon.json
+```
+
+2. Import mirrors
+
+```json
+{
+   "log-driver": "local",
+   "registry-mirrors": [
+      "https://mirror.gcr.io/",
+      "https://dockerhub.timeweb.cloud"
+   ]
+}
+```
+
+3. Restart Docker service to apply made changes
+
+```bash
+systemctl restart docker
+```
+
+-----
+
 ### Panel Protection via URL Parameter
 To enhance the security of the panel, an additional layer of protection against detection has been implemented in the NGINX configuration:
 - To access the panel, you must navigate to a URL in the following format:
@@ -83,8 +115,14 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
 
 To set up the server, run this command on it:
 
+For the latest version of Remnawave
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh)
+```
+
+For version 1.7.5 (compatible with panel 1.6.16):
+```
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy_en.png" alt="Image"></a></p>
 
@@ -99,6 +137,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 >**Use this tool/script only for demonstration purposes, as an example of reverse proxy operation and data protection. We strongly recommend removing the script after reviewing it. Further use is at your own risk.**
 >
 >**If you are unsure whether the use of this tool or its components violates the laws of your country, refrain from interacting with this tool.**
+
+## Telegram chat
+
+Join our [Telegram chat](https://t.me/remnawave_reverse) to ask questions and discuss the project with other users.
 
 ## Donations
 

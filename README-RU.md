@@ -1,9 +1,10 @@
-<div align="center">
-  <a href="https://remna.st">
-    <img src="https://cdn.remna.st/logos/logo.svg" alt="Logo" width="160" height="160">
-  </a>
-     <h1 align="center">REMNAWAVE REVERSE-PROXY</h3>
-</div>
+<p aling="center"><a href="https://github.com/eGamesAPI/remnawave-reverse-proxy">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="./media/logo.png" />
+   <source media="(prefers-color-scheme: light)" srcset="./media/logo-black.png" />
+   <img alt="Remnawave Reverse Proxy" src="https://github.com/eGamesAPI/remnawave-reverse-proxy" />
+ </picture>
+</a></p>
 
 Русский | [English](/README.md)
 
@@ -56,6 +57,37 @@
    - Перейдите ко второму серверу и выберите опцию "Установка компонентов Remnawave", а затем "Установить только ноду". Когда скрипт запросит сертификат, вставьте ранее скопированный ключ.
    - После завершения настройки вы увидите сообщение о том, что нода успешно подключена.
 -----
+
+### Добавление зеркал для Docker
+В некоторых случаях, как например в #40, серверы не могут загрузить образы, особенно если Ваш сервер находятся в России.
+Чтобы исправить эту проблему, можно добавить зеркала:
+
+1. Создайте файл `daemon.json`:
+
+```bash
+nano /etc/docker/daemon.json
+```
+
+2. Добавьте зеркала:
+
+```json
+{
+   "log-driver": "local",
+   "registry-mirrors": [
+      "https://mirror.gcr.io/",
+      "https://dockerhub.timeweb.cloud"
+   ]
+}
+```
+
+3. Перезапустите службу Docker для применения изменений
+
+```bash
+systemctl restart docker
+```
+
+-----
+
 ### Защита панели с помощью URL-параметра
 Для повышения безопасности панели в конфигурации NGINX реализован дополнительный уровень защиты от её обнаружения:
 - Чтобы получить доступ к панели, необходимо перейти по ссылке следующего формата:
@@ -83,8 +115,14 @@
 
 Для настройки сервера запустите на нём эту команду:
 
+Для последней версии Remnawave
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh)
+```
+
+Для версии 1.7.5 (совместима с панелью 1.6.16):
+```
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
 ```
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy.png" alt="Image"></a></p>
 
@@ -100,6 +138,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 > **Используйте этот инструмент/скрипт исключительно в демонстрационных целях, в качестве примера работы обратного прокси и защиты данных. Настоятельно рекомендуем удалить скрипт после ознакомления. Дальнейшее использование на ваш страх и риск.**
 >
 > **Если вы не уверены, нарушает ли использование данного инструмента или его компонентов законодательство вашей страны- откажитесь от любого взаимодействия с данным инструментом.**
+
+## Чат в Telegram
+
+Присоединяйтесь к нашему [чату в Telegram](https://t.me/remnawave_reverse), чтобы задавать вопросы и обсуждать проект с другими пользователями.
 
 ## Пожертвования
 
