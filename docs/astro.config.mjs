@@ -77,10 +77,10 @@ export default defineConfig({
 					label: 'Installation', translations: { ru: 'Установка' },
 					items: [
 						{ label: 'Requirements', slug: 'installation/requirements', translations: { ru: 'Обязательные условия' } },
-						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: 'New', variant: 'default'} },
+						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: '🎉New', variant: 'default'} },
 					],
 				},
 				{
@@ -94,7 +94,7 @@ export default defineConfig({
 				{
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
-						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: 'WIP', variant: 'caution'} },
+						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: '🎉 New', variant: 'default'} },
 						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},

@@ -3,6 +3,52 @@ title: Common Issues
 description: Troubleshooting common issues
 ---
 
+import { Steps, LinkButton } from '@astrojs/starlight/components';
+
 ## Deploying bots
 
 If you are deploying bots, ensure that in bot's env or config you're using `local` mode. In that case you can simply enter `remnawave:3000` to avoid problems with accessing panel.
+
+## Adding mirrors for Docker
+In some cases like [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40) servers, especially which are located in Russia, can't pull the images.  
+To fix this issue, you can add mirrors:
+
+<Steps>
+
+1. Create `daemon.json` file:
+
+    ```bash
+    nano /etc/docker/daemon.json
+    ```
+
+2. Import mirrors
+
+    ```json
+    {
+    "log-driver": "local",
+    "registry-mirrors": [
+        "https://mirror.gcr.io/",
+        "https://dockerhub.timeweb.cloud"
+        ]
+    }
+    ```
+
+3. Restart Docker service to apply made changes
+
+    ```bash
+    systemctl restart docker
+    ```
+
+</Steps>
+
+## Unlisted issue
+
+Feel free to report any related to our project issues in the [GitHub repository](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues).
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose"
+    icon="add-document"
+    iconPlacement="start"
+>
+    Create new issue
+</LinkButton>

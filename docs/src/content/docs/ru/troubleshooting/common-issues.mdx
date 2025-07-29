@@ -3,4 +3,53 @@ title: Частые проблемы
 description: Устранение распространенных проблем
 ---
 
-## В разработке
+import { Steps, LinkButton } from '@astrojs/starlight/components';
+import { Kbd, KbdPicker } from 'starlight-kbd/components';
+
+## Развертывание ботов
+
+Если вы развертываете ботов, убедитесь, что в окружении или конфигурации бота вы используете режим `local`. В этом случае вы можете просто ввести `remnawave:3000`, чтобы избежать проблем с доступом к панели.
+
+## Добавление зеркал для Docker
+В некоторых случаях, как в [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40), серверы, особенно те, которые расположены в России, не могут загружать образы.
+Чтобы решить эту проблему, вы можете добавить зеркала:
+
+<Steps>
+
+1. Создайте файл `daemon.json`:
+
+    ```bash
+    nano /etc/docker/daemon.json
+    ```
+
+2. Импортируйте зеркала
+
+    ```json
+    {
+    "log-driver": "local",
+    "registry-mirrors": [
+        "https://mirror.gcr.io/",
+        "https://dockerhub.timeweb.cloud"
+        ]
+    }
+    ```
+
+3. Перезапустите службу Docker, чтобы применить внесенные изменения
+
+    ```bash
+    systemctl restart docker
+    ```
+
+</Steps>
+
+## Проблема не найдена
+
+Не стесняйтесь сообщать о любых проблемах, связанных с Нашим проектом, в [репозитории GitHub](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues).
+
+<LinkButton
+    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose"
+    icon="add-document"
+    iconPlacement="start"
+>
+    Создать новую проблему
+</LinkButton>
