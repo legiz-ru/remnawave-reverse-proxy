@@ -3279,6 +3279,10 @@ get_panel_token() {
     TOKEN_FILE="${DIR_REMNAWAVE}/token"
     ENV_FILE="/opt/remnawave/.env"
     local domain_url="127.0.0.1:3000"
+
+    if [ -f "$TOKEN_FILE" ]; then
+        rm "$TOKEN_FILE"
+    fi
     
     local telegram_oauth_enabled=false
     if [ -f "$ENV_FILE" ]; then
