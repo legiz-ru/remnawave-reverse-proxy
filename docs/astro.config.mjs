@@ -40,7 +40,7 @@ export default defineConfig({
 					]
 				})
 			],
-			title: 'eGamesAPI',
+			title: 'Remnawave Reverse-Proxy',
 			logo: {
 				src: './src/assets/logo.png',
 			},
