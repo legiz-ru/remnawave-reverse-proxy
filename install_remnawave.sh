@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.7.9 DEV"
+SCRIPT_VERSION="2.0.0"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
-SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/dev/install_remnawave.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
 
 COLOR_RESET="\033[0m"
 COLOR_GREEN="\033[1;32m"
@@ -265,7 +265,7 @@ set_language() {
                 [CHECK_CONFIG]="Check the configuration or restart the panel."
                 #Add node to panel
                 [ADD_NODE_TO_PANEL]="Adding node to panel"
-		[ENTER_NODE_NAME]="Enter node name (e.g., Germany):"
+                [ENTER_NODE_NAME]="Enter node name (e.g., Germany):"
                 [USING_SAVED_TOKEN]="Using saved token..."
                 [INVALID_SAVED_TOKEN]="Saved token is invalid. Requesting a new one..."
                 [ENTER_PANEL_USERNAME]="Enter panel username: "
@@ -843,7 +843,7 @@ start_panel_node() {
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
 
-    if docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . || docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_RUNNING]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STARTING_PANEL_NODE]}...${COLOR_RESET}"
@@ -864,7 +864,7 @@ stop_panel_node() {
     fi
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_GREEN}${LANG[PANEL_STOPPED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}...${COLOR_RESET}"
@@ -973,7 +973,9 @@ update_remnawave_reverse() {
         hash -r
 
         printf "${COLOR_GREEN}${LANG[UPDATE_SUCCESS]}${COLOR_RESET}\n" "$remote_version"
+        echo -e ""
         echo -e "${COLOR_YELLOW}${LANG[RESTART_REQUIRED]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_GREEN} remnawave_reverse${COLOR_RESET}"
         exit 0
     else
         echo -e "${COLOR_RED}${LANG[UPDATE_FAILED]}${COLOR_RESET}"
@@ -3773,7 +3775,7 @@ install_remnawave() {
     cookies_random2=$(generate_user)
 
     METRICS_USER=$(generate_user)
-    METRICS_PASS=$(generate_password)
+    METRICS_PASS=$(generate_user)
 
     JWT_AUTH_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
@@ -3827,6 +3829,35 @@ TELEGRAM_OAUTH_ADMIN_IDS=[123, 321]
 TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
 TELEGRAM_NOTIFY_CRM_THREAD_ID=
+
+# Enable Github OAuth2, possible values: true, false
+OAUTH2_GITHUB_ENABLED=false
+# Github client ID, you can get it from Github application settings
+OAUTH2_GITHUB_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# Github client secret, you can get it from Github application settings
+OAUTH2_GITHUB_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# List of allowed emails, separated by commas
+OAUTH2_GITHUB_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
+
+# Enable PocketID OAuth2, possible values: true, false
+OAUTH2_POCKETID_ENABLED=false
+# PocketID Client ID, you can get it from OIDC Client settings
+OAUTH2_POCKETID_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# PocketID Client Secret, you can get it from OIDC Client settings
+OAUTH2_POCKETID_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# Plain domain where PocketID is hosted, do not place any paths here. Just plain domain.
+OAUTH2_POCKETID_PLAIN_DOMAIN="pocketid.domain.com"
+# List of allowed emails, separated by commas
+OAUTH2_POCKETID_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
+
+# Enable Yandex OAuth2, possible values: true, false
+OAUTH2_YANDEX_ENABLED=false
+# Yandex Client ID, you can get it from OIDC Client settings
+OAUTH2_YANDEX_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# Yandex Client Secret, you can get it from OIDC Client settings
+OAUTH2_YANDEX_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# List of allowed emails, separated by commas
+OAUTH2_YANDEX_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
 
 ### FRONT_END ###
 # Used by CORS, you can leave it as * or place your domain there
@@ -3915,7 +3946,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:dev
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
@@ -4386,6 +4417,35 @@ TELEGRAM_NOTIFY_USERS_THREAD_ID=
 TELEGRAM_NOTIFY_NODES_THREAD_ID=
 TELEGRAM_NOTIFY_CRM_THREAD_ID=
 
+# Enable Github OAuth2, possible values: true, false
+OAUTH2_GITHUB_ENABLED=false
+# Github client ID, you can get it from Github application settings
+OAUTH2_GITHUB_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# Github client secret, you can get it from Github application settings
+OAUTH2_GITHUB_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# List of allowed emails, separated by commas
+OAUTH2_GITHUB_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
+
+# Enable PocketID OAuth2, possible values: true, false
+OAUTH2_POCKETID_ENABLED=false
+# PocketID Client ID, you can get it from OIDC Client settings
+OAUTH2_POCKETID_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# PocketID Client Secret, you can get it from OIDC Client settings
+OAUTH2_POCKETID_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# Plain domain where PocketID is hosted, do not place any paths here. Just plain domain.
+OAUTH2_POCKETID_PLAIN_DOMAIN="pocketid.domain.com"
+# List of allowed emails, separated by commas
+OAUTH2_POCKETID_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
+
+# Enable Yandex OAuth2, possible values: true, false
+OAUTH2_YANDEX_ENABLED=false
+# Yandex Client ID, you can get it from OIDC Client settings
+OAUTH2_YANDEX_CLIENT_ID="REPLACE_WITH_YOUR_CLIENT_ID"
+# Yandex Client Secret, you can get it from OIDC Client settings
+OAUTH2_YANDEX_CLIENT_SECRET="REPLACE_WITH_YOUR_CLIENT_SECRET"
+# List of allowed emails, separated by commas
+OAUTH2_YANDEX_ALLOWED_EMAILS=["admin@example.com", "user@example.com"]
+
 ### FRONT_END ###
 # Used by CORS, you can leave it as * or place your domain there
 FRONT_END_DOMAIN=$PANEL_DOMAIN
@@ -4473,7 +4533,7 @@ services:
         max-file: '5'
 
   remnawave:
-    image: remnawave/backend:dev
+    image: remnawave/backend:latest
     container_name: remnawave
     hostname: remnawave
     restart: always
