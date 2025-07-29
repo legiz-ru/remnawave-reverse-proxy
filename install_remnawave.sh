@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.0"
+SCRIPT_VERSION="2.0.1"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -201,6 +201,12 @@ set_language() {
                 [HOST_CREATED]="Host successfully created"
                 [GET_DEFAULT_SQUAD]="Getting default squad"
                 [UPDATE_SQUAD]="Squad successfully updated"
+                [NO_SQUADS_FOUND]="No squads found"
+                [INVALID_UUID_FORMAT]="Invalid UUID format"
+                [NO_VALID_SQUADS_FOUND]="No valid squads found"
+                [ERROR_GET_SQUAD]="Failed to get squad"
+                [INVALID_SQUAD_UUID]="Invalid squad UUID"
+                [INVALID_INBOUND_UUID]="Invalid inbound UUID"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Failed to change to directory %s"
                 [DIR_NOT_FOUND]="Directory /opt/remnawave not found"
@@ -241,6 +247,8 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Registration error - empty server response"
                 [ERROR_REGISTER]="Registration error"
                 [ERROR_UPDATE_SQUAD]="Failed to update squad"
+                [ERROR_GET_SQUAD_LIST]="Failed to get squad list"
+                [NO_SQUADS_TO_UPDATE]="No squads to update"
                 #Reinstall Panel/Node
                 [REINSTALL_WARNING]="All data panel/node will be deleted from the server. Are you sure? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
@@ -562,6 +570,12 @@ set_language() {
                 [HOST_CREATED]="Хост успешно создан"
                 [GET_DEFAULT_SQUAD]="Получение default squad"
                 [UPDATE_SQUAD]="Squad успешно обновлен"
+                [NO_SQUADS_FOUND]="Нет squadов"
+                [INVALID_UUID_FORMAT]="Неверный формат UUID"
+                [NO_VALID_SQUADS_FOUND]="Нет валидных squadов"
+                [ERROR_GET_SQUAD]="Не удалось получить squad"
+                [INVALID_SQUAD_UUID]="Неверный UUID squad"
+                [INVALID_INBOUND_UUID]="Неверный UUID inbound"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Не удалось перейти в директорию %s"
                 [DIR_NOT_FOUND]="Директория /opt/remnawave не найдена"
@@ -605,6 +619,8 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Ошибка при регистрации - пустой ответ сервера"
                 [ERROR_REGISTER]="Ошибка регистрации"
                 [ERROR_UPDATE_SQUAD]="Ошибка обновления squad"
+                [ERROR_GET_SQUAD_LIST]="Ошибка получения списка squadов"
+                [NO_SQUADS_TO_UPDATE]="Нет сквадов для обновления"
                 #Reinstall Panel/Node
                 [REINSTALL_WARNING]="Все данные панели/ноды будут удалены с сервера. Вы уверены? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
@@ -3556,11 +3572,36 @@ get_default_squad() {
     local token=$2
 
     local response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
-    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.internalSquads' > /dev/null; then
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.internalSquads' > /dev/null 2>&1; then
         echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $response${COLOR_RESET}"
+        return 1
     fi
 
-    echo "$response" | jq -r '.response.internalSquads[].uuid'
+    local squad_uuids=$(echo "$response" | jq -r '.response.internalSquads[].uuid' 2>/dev/null)
+    if [ -z "$squad_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_SQUADS_FOUND]}${COLOR_RESET}"
+        return 0
+    fi
+
+    local valid_uuids=""
+    while IFS= read -r uuid; do
+        if [ -z "$uuid" ]; then
+            continue
+        fi
+        if [[ $uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+            valid_uuids+="$uuid\n"
+        else
+            echo -e "${COLOR_RED}${LANG[INVALID_UUID_FORMAT]}: $uuid${COLOR_RESET}"
+        fi
+    done <<< "$squad_uuids"
+
+    if [ -z "$valid_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_VALID_SQUADS_FOUND]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo -e "$valid_uuids" | sed '/^$/d'
+    return 0
 }
 
 update_squad() {
@@ -3569,11 +3610,23 @@ update_squad() {
     local squad_uuid=$3
     local inbound_uuid=$4
 
-    local squad_response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
-    if [ -z "$squad_response" ] || ! echo "$squad_response" | jq -e '.response.internalSquads' > /dev/null; then
-        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $squad_response${COLOR_RESET}"
+    if [[ ! $squad_uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+        echo -e "${COLOR_RED}${LANG[INVALID_SQUAD_UUID]}: $squad_uuid${COLOR_RESET}"
+        return 1
     fi
-    local existing_inbounds=$(echo "$squad_response" | jq -r --arg uuid "$squad_uuid" '.response.internalSquads[] | select(.uuid == $uuid) | .inbounds[].uuid')
+
+    if [[ ! $inbound_uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+        echo -e "${COLOR_RED}${LANG[INVALID_INBOUND_UUID]}: $inbound_uuid${COLOR_RESET}"
+        return 1
+    fi
+
+    local squad_response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
+    if [ -z "$squad_response" ] || ! echo "$squad_response" | jq -e '.response.internalSquads' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $squad_response${COLOR_RESET}"
+        return 1
+    fi
+
+    local existing_inbounds=$(echo "$squad_response" | jq -r --arg uuid "$squad_uuid" '.response.internalSquads[] | select(.uuid == $uuid) | .inbounds[].uuid' 2>/dev/null)
     if [ -z "$existing_inbounds" ]; then
         existing_inbounds="[]"
     else
@@ -3588,9 +3641,12 @@ update_squad() {
     }')
 
     local response=$(make_api_request "PATCH" "http://$domain_url/api/internal-squads" "$token" "$request_body")
-    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null; then
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null 2>&1; then
         echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_SQUAD]}: $response${COLOR_RESET}"
+        return 1
     fi
+
+    return 0
 }
 
 ### API Functions ###
@@ -5109,10 +5165,22 @@ add_node_to_panel() {
     create_host "$domain_url" "$token" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid" "$entity_name"
 
     echo -e "${COLOR_YELLOW}${LANG[GET_DEFAULT_SQUAD]}${COLOR_RESET}"
-    local squad_uuid=$(get_default_squad "$domain_url" "$token")
-
-    update_squad "$domain_url" "$token" "$squad_uuid" "$inbound_uuid"
-    echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
+    local squad_uuids=$(get_default_squad "$domain_url" "$token")
+    if [ $? -ne 0 ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD_LIST]}${COLOR_RESET}"
+    elif [ -z "$squad_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_SQUADS_TO_UPDATE]}${COLOR_RESET}"
+    else
+        for squad_uuid in $squad_uuids; do
+            echo -e "${COLOR_YELLOW}${LANG[UPDATING_SQUAD]} $squad_uuid${COLOR_RESET}"
+            update_squad "$domain_url" "$token" "$squad_uuid" "$inbound_uuid"
+            if [ $? -eq 0 ]; then
+                echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]} $squad_uuid${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_SQUAD]} $squad_uuid${COLOR_RESET}"
+            fi
+        done
+    fi
 
     echo -e "${COLOR_GREEN}${LANG[NODE_ADDED_SUCCESS]}${COLOR_RESET}"
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
