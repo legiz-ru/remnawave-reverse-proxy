@@ -80,7 +80,7 @@ export default defineConfig({
 						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: '🎉 New', variant: 'default'} },
-						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: '🎉New', variant: 'default'} },
+						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: '🎉 New', variant: 'default'} },
 					],
 				},
 				{
@@ -95,13 +95,14 @@ export default defineConfig({
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
 						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Adding mirrors for Docker', slug: 'troubleshooting/docker-mirrors', translations: { ru: 'Добавление зеркал для Docker' }, badge: {text: '🎉 New', variant: 'default'} },
 						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
 				{
 					label: 'Contribution', translations: { ru: 'Помощь в разработке' },
 					items: [
-						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' } },
+						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Contribution Guide', slug: 'contribution/guide', translations: { ru: 'Руководство по внесению изменений' } },
 					],
 				},

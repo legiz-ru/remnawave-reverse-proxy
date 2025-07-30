@@ -1,0 +1,56 @@
+---
+title: Adding mirrors for Docker
+description: Solution for issues with pulling images
+---
+
+import { Steps, LinkButton } from '@astrojs/starlight/components';
+
+In some cases like [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40) servers, especially which are located in Russia, can't pull the images.  
+To fix this issue, you can add mirrors:
+
+<Steps>
+
+1. Create `daemon.json` file:
+
+    ```bash
+    nano /etc/docker/daemon.json
+    ```
+
+2. Import mirrors
+
+    ```json
+    {
+    "log-driver": "local",
+    "registry-mirrors": [
+        "https://mirror.gcr.io/",
+        "https://dockerhub.timeweb.cloud"
+        ]
+    }
+    ```
+
+3. Restart Docker service to apply made changes
+
+    ```bash
+    systemctl restart docker
+    ```
+
+</Steps>
+
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center', marginTop: '2rem' }}>
+    <p>Feel free to report any related to our project issues in the <a href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues">GitHub repository</a> or <a href="https://t.me/remnawave_reverse">Telegram</a> chat.</p>
+    <LinkButton
+        href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose"
+        icon="add-document"
+        iconPlacement="start"
+    >
+        Create new issue
+    </LinkButton>
+
+    <LinkButton
+        href="https://t.me/remnawave_reverse"
+        icon="telegram"
+        iconPlacement="start"
+    >
+        Discuss in Telegram
+    </LinkButton>
+</div>
