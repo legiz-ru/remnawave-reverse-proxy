@@ -9,11 +9,11 @@ import { Card, LinkButton } from '@astrojs/starlight/components';
 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
     <p>Это все контрибьютеры репозитория <a href="https://github.com/eGamesAPI/remnawave-reverse-proxy">Remnawave Reverse-proxy</a>, которым мы благодарны за их вклад, большой и малый.</p>
 
-    <ContributorList githubRepo="eGamesAPI/remnawave-reverse-proxy" ignore={["autofix-ci[bot]", "github-actions[bot]"]} />
+    <ContributorList githubRepo="eGamesAPI/remnawave-reverse-proxy" ignore={["autofix-ci[bot]", "github-actions[bot]", "renovate[bot]"]} />
 
     <Card title="Станьте одним из нас!" icon="github">
     Хотите внести свой вклад? Мы будем рады вашей помощи! Ознакомьтесь с нашим руководством, чтобы начать.
-    <div style={{ marginTop: '1rem' }}>
+    <div>
         <LinkButton href="/ru/contribution/guide" icon="npm" iconPlacement="start">
             Руководство по внесению изменений
         </LinkButton>
