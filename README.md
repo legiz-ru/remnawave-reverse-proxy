@@ -22,7 +22,9 @@ The script supports deployment on either a single server (with both the panel an
 - Panel Server: Serves as the central management hub, without hosting an Xray node.
 - Node Server: Hosts the Xray node along with a Self Steal stub for VLESS REALITY.
 To ensure proper operation, you need to prepare three domains (or subdomains) in advance: the first will be used for the control panel, the second for handling subscriptions, and the third for the Self Steal stub site, which is hosted on the node server.
+
 -----
+
 ### Domain Configuration
 The script supports two methods of domain configuration: via Cloudflare or using ACME with your hosting provider.
 
@@ -48,6 +50,7 @@ The script supports two methods of domain configuration: via Cloudflare or using
 | A     | node.example.com  | your_server_ip_vps_node | DNS only      |
 
 -----
+
 ### Installation Guidelines
 ### 1. Single Server Setup:
    - Select the option "Install Remnawave components", then choose "Install panel and node on one server". Once the process is complete, the script will automatically restart the panel and provide all the necessary login details.
@@ -56,35 +59,6 @@ The script supports two methods of domain configuration: via Cloudflare or using
    - Log into the control panel, navigate to Nodes → Management, select the desired node, and click the "Important Information". In the pop-up window, you’ll see an icon to copy the certificate — click on it.
    - Proceed to the second server and initiate the node installation. When prompted, paste the certificate you copied earlier.
    - Upon completion, you’ll see a message confirming that the node has been successfully connected.
------
-
-### Adding mirrors for Docker
-In some cases like #40 servers can't pull the images, especially which are located in Russia.  
-To fix this issue, you can add mirrors:
-
-1. Create `daemon.json` file:
-
-```bash
-nano /etc/docker/daemon.json
-```
-
-2. Import mirrors
-
-```json
-{
-   "log-driver": "local",
-   "registry-mirrors": [
-      "https://mirror.gcr.io/",
-      "https://dockerhub.timeweb.cloud"
-   ]
-}
-```
-
-3. Restart Docker service to apply made changes
-
-```bash
-systemctl restart docker
-```
 
 -----
 
@@ -100,6 +74,7 @@ To enhance the security of the panel, an additional layer of protection against 
 This mechanism ensures the panel remains hidden from unauthorized access. Even if an attacker attempts to scan the host or brute-force paths, they will be unable to access the panel without the correct parameter and corresponding Cookie.
 
 -----
+
 ### Proxy server configuration:
 1. Proxy server configuration:
    - Support for automatic configuration updates via subscription and JSON subscription with the ability to convert to formats for popular applications.
@@ -110,7 +85,9 @@ This mechanism ensures the panel remains hidden from unauthorized access. Even i
    - Manage IPv6 to prevent potential vulnerabilities.
    - BBR optimization for TCP connections.
    - Selecting a random website template from an array.
+
 -----
+
 ### Server Setup:
 
 To set up the server, run this command on it:
@@ -127,6 +104,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 <p align="center"><a href="#"><img src="./media/remnawave-reverse-proxy_en.png" alt="Image"></a></p>
 
 -----
+
 > [!IMPORTANT]
 > **This repository is intended solely for educational purposes and for studying the principles of reverse proxy servers and network security. The script demonstrates the setup of a proxy server using NGINX for reverse proxy, traffic management, and attack protection.**
 >
