@@ -1390,7 +1390,7 @@ view_logs() {
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
 
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
         exit 1
     fi
