@@ -4,7 +4,6 @@ description: Устранение проблем с загрузкой обра�
 ---
 
 import { Steps, LinkButton } from '@astrojs/starlight/components';
-import { Kbd, KbdPicker } from 'starlight-kbd/components';
 
 В некоторых случаях, как в [#40](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/40), серверы, особенно те, которые расположены в России, не могут загружать образы.
 Чтобы решить эту проблему, вы можете добавить зеркала:
@@ -37,8 +36,9 @@ import { Kbd, KbdPicker } from 'starlight-kbd/components';
 
 </Steps>
 
-<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
-    <p>Не стесняйтесь сообщать о любых проблемах, связанных с нашим проектом, в <a href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues">репозитории GitHub</a> или <a href="https://t.me/remnawave_reverse">Telegram</a> чате.</p>
+Не стесняйтесь сообщать о любых проблемах, связанных с нашим проектом, в [репозитории GitHub](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues) или [Telegram](https://t.me/remnawave_reverse) чате.
+
+<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '1rem' }}>
     <LinkButton
         href="https://github.com/eGamesAPI/remnawave-reverse-proxy/issues/new/choose"
         icon="add-document"
