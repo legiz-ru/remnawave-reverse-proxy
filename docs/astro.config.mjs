@@ -95,14 +95,14 @@ export default defineConfig({
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
 						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: '🎉 New', variant: 'default'} },
-						{ label: 'Adding mirrors for Docker', slug: 'troubleshooting/docker-mirrors', translations: { ru: 'Добавление зеркал для Docker' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Docker related issues', slug: 'troubleshooting/docker-issues', translations: { ru: 'Проблемы, связанные с Docker' }, badge: {text: '🎉 New', variant: 'default'} },
 						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
 				{
 					label: 'Contribution', translations: { ru: 'Помощь в разработке' },
 					items: [
-						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Contributors', slug: 'contribution/contributors', translations: { ru: 'Участники разработки' } },
 						{ label: 'Contribution Guide', slug: 'contribution/guide', translations: { ru: 'Руководство по внесению изменений' } },
 					],
 				},
