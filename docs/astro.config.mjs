@@ -42,7 +42,7 @@ export default defineConfig({
 			],
 			title: 'Remnawave Reverse-Proxy',
 			logo: {
-				src: './src/assets/logo.png',
+				src: './src/assets/logo.webp',
 			},
 			customCss: [
 				'./src/styles/custom.css',
