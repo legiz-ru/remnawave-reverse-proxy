@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.4"
+SCRIPT_VERSION="2.0.5"
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -1780,6 +1780,8 @@ manage_warp() {
             fi
 
             echo -e "${COLOR_GREEN}${LANG[WARP_DELETE_SUCCESS]}${COLOR_RESET}"
+            log_clear
+            manage_warp
             ;;
         0)
             echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
@@ -2148,9 +2150,6 @@ update_subscription_template() {
 
     echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
 
-    get_panel_token
-    token=$(cat "$TOKEN_FILE")
-
     local template_content=$(curl -s "$template_url")
     if [ -z "$template_content" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
@@ -2179,6 +2178,9 @@ update_subscription_template() {
         template_field="templateJson"
         template_value="$template_content"
     fi
+
+    get_panel_token
+    token=$(cat "$TOKEN_FILE")
 
     local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token")
     if [ -z "$get_response" ]; then
@@ -2763,7 +2765,7 @@ install_packages() {
     sysctl -p >/dev/null
 
     # UFW
-    if ! ufw --force reset || ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
+    if ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
         echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UFW]}${COLOR_RESET}" >&2
         return 1
     fi
@@ -3379,15 +3381,14 @@ get_panel_token() {
     TOKEN_FILE="${DIR_REMNAWAVE}/token"
     ENV_FILE="/opt/remnawave/.env"
     local domain_url="127.0.0.1:3000"
-
-    if [ -f "$TOKEN_FILE" ]; then
-        rm "$TOKEN_FILE"
-    fi
     
-    local telegram_oauth_enabled=false
+    local oauth_enabled=false
     if [ -f "$ENV_FILE" ]; then
-        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
-            telegram_oauth_enabled=true
+        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_GITHUB_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_POCKETID_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_YANDEX_ENABLED=true" "$ENV_FILE"; then
+            oauth_enabled=true
         fi
     fi
     
@@ -3402,7 +3403,7 @@ get_panel_token() {
     fi
     
     if [ -z "$token" ]; then
-        if [ "$telegram_oauth_enabled" = true ]; then
+        if [ "$oauth_enabled" = true ]; then
             echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
@@ -5362,9 +5363,7 @@ case $OPTION in
         ;;
     6)
         manage_warp
-        sleep 2
         log_clear
-        remnawave_reverse
         ;;
     7)
         manage_ipv6
