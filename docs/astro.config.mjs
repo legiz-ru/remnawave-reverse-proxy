@@ -89,6 +89,7 @@ export default defineConfig({
 						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к метрикам Prometheus' } },
 						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
 						{ label: 'Monitoring with Grafana', slug: 'configuration/grafana-monitoring', translations: { ru: 'Мониторинг через Grafana' } },
+					//	{ label: 'NetBird', slug: 'configuration/netbird', translations: { ru: 'NetBird' }, badge: {text: '🎉 New', variant: 'default'} },
 					],
 				},
 				{
