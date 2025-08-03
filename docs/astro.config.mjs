@@ -77,10 +77,10 @@ export default defineConfig({
 					label: 'Installation', translations: { ru: 'Установка' },
 					items: [
 						{ label: 'Requirements', slug: 'installation/requirements', translations: { ru: 'Обязательные условия' } },
-						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: '🎉 New', variant: 'default'} },
-						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: '🎉 New', variant: 'default'} },
-						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: '🎉 New', variant: 'default'} },
-						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' } },
+						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' } },
+						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' } },
+						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' } },
 					],
 				},
 				{
@@ -89,7 +89,7 @@ export default defineConfig({
 						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к метрикам Prometheus' } },
 						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
 						{ label: 'Monitoring with Grafana', slug: 'configuration/grafana-monitoring', translations: { ru: 'Мониторинг через Grafana' } },
-						// { label: 'NetBird', slug: 'configuration/netbird', translations: { ru: 'NetBird' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'NetBird', slug: 'configuration/netbird', translations: { ru: 'Netbird' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Warp Native', slug: 'configuration/warp-native', translations: { ru: 'Warp Native' }, badge: {text: '🎉 New', variant: 'default'} },
 					],
 				},
