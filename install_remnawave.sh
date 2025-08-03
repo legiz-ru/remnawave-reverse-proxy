@@ -990,7 +990,10 @@ update_remnawave_reverse() {
         mv "$temp_script" "$update_script"
         chmod +x "$update_script"
 
-        ln -sf "$update_script" "$bin_link"
+        if [ -e "$bin_link" ]; then
+            rm -f "$bin_link"
+        fi
+        ln -s "$update_script" "$bin_link"
 
         hash -r
 
