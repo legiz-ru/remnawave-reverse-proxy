@@ -26,6 +26,45 @@ location ^~ /api/ {
  
 Это открывает доступ к API из-вне, при этом API будут по прежнему защищены токеном авторизации.
 
+## Получение доступа к API с использованием cookie
+
+### Получение cookie
+
+Открываем nginx.conf и ищем строку `map $http_cookie $auth_cookie`. Нам понадобиться значение после `*`, i.e. для
+
+```
+map $http_cookie $auth_cookie {                                                                                                                                                default 0;
+"~*aEmFnBcC=WbYWpixX" 1;
+}
+```
+
+нашими cookie будут aEmFnBcC=WbYWpixX.
+
+### Отправка cookies в header'е
+
+На примере HTTP клиента `httpx` и записи `COOKIES` в `.env` рассмотрим отправку cookies в заголовке:
+
+```json
+COOKIES={"aEmFnBcC":"WbYWpixX"}
+```
+
+```python
+token = os.getenv("API_TOKEN", "")
+base_url = os.getenv("REMNAWAVE_BASE_URL", "")
+cookies = json.loads(os.getenv("COOKIES", "{}"))
+
+async def get_all_nodes():
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+    }
+
+    async with httpx.AsyncClient(cookies=cookies) as async_client:
+        response = await async_client.get(f"{base_url}/api/nodes", headers=headers)
+
+    return response.json()
+```
+
 :::danger[Важно]
 После этого в `.env` файле замените строку `IS_DOCS_ENABLED=true` на `IS_DOCS_ENABLED=false`, чтобы не "светить" документацией во внешний интернет
 :::
