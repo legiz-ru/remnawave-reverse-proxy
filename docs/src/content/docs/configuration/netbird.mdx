@@ -30,7 +30,7 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
 
 3. Click `Sign Up`. Choose a registration method: via email, Google, GitHub, or Microsoft.
 
-4. Fill in the fields (email, password, name) and confirm your registration via the email you receive.
+4. Fill in the fields (email, password) and confirm your registration via the email you receive.
 
 5. After this, you will be taken to the Netbird Dashboard.
 
@@ -39,6 +39,10 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
 </Steps>
 
 ## Creating and Configuring a Setup Key
+
+:::note
+Setup key is a pre-authentication key that allows to register new machines in your network. It simply associates a machine with an account on a first run.
+:::
 
 <Steps>
 
@@ -56,7 +60,7 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
       />
     </div>
 
-3. Enter a name for the key (e.g., RemnawaveKey).
+3. Enter a name for the key (e.g., `Key`).
 
 4. Enable the `Make this key reusable` slider so the key can be used for multiple servers (up to 30 peers).
 
@@ -64,7 +68,8 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
 
 6. Click `Create Setup Key`.
 
-7. Save your key.
+7. Save your key. A window will appear with the generated key.
+Copy the key and save it in a safe place for future use.
 
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <img 
@@ -74,16 +79,13 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
       />
     </div>
 
-    A window will appear with the generated key (e.g., 12B653C1-4E03-452E-9DA9-40523493205B).
-    Copy the key and save it in a safe place for future use.
-
 </Steps>
 
-## Installing Netbird on the Panel Server
+## Installing Netbird on the Panel Server Remnawave
 
 <Steps>
 
-1. Click the Install Netbird button.
+1. Click the `Install Netbird` button.
     A window with installation instructions will open.
 
     <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -102,7 +104,7 @@ Netbird is an open-source platform based on WireGuard that allows you to easily 
 
     ![Netbird setup](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/netbird/setup_netbird.png)
 
-3. Start Netbird with the key. Run the command to connect using your saved key:
+3. Launch Netbird with the key you copied earlier. Execute the command to connect using the saved key (you will have your own key):
 
     ```bash
     netbird up --setup-key AE53280D-88CC-4250-9228-401AB1C7C041
@@ -122,17 +124,17 @@ Ensure that the Remnawave panel peer is shown as connected.
 
 ![Netbird peer](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/netbird/peer_netbird.png)
 
-## Installing Netbird on the Node Server
+## Installing Netbird on the Node Server Remnawave
 
-Follow the same installation steps as on the panel server.
+Follow the same installation steps as on the [`panel server`](https://wiki.egam.es/configuration/netbird/#installing-netbird-on-the-panel-server).
 
-Return to the Dashboard and go to the Peers section. Ensure that the node peer is shown as connected.
+Return to the Dashboard Netbird and go to the Peers section. Ensure that the node peer is shown as connected.
 
 ![Netbird peer](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/netbird/peer_netbird_node.png)
 
 ## Configuring the Firewall (UFW) on the Node Server
 
-In the Dashboard, find the Netbird IP address of the panel (in our case, it's 100.88.38.121; yours may be different).
+In the Netbird Dashboard, find the Netbird IP address of the panel Remnawave (in our case, it's 100.88.38.121; yours may be different).
 Run the command to open port 2222 (TCP) for this IP:
 
 ```bash
@@ -145,7 +147,7 @@ Reload the firewall:
 ufw reload
 ```
 
-## Configuring Netbird in the Remnawave Panel
+## Configuring IP adress Netbird in the Remnawave Panel
 
 <Steps>
 
