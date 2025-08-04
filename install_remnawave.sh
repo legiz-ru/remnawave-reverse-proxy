@@ -4888,7 +4888,7 @@ server {
 
     location / {
         if (\$authorized = 0) {
-            return 404;
+            return 444;
         }
         proxy_http_version 1.1;
         proxy_pass http://remnawave;
