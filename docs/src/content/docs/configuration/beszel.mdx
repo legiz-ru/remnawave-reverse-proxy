@@ -61,6 +61,10 @@ Do not forget to create a DNS record for beszel.example.com
 
 5. Add Beszel to our nginx config
 
+    :::danger[Important]
+    In this config we use a wildcard certificate, if you have ACME, then do not forget to generate it and specify its path
+    ::: 
+
     ```nginx
     upstream beszel {
         server 127.0.0.1:8090;
