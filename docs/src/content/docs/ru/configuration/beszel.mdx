@@ -121,3 +121,53 @@ Beszel — это легковесная платформа для монито�
     ![Add System](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/add_system_beszel.png)
 
 </Steps>
+
+## Добавление агента в панель управления Beszel
+
+<Steps>
+
+1. Нажимаем на `Add System`
+
+2. Добавляем в систему нашего агента
+
+    ![Add System Host](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/add_system_host_beszel.png)
+
+3. Выбираем способ подключения Binary
+
+4. Заполняем имя агента и вводим IP-адрес нашей ноды Remnawave (порт можем оставить поумолчанию)
+
+5. Нажимаем на `Copy Linux command` и получаем команду для установки агента.
+
+6. Переходим на наш сервер Remnawave ноды и выполняем команду
+
+    ```bash
+    curl -sL https://get.beszel.dev -o /tmp/install-agent.sh && chmod +x /tmp/install-agent.sh && /tmp/install-agent.sh -p 45876 -k "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPW2NUPqCB4pq8oOgEFB9Luqe6oWjEy4bkQV3qcXo3qt" -t "8c9e7262-ced0-4162-bc49-4c985162c22f" -url "https://beszel.example.com"
+    ```
+
+7. Видим, что наш агент успешно установлен
+
+    ![Install Agent](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/install_agent_beszel.png)
+
+</Steps>
+
+## Настройка брандмауэра (UFW) на сервере ноды Remnawave
+
+<Steps>
+
+1. Выполните команду для открытия порта 45876 (TCP) для IP-адреса панели Remnawave:
+
+    ```bash
+    ufw allow from 100.88.38.121 to any port 45876 proto tcp
+    ```
+
+2. Перезагрузите брандмауэр:
+
+    ```bash
+    ufw reload
+    ```
+
+3. Подождите пару минут, пока агент не подключится к панели Beszel
+
+    ![Host System](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/host_system_beszel.png)
+
+</Steps>

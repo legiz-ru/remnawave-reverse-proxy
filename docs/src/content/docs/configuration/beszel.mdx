@@ -1,30 +1,34 @@
 ---
-title: Руководство по установке Beszel
-description: Инструкция по установке и настройке Beszel
+title: Installing and Configuring Beszel
+description: Guide to install and configure Beszel
 ---
 import { Code } from '@astrojs/starlight/components';
 import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
-Beszel — это легковесная платформа для мониторинга серверов, включающая статистику Docker, исторические данные и функции оповещения.
+Beszel is a lightweight platform for monitoring servers, including Docker statistics, historical data, and alerting functions.
 
-Она имеет дружелюбный веб-интерфейс, простую конфигурацию и готова к использованию «из коробки». Поддерживает автоматическое резервное копирование, многопользовательский режим, аутентификацию OAuth и доступ к API.
+It has a friendly web interface, simple configuration, and is ready to use "out of the box". It supports automatic backups, multi-user mode, OAuth authentication, and API access.
 
-## Установка Beszel Hub (основной компонент)
+## Installing Beszel Hub (main component)
 
-:::danger[Важно]
-Требуется наличие установленной панели Remnawave
+:::danger[Important]
+Requires a Remnawave panel to be installed
+:::
+
+:::note[Note]
+Do not forget to create a DNS record for beszel.example.com
 :::
 
 <Steps>
 
-1. Переходим в директорию remnawave и редактируем docker-compose.yml
+1. Navigate to the directory remnawave and edit docker-compose.yml
 
     ```bash
     cd /opt/remnawave && nano docker-compose.yml
     ```
 
-2. Добавляем в наш docker-compose.yml Beszel Hub
+2. Add Beszel Hub to our docker-compose.yml
 
     ```yaml
     beszel:
@@ -44,13 +48,13 @@ Beszel — это легковесная платформа для монито�
           max-file: '5'
     ```
 
-3. Редактируем наш nginx конфиг
+3. Edit our nginx config
 
     ```bash
     cd /opt/remnawave && nano nginx.conf
     ```
 
-4. Добавляем в наш nginx конфиг Beszel
+4. Add Beszel to our nginx config
 
     ```nginx
     upstream beszel {
@@ -88,7 +92,7 @@ Beszel — это легковесная платформа для монито�
     }
     ```
 
-5. Перезапускаем наш docker
+5. Restart our docker
 
     ```bash
     cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f
@@ -96,11 +100,74 @@ Beszel — это легковесная платформа для монито�
 
 </Steps>
 
-Переходим по адресу Beszel, не забывая подставить ваши куки
-```
-https://beszel.example.com/?LDMBcZNB=jdJYPxqq
-```
 
-Нас встречает страница авторизации Beszel
+### Account creation
 
-Вводим нашу почту и пароль
+<Steps>
+
+1. Navigate to the address of Beszel, don't forget to substitute your cookies
+    ```
+    https://beszel.example.com/?LDMBcZNB=jdJYPxqq
+    ```
+
+2. We meet the Beszel authorization page
+
+    ![Admin creation](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/beszel/admin_creation_beszel.png)
+
+3. Enter our email and password
+
+4. We get to the Beszel dashboard
+
+    ![Add System](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/beszel/add_system_beszel.png)
+
+</Steps>
+
+## Adding an agent to the Beszel dashboard
+
+<Steps>
+
+1. Click on `Add System`
+
+2. Add our agent to the system
+
+    ![Add System Host](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/beszel/add_system_host_beszel.png)
+
+3. Select the Binary connection method
+
+4. Fill in the agent name and enter the IP address of our Remnawave node (we can leave the port as default)
+
+5. Click on `Copy Linux command` and get the agent installation command.
+
+6. Go to our Remnawave node server and execute the command
+
+    ```bash
+    curl -sL https://get.beszel.dev -o /tmp/install-agent.sh && chmod +x /tmp/install-agent.sh && /tmp/install-agent.sh -p 45876 -k "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPW2NUPqCB4pq8oOgEFB9Luqe6oWjEy4bkQV3qcXo3qt" -t "8c9e7262-ced0-4162-bc49-4c985162c22f" -url "https://beszel.example.com"
+    ```
+
+7. We see that our agent is successfully installed
+
+    ![Install Agent](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/beszel/install_agent_beszel.png)
+
+</Steps>
+
+## Configuring the firewall (UFW) on the Remnawave node server
+
+<Steps>
+
+1. Execute the command to open port 45876 (TCP) for the Remnawave panel IP address:
+
+    ```bash
+    ufw allow from 100.88.38.121 to any port 45876 proto tcp
+    ```
+
+2. Reload the firewall:
+
+    ```bash
+    ufw reload
+    ```
+
+3. Wait a few minutes for the agent to connect to the Beszel panel
+
+    ![Host System](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/beszel/host_system_beszel.png)
+
+</Steps>
