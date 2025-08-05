@@ -53,13 +53,13 @@ Do not forget to create a DNS record for beszel.example.com
     cd /opt/beszel && docker compose up -d && docker compose logs -f
     ```
 
-4. Edit our nginx config
+4. Edit our nginx.conf
 
     ```bash
     cd /opt/remnawave && nano nginx.conf
     ```
 
-5. Add Beszel to our nginx config
+5. Add to our nginx.conf block server and upstream for Beszel
 
     :::danger[Important]
     In this config we use a wildcard certificate, if you have ACME, then do not forget to generate it and specify its path
