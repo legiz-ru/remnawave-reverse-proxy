@@ -16,6 +16,10 @@ Beszel — это легковесная платформа для монито�
 Требуется наличие установленной панели Remnawave
 :::
 
+:::note[Заметка]
+Не забудьте создать запись DNS для beszel.example.com
+:::
+
 <Steps>
 
 1. Переходим в директорию remnawave и редактируем docker-compose.yml
@@ -96,11 +100,24 @@ Beszel — это легковесная платформа для монито�
 
 </Steps>
 
-Переходим по адресу Beszel, не забывая подставить ваши куки
-```
-https://beszel.example.com/?LDMBcZNB=jdJYPxqq
-```
 
-Нас встречает страница авторизации Beszel
+### Создание аккаунта
 
-Вводим нашу почту и пароль
+<Steps>
+
+1. Переходим по адресу Beszel, не забывая подставить ваши куки
+    ```
+    https://beszel.example.com/?LDMBcZNB=jdJYPxqq
+    ```
+
+2. Нас встречает страница авторизации Beszel
+
+    ![Admin creation](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/admin_creation_beszel.png)
+
+3. Вводим нашу почту и пароль
+
+4. Попадаем в панель управления Beszel
+
+    ![Add System](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/beszel/add_system_beszel.png)
+
+</Steps>
