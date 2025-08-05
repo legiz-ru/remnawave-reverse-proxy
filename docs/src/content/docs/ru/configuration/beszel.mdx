@@ -79,12 +79,7 @@ Beszel — это легковесная платформа для монито�
         ssl_certificate_key "/etc/nginx/ssl/example.com/privkey.pem";
         ssl_trusted_certificate "/etc/nginx/ssl/example.com/fullchain.pem";
 
-        add_header Set-Cookie $set_cookie_header;
-
         location / {
-            if ($authorized = 0) {
-                return 444;
-            }
             proxy_http_version 1.1;
             proxy_pass http://beszel;
             proxy_set_header Host $host;
@@ -114,9 +109,9 @@ Beszel — это легковесная платформа для монито�
 
 <Steps>
 
-1. Переходим по адресу Beszel, не забывая подставить ваши куки
+1. Переходим по адресу Beszel
     ```
-    https://beszel.example.com/?LDMBcZNB=jdJYPxqq
+    https://beszel.example.com
     ```
 
 2. Нас встречает страница авторизации Beszel

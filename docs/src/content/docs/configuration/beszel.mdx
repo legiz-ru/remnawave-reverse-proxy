@@ -79,12 +79,7 @@ Do not forget to create a DNS record for beszel.example.com
         ssl_certificate_key "/etc/nginx/ssl/example.com/privkey.pem";
         ssl_trusted_certificate "/etc/nginx/ssl/example.com/fullchain.pem";
 
-        add_header Set-Cookie $set_cookie_header;
-
         location / {
-            if ($authorized = 0) {
-                return 444;
-            }
             proxy_http_version 1.1;
             proxy_pass http://beszel;
             proxy_set_header Host $host;
@@ -114,9 +109,9 @@ Do not forget to create a DNS record for beszel.example.com
 
 <Steps>
 
-1. Navigate to the address of Beszel, don't forget to substitute your cookies
+1. Navigate to the address of Beszel
     ```
-    https://beszel.example.com/?LDMBcZNB=jdJYPxqq
+    https://beszel.example.com
     ```
 
 2. We meet the Beszel authorization page
