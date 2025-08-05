@@ -22,39 +22,44 @@ Beszel — это легковесная платформа для монито�
 
 <Steps>
 
-1. Переходим в директорию remnawave и редактируем docker-compose.yml
+1. Создаем директорию для Beszel и редактируем docker-compose.yml
 
     ```bash
-    cd /opt/remnawave && nano docker-compose.yml
+    mkdir /opt/beszel && cd /opt/beszel && nano docker-compose.yml
     ```
 
 2. Добавляем в наш docker-compose.yml Beszel Hub
 
     ```yaml
-    beszel:
-      image: henrygd/beszel
-      container_name: beszel
-      restart: always
-      ports:
-        - '127.0.0.1:8090:8090'
-      volumes:
-        - ./beszel_data:/beszel_data
-      networks:
-        - remnawave-network
-      logging:
-        driver: 'json-file'
-        options:
-          max-size: '30m'
-          max-file: '5'
+    services:
+      beszel:
+        image: henrygd/beszel
+        container_name: beszel
+        restart: always
+        ports:
+          - '127.0.0.1:8090:8090'
+        volumes:
+          - ./beszel_data:/beszel_data
+        logging:
+          driver: 'json-file'
+          options:
+            max-size: '30m'
+            max-file: '5'
     ```
 
-3. Редактируем наш nginx конфиг
+3. Запускаем Beszel Hub
+
+    ```bash
+    cd /opt/beszel && docker compose up -d && docker compose logs -f
+    ```
+
+4. Редактируем наш nginx конфиг
 
     ```bash
     cd /opt/remnawave && nano nginx.conf
     ```
 
-4. Добавляем в наш nginx конфиг Beszel
+5. Добавляем в наш nginx конфиг Beszel
 
     ```nginx
     upstream beszel {
@@ -92,10 +97,10 @@ Beszel — это легковесная платформа для монито�
     }
     ```
 
-5. Перезапускаем наш docker
+6. Перезапускаем наш nginx
 
     ```bash
-    cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f
+    cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx && docker compose logs -f remnawave-nginx
     ```
 
 </Steps>
@@ -134,7 +139,7 @@ Beszel — это легковесная платформа для монито�
 
 3. Выбираем способ подключения Binary
 
-4. Заполняем имя агента и вводим IP-адрес нашей ноды Remnawave (порт можем оставить поумолчанию)
+4. Заполняем имя агента и вводим IP-адрес нашей ноды Remnawave (порт можем оставить по умолчанию)
 
 5. Нажимаем на `Copy Linux command` и получаем команду для установки агента.
 

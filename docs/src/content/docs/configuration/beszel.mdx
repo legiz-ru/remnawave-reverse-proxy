@@ -22,39 +22,44 @@ Do not forget to create a DNS record for beszel.example.com
 
 <Steps>
 
-1. Navigate to the directory remnawave and edit docker-compose.yml
+1. Create directory for Beszel and edit docker-compose.yml
 
     ```bash
-    cd /opt/remnawave && nano docker-compose.yml
+    mkdir /opt/beszel && cd /opt/beszel && nano docker-compose.yml
     ```
 
 2. Add Beszel Hub to our docker-compose.yml
 
     ```yaml
-    beszel:
-      image: henrygd/beszel
-      container_name: beszel
-      restart: always
-      ports:
-        - '127.0.0.1:8090:8090'
-      volumes:
-        - ./beszel_data:/beszel_data
-      networks:
-        - remnawave-network
-      logging:
-        driver: 'json-file'
-        options:
-          max-size: '30m'
-          max-file: '5'
+    services:
+      beszel:
+        image: henrygd/beszel
+        container_name: beszel
+        restart: always
+        ports:
+          - '127.0.0.1:8090:8090'
+        volumes:
+          - ./beszel_data:/beszel_data
+        logging:
+          driver: 'json-file'
+          options:
+            max-size: '30m'
+            max-file: '5'
     ```
 
-3. Edit our nginx config
+3. Run Beszel Hub
+
+    ```bash
+    cd /opt/beszel && docker compose up -d && docker compose logs -f
+    ```
+
+4. Edit our nginx config
 
     ```bash
     cd /opt/remnawave && nano nginx.conf
     ```
 
-4. Add Beszel to our nginx config
+5. Add Beszel to our nginx config
 
     ```nginx
     upstream beszel {
@@ -92,10 +97,10 @@ Do not forget to create a DNS record for beszel.example.com
     }
     ```
 
-5. Restart our docker
+6. Restart our nginx
 
     ```bash
-    cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f
+    cd /opt/remnawave && docker compose down remnawave-nginx && docker compose up -d remnawave-nginx && docker compose logs -f remnawave-nginx
     ```
 
 </Steps>
