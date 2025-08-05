@@ -1,0 +1,106 @@
+---
+title: Руководство по установке Beszel
+description: Инструкция по установке и настройке Beszel
+---
+import { Code } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+import { LinkButton } from '@astrojs/starlight/components';
+
+Beszel — это легковесная платформа для мониторинга серверов, включающая статистику Docker, исторические данные и функции оповещения.
+
+Она имеет дружелюбный веб-интерфейс, простую конфигурацию и готова к использованию «из коробки». Поддерживает автоматическое резервное копирование, многопользовательский режим, аутентификацию OAuth и доступ к API.
+
+## Установка Beszel Hub (основной компонент)
+
+:::danger[Важно]
+Требуется наличие установленной панели Remnawave
+:::
+
+<Steps>
+
+1. Переходим в директорию remnawave и редактируем docker-compose.yml
+
+    ```bash
+    cd /opt/remnawave && nano docker-compose.yml
+    ```
+
+2. Добавляем в наш docker-compose.yml Beszel Hub
+
+    ```yaml
+    beszel:
+      image: henrygd/beszel
+      container_name: beszel
+      restart: always
+      ports:
+        - '127.0.0.1:8090:8090'
+      volumes:
+        - ./beszel_data:/beszel_data
+      networks:
+        - remnawave-network
+      logging:
+        driver: 'json-file'
+        options:
+          max-size: '30m'
+          max-file: '5'
+    ```
+
+3. Редактируем наш nginx конфиг
+
+    ```bash
+    cd /opt/remnawave && nano nginx.conf
+    ```
+
+4. Добавляем в наш nginx конфиг Beszel
+
+    ```nginx
+    upstream beszel {
+        server 127.0.0.1:8090;
+    }
+
+    server {
+        server_name beszel.example.com;
+        listen 443 ssl;
+        http2 on;
+
+        ssl_certificate "/etc/nginx/ssl/example.com/fullchain.pem";
+        ssl_certificate_key "/etc/nginx/ssl/example.com/privkey.pem";
+        ssl_trusted_certificate "/etc/nginx/ssl/example.com/fullchain.pem";
+
+        add_header Set-Cookie $set_cookie_header;
+
+        location / {
+            if ($authorized = 0) {
+                return 444;
+            }
+            proxy_http_version 1.1;
+            proxy_pass http://beszel;
+            proxy_set_header Host $host;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Port $server_port;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+    }
+    ```
+
+5. Перезапускаем наш docker
+
+    ```bash
+    cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f
+    ```
+
+</Steps>
+
+Переходим по адресу Beszel, не забывая подставить ваши куки
+```
+https://beszel.example.com/?LDMBcZNB=jdJYPxqq
+```
+
+Нас встречает страница авторизации Beszel
+
+Вводим нашу почту и пароль
