@@ -12,12 +12,9 @@ It has a friendly web interface, simple configuration, and is ready to use "out 
 
 ## Installing Beszel Hub (main component)
 
-:::danger[Important]
-Requires a Remnawave panel to be installed
-:::
-
 :::note[Note]
-Do not forget to create a DNS record for beszel.example.com
+Recommended to have a `Remnawave panel` installed, to make it easier with `your domain certificates`.
+Also do not forget to create a DNS record for your Beszel `beszel.example.com` (example)
 :::
 
 <Steps>
@@ -62,7 +59,7 @@ Do not forget to create a DNS record for beszel.example.com
 5. Add to our nginx.conf block server and upstream for Beszel
 
     :::danger[Important]
-    In this config we use a wildcard certificate, if you have ACME, then do not forget to generate it and specify its path
+    In this config we use `Wildcard` certificate. If you have `ACME`, then do not forget to generate it and specify its path in `nginx.conf` and `docker-compose.yml` in `/opt/remnawave`
     ::: 
 
     ```nginx
