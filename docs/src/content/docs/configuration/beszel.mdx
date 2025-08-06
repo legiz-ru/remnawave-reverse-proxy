@@ -59,7 +59,7 @@ Also do not forget to create a DNS record for your Beszel `beszel.example.com` (
 5. Add to our nginx.conf block server and upstream for Beszel
 
     :::danger[Important]
-    In this config we use `Wildcard` certificate. If you have `ACME`, then do not forget to generate it and specify its path in `nginx.conf` and `docker-compose.yml` in `/opt/remnawave`
+    In this config we use Wildcard certificate. If you have ACME, then do not forget to generate it for the new domain `beszel.example.com` (example) and specify its path in `nginx.conf` and `docker-compose.yml` in `/opt/remnawave`
     ::: 
 
     ```nginx

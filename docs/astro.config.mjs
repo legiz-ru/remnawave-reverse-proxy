@@ -91,7 +91,7 @@ export default defineConfig({
 						{ label: 'Monitoring with Grafana', slug: 'configuration/grafana-monitoring', translations: { ru: 'Мониторинг через Grafana' } },
 						{ label: 'Netbird', slug: 'configuration/netbird', translations: { ru: 'Netbird' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Warp Native', slug: 'configuration/warp-native', translations: { ru: 'Warp Native' }, badge: {text: '🎉 New', variant: 'default'} },
-						// { label: 'Beszel', slug: 'configuration/beszel', translations: { ru: 'Beszel' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Beszel', slug: 'configuration/beszel', translations: { ru: 'Beszel' }, badge: {text: '🎉 New', variant: 'default'} },
 					],
 				},
 				{
