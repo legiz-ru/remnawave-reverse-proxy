@@ -207,12 +207,12 @@ Here `sub.mydomain.com` is the domain address attached to the monitoring VPS whe
       scrape_interval: 15s
 
     scrape_configs:
-      - job_name: 'remnawave_exporter'
+      - job_name: 'node_exporter'
         static_configs:
           - targets: ['127.0.0.1:9002']
             labels:
               label: "Remnaserver"
-      - job_name: 'integrations/node_exporter'
+      - job_name: 'integrations/remnawave_exporter'
         static_configs:
           - targets: ['127.0.0.1:9001']
             labels:
