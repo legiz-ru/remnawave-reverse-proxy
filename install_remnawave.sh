@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.6a"
+SCRIPT_VERSION="2.0.6b"
+UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -76,6 +77,7 @@ set_language() {
                 [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="update available"
                 [VERSION_LABEL]="Version: %s"
                 [EXIT]="Exit"
                 [MENU_1]="Install Remnawave Components"
@@ -432,6 +434,7 @@ set_language() {
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="доступно обновление"
                 [VERSION_LABEL]="Версия: %s"
                 #Install Packages
                 [ERROR_UPDATE_LIST]="Ошибка: Не удалось обновить список пакетов"
@@ -1125,10 +1128,71 @@ generate_password() {
     echo "$password"
 }
 
+#Displaying the availability of the update in the menu
+check_update_status() {
+    local TEMP_REMOTE_VERSION_FILE
+    TEMP_REMOTE_VERSION_FILE=$(mktemp)
+
+    if ! curl -fsSL "$SCRIPT_URL" 2>/dev/null | head -n 100 > "$TEMP_REMOTE_VERSION_FILE"; then
+        UPDATE_AVAILABLE=false
+        rm -f "$TEMP_REMOTE_VERSION_FILE"
+        return
+    fi
+
+    local REMOTE_VERSION
+    REMOTE_VERSION=$(grep -m 1 "^SCRIPT_VERSION=" "$TEMP_REMOTE_VERSION_FILE" | cut -d'"' -f2)
+    rm -f "$TEMP_REMOTE_VERSION_FILE"
+
+    if [[ -z "$REMOTE_VERSION" ]]; then
+        UPDATE_AVAILABLE=false
+        return
+    fi
+
+    compare_versions_for_check() {
+        local v1="$1"
+        local v2="$2"
+
+        local v1_num="${v1//[^0-9.]/}"
+        local v2_num="${v2//[^0-9.]/}"
+
+        local v1_sfx="${v1//$v1_num/}"
+        local v2_sfx="${v2//$v2_num/}"
+
+        if [[ "$v1_num" == "$v2_num" ]]; then
+            if [[ -z "$v1_sfx" && -n "$v2_sfx" ]]; then
+                return 0
+            elif [[ -n "$v1_sfx" && -z "$v2_sfx" ]]; then
+                return 1
+            elif [[ "$v1_sfx" < "$v2_sfx" ]]; then
+                return 0
+            else
+                return 1
+            fi
+        else
+            if printf '%s\n' "$v1_num" "$v2_num" | sort -V | head -n1 | grep -qx "$v1_num"; then
+                return 0
+            else
+                return 1
+            fi
+        fi
+    }
+
+    if compare_versions_for_check "$SCRIPT_VERSION" "$REMOTE_VERSION"; then
+        UPDATE_AVAILABLE=true
+    else
+        UPDATE_AVAILABLE=false
+    fi
+}
+
 show_menu() {
     echo -e ""
+	check_update_status
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
-    printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+    if [[ "$UPDATE_AVAILABLE" == true ]]; then
+		printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION ${COLOR_RED}${LANG[AVAILABLE_UPDATE]}${COLOR_RESET}"
+    else
+		printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+    fi
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}" # Install Remnawave Components
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}" # Reinstall panel/node
