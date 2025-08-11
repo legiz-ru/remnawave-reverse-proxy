@@ -1644,7 +1644,9 @@ manage_warp() {
                 local warp_outbound='{
                     "tag": "warp-out",
                     "protocol": "freedom",
-                    "settings": {},
+                    "settings": {
+					    "domainStrategy": "UseIP"
+					},
                     "streamSettings": {
                         "sockopt": {
                             "interface": "warp",
