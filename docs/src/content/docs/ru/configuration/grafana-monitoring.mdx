@@ -202,23 +202,22 @@ remnawave:
 
 1. Файл `/opt/monitoring/prometheus/prometheus.yml`. `username` и `password` из `.env` файла Remnawave (секция `### PROMETHEUS ###`)
 
-    ```yaml
+```yaml
     global:
       scrape_interval: 15s
 
     scrape_configs:
-      - job_name: 'node_exporter'
+      # Для корректной работы Grafana-дашбордов, которые указаны в ссылках ниже
+      # используйте job_name: integrations/node_exporter.
+      - job_name: 'node_exporter' 
         static_configs:
           - targets: ['127.0.0.1:9002']
             labels:
-              label: "Remnaserver"
-      - job_name: 'integrations/node_exporter'
+              cluster: "test"
+              instance: "127.0.0.1:9002"
+      - job_name: 'remnawave_exporter'
         static_configs:
           - targets: ['127.0.0.1:9001']
-            labels:
-              cluster: "test"
-              job: "integrations/node_exporter"
-              instance: "127.0.0.1:9001"
         basic_auth:
           username: "XXXXXXXXXXXXXXX"
           password: "XXXXXXXXXXXXXXX"
