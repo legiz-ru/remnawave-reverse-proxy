@@ -1617,10 +1617,10 @@ manage_warp() {
                 echo -e "${COLOR_RED}${LANG[WARP_NO_NODE]}${COLOR_RESET}"
                 exit 1
             fi
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/install.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/install.sh)
             ;;
         2)
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/uninstall.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/uninstall.sh)
             ;;
         3)
             local domain_url="127.0.0.1:3000"
