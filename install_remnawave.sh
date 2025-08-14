@@ -3213,11 +3213,20 @@ EOL
         fi
 
         if [ "$days_left" -le "$renew_threshold" ]; then
+            if [ "$cert_method" == "2" ]; then
+                ufw allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             certbot renew --cert-name "$domain" --no-random-sleep-on-renew >> /var/log/letsencrypt/letsencrypt.log 2>&1 &
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
             local certbot_exit_code=$?
+
+            if [ "$cert_method" == "2" ]; then
+                ufw delete allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             if [ "$certbot_exit_code" -ne 0 ]; then
                 cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}: ${LANG[RATE_LIMIT_EXCEEDED]}"
                 continue
