@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.6b"
+SCRIPT_VERSION="2.0.7"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -1185,13 +1185,11 @@ check_update_status() {
 }
 
 show_menu() {
-    echo -e ""
-	check_update_status
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
     if [[ "$UPDATE_AVAILABLE" == true ]]; then
-		printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION ${LANG[AVAILABLE_UPDATE]}"
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION ${COLOR_RED}${LANG[AVAILABLE_UPDATE]}${COLOR_RESET}")${COLOR_RESET}"
     else
-		printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION")${COLOR_RESET}"
     fi
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}" # Install Remnawave Components
@@ -5386,6 +5384,7 @@ fi
 check_root
 check_os
 install_script_if_missing
+check_update_status
 show_menu
 
 reading "${LANG[PROMPT_ACTION]}" OPTION
