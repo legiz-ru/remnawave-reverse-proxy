@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.7"
+SCRIPT_VERSION="2.0.7a"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -3666,7 +3666,7 @@ create_config_profile() {
                 port: 443,
                 protocol: "vless",
                 settings: { clients: [], decryption: "none" },
-                sniffing: { enabled: true, destOverride: ["http", "tls", "quic"] },
+                sniffing: { enabled: true, destOverride: ["http", "tls"] },
                 streamSettings: {
                     network: "tcp",
                     security: "reality",
@@ -4054,6 +4054,10 @@ REDIS_PORT=6379
 ### JWT ###
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
+
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
 
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
@@ -4641,6 +4645,10 @@ REDIS_PORT=6379
 ### JWT ###
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
+
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
 
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
