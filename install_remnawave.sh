@@ -3472,8 +3472,14 @@ get_panel_token() {
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
         local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+        
+        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+            if echo "$test_response" | grep -q '"statusCode":401' || \
+               echo "$test_response" | jq -e '.message | test("Unauthorized")' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+            fi
             token=""
         fi
     fi
@@ -3491,7 +3497,7 @@ get_panel_token() {
             fi
             
             local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
+            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
                 echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
                 return 1
             fi
@@ -3511,6 +3517,12 @@ get_panel_token() {
         echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+    
+    local final_test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+    if [ -z "$final_test_response" ] || ! echo "$final_test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $final_test_response${COLOR_RESET}"
+        return 1
     fi
 }
 
