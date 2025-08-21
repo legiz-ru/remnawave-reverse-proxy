@@ -56,12 +56,15 @@ The following blocks are added to the node's configuration profile:
 export const exampleCode = `{
   "tag": "warp-out",
   "protocol": "freedom",
-  "settings": {},
+  "settings": {
+    "domainStrategy": "UseIP"
+  },
   "streamSettings": {
     "sockopt": {
       "interface": "warp",
       "tcpFastOpen": true
     }
+  }
 }`;
 export const fileName = 'outbound';
 

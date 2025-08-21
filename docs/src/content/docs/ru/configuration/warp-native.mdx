@@ -56,12 +56,15 @@ import { LinkButton } from '@astrojs/starlight/components';
 export const exampleCode = `{
   "tag": "warp-out",
   "protocol": "freedom",
-  "settings": {},
+  "settings": {
+    "domainStrategy": "UseIP"
+  },
   "streamSettings": {
     "sockopt": {
       "interface": "warp",
       "tcpFastOpen": true
     }
+  }
 }`;
 export const fileName = 'outbound';
 

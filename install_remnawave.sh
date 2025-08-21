@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.6a"
+SCRIPT_VERSION="2.0.8"
+UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -76,6 +77,7 @@ set_language() {
                 [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="update available"
                 [VERSION_LABEL]="Version: %s"
                 [EXIT]="Exit"
                 [MENU_1]="Install Remnawave Components"
@@ -432,6 +434,7 @@ set_language() {
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="доступно обновление"
                 [VERSION_LABEL]="Версия: %s"
                 #Install Packages
                 [ERROR_UPDATE_LIST]="Ошибка: Не удалось обновить список пакетов"
@@ -1125,10 +1128,69 @@ generate_password() {
     echo "$password"
 }
 
+#Displaying the availability of the update in the menu
+check_update_status() {
+    local TEMP_REMOTE_VERSION_FILE
+    TEMP_REMOTE_VERSION_FILE=$(mktemp)
+
+    if ! curl -fsSL "$SCRIPT_URL" 2>/dev/null | head -n 100 > "$TEMP_REMOTE_VERSION_FILE"; then
+        UPDATE_AVAILABLE=false
+        rm -f "$TEMP_REMOTE_VERSION_FILE"
+        return
+    fi
+
+    local REMOTE_VERSION
+    REMOTE_VERSION=$(grep -m 1 "^SCRIPT_VERSION=" "$TEMP_REMOTE_VERSION_FILE" | cut -d'"' -f2)
+    rm -f "$TEMP_REMOTE_VERSION_FILE"
+
+    if [[ -z "$REMOTE_VERSION" ]]; then
+        UPDATE_AVAILABLE=false
+        return
+    fi
+
+    compare_versions_for_check() {
+        local v1="$1"
+        local v2="$2"
+
+        local v1_num="${v1//[^0-9.]/}"
+        local v2_num="${v2//[^0-9.]/}"
+
+        local v1_sfx="${v1//$v1_num/}"
+        local v2_sfx="${v2//$v2_num/}"
+
+        if [[ "$v1_num" == "$v2_num" ]]; then
+            if [[ -z "$v1_sfx" && -n "$v2_sfx" ]]; then
+                return 0
+            elif [[ -n "$v1_sfx" && -z "$v2_sfx" ]]; then
+                return 1
+            elif [[ "$v1_sfx" < "$v2_sfx" ]]; then
+                return 0
+            else
+                return 1
+            fi
+        else
+            if printf '%s\n' "$v1_num" "$v2_num" | sort -V | head -n1 | grep -qx "$v1_num"; then
+                return 0
+            else
+                return 1
+            fi
+        fi
+    }
+
+    if compare_versions_for_check "$SCRIPT_VERSION" "$REMOTE_VERSION"; then
+        UPDATE_AVAILABLE=true
+    else
+        UPDATE_AVAILABLE=false
+    fi
+}
+
 show_menu() {
-    echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
-    printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+    if [[ "$UPDATE_AVAILABLE" == true ]]; then
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION ${COLOR_RED}${LANG[AVAILABLE_UPDATE]}${COLOR_RESET}")${COLOR_RESET}"
+    else
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION")${COLOR_RESET}"
+    fi
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}" # Install Remnawave Components
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}" # Reinstall panel/node
@@ -1553,10 +1615,10 @@ manage_warp() {
                 echo -e "${COLOR_RED}${LANG[WARP_NO_NODE]}${COLOR_RESET}"
                 exit 1
             fi
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/install.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/install.sh)
             ;;
         2)
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/uninstall.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/uninstall.sh)
             ;;
         3)
             local domain_url="127.0.0.1:3000"
@@ -1644,7 +1706,9 @@ manage_warp() {
                 local warp_outbound='{
                     "tag": "warp-out",
                     "protocol": "freedom",
-                    "settings": {},
+                    "settings": {
+					    "domainStrategy": "UseIP"
+					},
                     "streamSettings": {
                         "sockopt": {
                             "interface": "warp",
@@ -3149,11 +3213,20 @@ EOL
         fi
 
         if [ "$days_left" -le "$renew_threshold" ]; then
+            if [ "$cert_method" == "2" ]; then
+                ufw allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             certbot renew --cert-name "$domain" --no-random-sleep-on-renew >> /var/log/letsencrypt/letsencrypt.log 2>&1 &
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
             local certbot_exit_code=$?
+
+            if [ "$cert_method" == "2" ]; then
+                ufw delete allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             if [ "$certbot_exit_code" -ne 0 ]; then
                 cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}: ${LANG[RATE_LIMIT_EXCEEDED]}"
                 continue
@@ -3399,8 +3472,14 @@ get_panel_token() {
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
         local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+        
+        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+            if echo "$test_response" | grep -q '"statusCode":401' || \
+               echo "$test_response" | jq -e '.message | test("Unauthorized")' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+            fi
             token=""
         fi
     fi
@@ -3418,7 +3497,7 @@ get_panel_token() {
             fi
             
             local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
+            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
                 echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
                 return 1
             fi
@@ -3438,6 +3517,12 @@ get_panel_token() {
         echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+    
+    local final_test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+    if [ -z "$final_test_response" ] || ! echo "$final_test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $final_test_response${COLOR_RESET}"
+        return 1
     fi
 }
 
@@ -3593,7 +3678,7 @@ create_config_profile() {
                 port: 443,
                 protocol: "vless",
                 settings: { clients: [], decryption: "none" },
-                sniffing: { enabled: true, destOverride: ["http", "tls", "quic"] },
+                sniffing: { enabled: true, destOverride: ["http", "tls"] },
                 streamSettings: {
                     network: "tcp",
                     security: "reality",
@@ -3981,6 +4066,10 @@ REDIS_PORT=6379
 ### JWT ###
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
+
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
 
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
@@ -4568,6 +4657,10 @@ REDIS_PORT=6379
 ### JWT ###
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
+
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
 
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
@@ -5320,6 +5413,7 @@ fi
 check_root
 check_os
 install_script_if_missing
+check_update_status
 show_menu
 
 reading "${LANG[PROMPT_ACTION]}" OPTION
