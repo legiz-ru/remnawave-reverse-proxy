@@ -63,9 +63,15 @@ All steps were reproduced under root.
         - SWAG_AUTORELOAD=true
       volumes:
         - /path/to/swag:/config
-        - /dev/shm:/dev/shm:rw
       restart: unless-stopped
-      network_mode: host
+      networks:
+        - remnawave-network
+
+    networks:
+      remnawave-network:
+        name: remnawave-network
+          driver: bridge
+          external: true
     ```
 
       I guess optional, but can be added
@@ -86,19 +92,27 @@ All steps were reproduced under root.
     dns_cloudflare_api_token = token
     ```
 
-5. Start the stack and watch logs, we'll need them in a second.
+5. Delete nginx section in `/opt/remnawave/docker-compose.yml` and stop the stack.
 
     ```bash
-    docker compose up -d && docker compose logs -f -t
+    cd /opt/remnawave && docker compose down
     ```
 
-    In case you've done everything right "Server ready." will pop up in logs and make sure that `domain.com` shows the welcome page with a valid certificate. But we need logs for monitoring autoreload logs in case you've done mistakes in proxy-conf.
+6. Start the stack and monitor logs, we'll need them in a second.
+
+    ```bash
+    cd /opt/swag && docker compose up -d && docker compose logs -f -t
+    ```
+
+    In case you've done everything right "Server ready." will pop up in logs and make sure that `domain.com` shows the welcome page with a valid certificate. But we also need logs for monitoring autoreload logs in case you've done mistakes in proxy-conf.
 
 </Steps>
 
 ## Configuring SWAG
 
 Now we need to implement the nginx configuration we had for SWAG to work with remnawave panel & nodes.
+
+<Steps>
 
 1. Copy template for remnawave
 
@@ -113,7 +127,86 @@ Now we need to implement the nginx configuration we had for SWAG to work with re
     nano remnawave.subdomain.conf
     ```
 
-    
+3. If you want, you may delete everything in the file and paste the following:
+
+    ```nginx
+    map $http_cookie $auth_cookie {
+    default 0;
+    "~*abcdEfgH=IJKlmnoPq" 1;
+    }
+
+    map $arg_abcdEfgH $auth_query {
+        default 0;
+        "IJKlmnoPq" 1;
+    }
+
+    map "$auth_cookie$auth_query" $authorized {
+        "~1" 1;
+        default 0;
+    }
+
+    map $arg_abcdEfgH $set_cookie_header {
+        "IJKlmnoPq" "abcdEfgH=IJKlmnoPq; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=31536000";
+        default "";
+    }
+
+    server {
+        listen 443 ssl;
+
+        server_name panel.*;
+
+        include /config/nginx/ssl.conf;
+
+        client_max_body_size 0;
+
+        add_header Set-Cookie $set_cookie_header;
+
+        location / {
+            if ($authorized = 0) {
+                return 444;
+            }
+
+            include /config/nginx/proxy.conf;
+            include /config/nginx/resolver.conf;
+            set $upstream_app remnawave;
+            set $upstream_port 3000;
+            set $upstream_proto http;
+            proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
+        }
+    }
+
+    server {
+        listen 443 ssl;
+
+        server_name subscription.*;
+
+        include /config/nginx/ssl.conf;
+
+        client_max_body_size 0;
+
+        location / {
+            include /config/nginx/proxy.conf;
+            include /config/nginx/resolver.conf;
+            set $upstream_app remnawave-subscription-page;
+            set $upstream_port 3010;
+            set $upstream_proto http;
+            proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
+        }
+
+        location @redirect {
+            return 404;
+        }
+    }
+    ```
+
+    You may get confused as a lot of strings are gone, that's because some parameters and headers are already present in SWAG's `proxy.conf` and `ssl.conf`, so you don't need to repeat them. If you want to add some headers, you add them back from `/opt/remnawave/nginx.conf`.
+
+</Steps>
+
 ## Securing SWAG
 
 ## Adding mods
+
+## Using Nginx.sock in SWAG
