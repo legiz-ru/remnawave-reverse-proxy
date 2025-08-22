@@ -7,9 +7,23 @@ import { Steps, LinkButtons, Tabs, TabItem, Icons, FileTree, Code, Badges, LinkC
 
 First, you need to decide whether you want to use [SWAG](https://github.com/linuxserver/docker-swag) or stick with the default nginx configuration. SWAG is a popular and easy choice for reverse proxy setups, especially when you've got a lot of stacks/containers to manage. It comes with built-it cert renewal, templates for various containers, which are a bit changed for beginner-friendly experience.
 
-There are 2 ways. You are "geek" and you stick to [Pingora](https://github.com/cloudflare/pingora)/[River](https://github.com/memorysafety/river) or you are "normal" and you use default Nginx because you don't want to deal with it, aight? SWAG is same nginx you familiar with (watch the pic below), but with some extra features and easier configuration. Your critisizm won't be even viewed.
+There are 2 ways. You are "geek" and you stick to [Pingora](https://github.com/cloudflare/pingora)/[River](https://github.com/memorysafety/river) or you are "normal" and you use default Nginx because you don't want to deal with it, aight? SWAG is same nginx you familiar with (watch the pic below), but with some extra features and easier configuration. 
 
-TODO: add pic here
+:::tip[Contribution]
+Your critisizm won't be even viewed. However, I appreciate any feedback for IMPROVING it!
+:::
+
+<div style={{ display: 'flex', justifyContent: 'center' }}>
+  <img 
+    src="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/swag/dialog.webp" 
+    alt="Netbird registration" 
+    style={{ maxWidth: '60%' }} 
+  />
+</div>
+
+:::danger[Important]
+You can't use SWAG if you installed Panel and Node on one machine. Panel and node installation uses nginx.sock, but for some reason I didn't manage to make SWAG remove it, so you don't have to manually stop it. Otherwise it will give you a message that sock is already used.
+:::
 
 ## Installing SWAG
 
@@ -49,11 +63,20 @@ All steps were reproduced under root.
         - SWAG_AUTORELOAD=true
       volumes:
         - /path/to/swag:/config
-      ports:
-        - 443:443
-        - 80:80
+        - /dev/shm:/dev/shm:rw
       restart: unless-stopped
-      ```
+      network_mode: host
+    ```
+
+      I guess optional, but can be added
+
+    ```yml
+      logging:
+        driver: 'json-file'
+        options:
+          max-size: '30m'
+          max-file: '5'
+    ```
 
 3. Generate a Cloudflare [API token](https://dash.cloudflare.com/profile/api-tokens) with `DNS:Read`, `DNS:Edit` permissions to `domain.com` and copy the token.
 
@@ -75,6 +98,22 @@ All steps were reproduced under root.
 
 ## Configuring SWAG
 
+Now we need to implement the nginx configuration we had for SWAG to work with remnawave panel & nodes.
+
+1. Copy template for remnawave
+
+    ```bash
+    cd /path/to/swag/config/nginx/proxy-confs
+    cp _template.subdomain.conf.sample remnawave.subdomain.conf
+    ```
+
+2. Edit the configuration file
+
+    ```bash
+    nano remnawave.subdomain.conf
+    ```
+
+    
 ## Securing SWAG
 
 ## Adding mods

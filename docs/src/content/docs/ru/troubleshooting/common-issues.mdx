@@ -47,6 +47,50 @@ import { Kbd, KbdPicker } from 'starlight-kbd/components';
 
 </Steps>
 
+## Alias не работает в моем терминале
+
+Если вы установили скрипт в другом терминале (например, bash), а теперь, например, zsh не может выполнить команду `rr`, вам нужно:
+
+<Steps>
+
+1. Открыть конфигурацию zsh (root или пользователь или же оба)
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        nano ~/.zsh
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        nano /root/.zsh
+        ```
+        </TabItem>
+    </Tabs>
+
+2. Добавить следующие строки
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        source /home/YOURUSERNAME/.bash_profile
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        source /root/.bash_profile # или source /etc/bash.bashrc
+        ```
+        </TabItem>
+    </Tabs>
+
+3. Перезапустите терминал или выполните команду
+
+    ```bash
+    exec zsh
+    ```
+
+</Steps>
+
 ## Моей проблемы здесь нет
 
 Не стесняйтесь сообщать о любых проблемах, связанных с нашим проектом, в [репозитории GitHub](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues) или [Telegram](https://t.me/remnawave_reverse) чате.

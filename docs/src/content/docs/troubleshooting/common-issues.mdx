@@ -46,6 +46,50 @@ If you've lost cookie-header to access the panel, you can retrieve it by followi
 
 </Steps>
 
+## Alias doesn't work in my terminal
+
+In case you've installed script in different terminal (e.g. bash) and now e.g. zsh can't execute the `rr` command you need to:
+
+<Steps>
+
+1. Open zsh config (root or user or even both)
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        nano ~/.zsh
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        nano /root/.zsh
+        ```
+        </TabItem>
+    </Tabs>
+
+2. Add the following strings
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        source /home/YOURUSERNAME/.bash_profile
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        source /root/.bash_profile # or source /etc/bash.bashrc
+        ```
+        </TabItem>
+    </Tabs>
+
+3. Restart your terminal or run the command
+
+    ```bash
+    exec zsh
+    ```
+
+</Steps>
+
 ## Unlisted issue
 
 Feel free to report any related to our project issues in the [GitHub repository](https://github.com/eGamesAPI/remnawave-reverse-proxy/issues) or [Telegram](https://t.me/remnawave_reverse) chat.
