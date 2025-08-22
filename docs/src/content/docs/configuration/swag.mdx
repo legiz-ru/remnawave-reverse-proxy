@@ -1,0 +1,80 @@
+---
+title: Replacing default nginx with SWAG and configuring it for Remnawave
+description: A guide on installing and configuring SWAG to replace the default nginx in Remnawave.
+---
+
+import { Steps, LinkButtons, Tabs, TabItem, Icons, FileTree, Code, Badges, LinkCard } from '@astrojs/starlight/components';
+
+First, you need to decide whether you want to use [SWAG](https://github.com/linuxserver/docker-swag) or stick with the default nginx configuration. SWAG is a popular and easy choice for reverse proxy setups, especially when you've got a lot of stacks/containers to manage. It comes with built-it cert renewal, templates for various containers, which are a bit changed for beginner-friendly experience.
+
+There are 2 ways. You are "geek" and you stick to [Pingora](https://github.com/cloudflare/pingora)/[River](https://github.com/memorysafety/river) or you are "normal" and you use default Nginx because you don't want to deal with it, aight? SWAG is same nginx you familiar with (watch the pic below), but with some extra features and easier configuration. Your critisizm won't be even viewed.
+
+TODO: add pic here
+
+## Installing SWAG
+
+:::note
+All steps were reproduced under root.
+:::
+
+<Steps>
+
+1. Create a directory for SWAG.
+
+    ```bash
+    mkdir /opt/swag
+    ```
+
+2. Create a docker compose file.
+
+    ```bash
+    nano docker-compose.yml
+    ```
+
+    ```yml
+    swag:
+      image: lscr.io/linuxserver/swag:latest
+      container_name: swag
+      cap_add:
+        - NET_ADMIN
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Etc/UTC
+        - URL=domain.com
+        - VALIDATION=dns
+        - SUBDOMAINS=wildcard
+        - DNSPLUGIN=cloudflare
+        - PROPAGATION=60
+        - SWAG_AUTORELOAD=true
+      volumes:
+        - /path/to/swag:/config
+      ports:
+        - 443:443
+        - 80:80
+      restart: unless-stopped
+      ```
+
+3. Generate a Cloudflare [API token](https://dash.cloudflare.com/profile/api-tokens) with `DNS:Read`, `DNS:Edit` permissions to `domain.com` and copy the token.
+
+4. Edit `/path/to/swag/dns-conf/cloudflare.ini`, delete everything and paste the following with your token:
+
+    ```ini
+    dns_cloudflare_api_token = token
+    ```
+
+5. Start the stack and watch logs, we'll need them in a second.
+
+    ```bash
+    docker compose up -d && docker compose logs -f -t
+    ```
+
+    In case you've done everything right "Server ready." will pop up in logs and make sure that `domain.com` shows the welcome page with a valid certificate. But we need logs for monitoring autoreload logs in case you've done mistakes in proxy-conf.
+
+</Steps>
+
+## Configuring SWAG
+
+## Securing SWAG
+
+## Adding mods
