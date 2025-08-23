@@ -117,6 +117,7 @@ export default defineConfig({
 
 
 // TODO:
+// add https://starlight-github-alerts.netlify.app/getting-started/
 // add more content to the "Common Issues" page
 // https://www.create.bingo/
 // https://octo.guide/

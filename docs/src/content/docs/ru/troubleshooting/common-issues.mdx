@@ -3,8 +3,7 @@ title: Частые проблемы
 description: Устранение распространенных проблем
 ---
 
-import { Steps, LinkButton, Code } from '@astrojs/starlight/components';
-import { Kbd, KbdPicker } from 'starlight-kbd/components';
+import { Steps, LinkButton, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Развертывание ботов
 
@@ -43,6 +42,50 @@ import { Kbd, KbdPicker } from 'starlight-kbd/components';
 
     ```
     https://domain.com/auth?/login?rEmnaprx=aBCDefgh
+    ```
+
+</Steps>
+
+## Alias не работает в моем терминале
+
+Если вы установили скрипт в другом терминале (например, bash), а теперь, например, zsh не может выполнить команду `rr`, вам нужно:
+
+<Steps>
+
+1. Открыть конфигурацию zsh (root или пользователь или же оба)
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        nano ~/.zsh
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        nano /root/.zsh
+        ```
+        </TabItem>
+    </Tabs>
+
+2. Добавить следующие строки
+
+    <Tabs>
+        <TabItem label="User">
+        ```bash
+        source /home/YOURUSERNAME/.bash_profile
+        ```
+        </TabItem>
+        <TabItem label="Root">
+        ```bash
+        source /root/.bash_profile # или source /etc/bash.bashrc
+        ```
+        </TabItem>
+    </Tabs>
+
+3. Перезапустите терминал или выполните команду
+
+    ```bash
+    exec zsh
     ```
 
 </Steps>
