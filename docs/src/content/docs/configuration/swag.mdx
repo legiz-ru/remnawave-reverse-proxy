@@ -216,6 +216,25 @@ Now we need to implement the nginx configuration we had for SWAG to work with re
 
 </Steps>
 
-## Adding mods
+## Securing SWAG
+
+### Fail2ban / Crowdsec
+
+Crowdsec and Fail2Ban can prevent brute-force attacks by monitoring the logs of apps and banning IPs that fail multiple login attempts.
+
+SWAG comes with Fail2Ban pre-configured with a few basic protections, you can fine-tune it specifically for your apps, or disable it and set up Crowdsec instead.
+
+#### Crowdsec
+
+[Crowdsec](https://www.crowdsec.net/) is a free, open-source and collaborative IPS; it's like fail2ban but you share your bans with all of the other users to try and pre-emptively block malicious hosts.
+
+Follow [this blog post](https://www.linuxserver.io/blog/blocking-malicious-connections-with-crowdsec-and-swag) to set it up in SWAG.
+
+#### Fail2ban
+
+Fail2Ban is an intrusion prevention software that protects external applications from brute-force attacks. Attackers that fail to login to your applications a certain number of times will get blocked from accessing all of your applications.  
+Fail2Ban looks for failed login attempts in log files, counts the failed attempts in a short period, and bans the IP address of the attacker.
+
+Follow [this guide](https://docs.linuxserver.io/images/docker-swag/?h=fail2ban#using-fail2ban) to set it up in SWAG.
 
 ## Using Nginx.sock in SWAG
