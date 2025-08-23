@@ -203,9 +203,18 @@ Now we need to implement the nginx configuration we had for SWAG to work with re
 
     You may get confused as a lot of strings are gone, that's because some parameters and headers are already present in SWAG's `proxy.conf` and `ssl.conf`, so you don't need to repeat them. If you want to add some headers, you add them back from `/opt/remnawave/nginx.conf`.
 
-</Steps>
+4. Navigate to `/path/to/swag/config/nginx/site-confs` and edit `default` file.
 
-## Securing SWAG
+    ```nginx "ssl_reject_handshake on;"
+    # main server block
+    server {
+        listen 443 ssl default_server;
+
+        server_name _;
+        ssl_reject_handshake on;
+        include /config/nginx/ssl.conf;
+
+</Steps>
 
 ## Adding mods
 
