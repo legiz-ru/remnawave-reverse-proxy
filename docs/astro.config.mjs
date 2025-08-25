@@ -92,6 +92,7 @@ export default defineConfig({
 						{ label: 'Netbird', slug: 'configuration/netbird', translations: { ru: 'Netbird' } },
 						{ label: 'Warp Native', slug: 'configuration/warp-native', translations: { ru: 'Warp Native' } },
 						{ label: 'Beszel', slug: 'configuration/beszel', translations: { ru: 'Beszel' } },
+						//{ label: 'Monitoring with Grafana and Victoria Metrics', slug: 'configuration/grafana-monitor', translations: { ru: 'Мониторинг через Grafana и Victoria Metrics' } },
 					],
 				},
 				{
