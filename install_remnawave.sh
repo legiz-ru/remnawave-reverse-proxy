@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.9"
+SCRIPT_VERSION="2.1.0"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -4345,9 +4345,11 @@ installation() {
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
+        local sub_base_domain=$(extract_domain "$SUB_DOMAIN")
+        local node_base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         PANEL_CERT_DOMAIN="$base_domain"
-        SUB_CERT_DOMAIN="$base_domain"
-        NODE_CERT_DOMAIN="$base_domain"
+        SUB_CERT_DOMAIN="$sub_base_domain"
+        NODE_CERT_DOMAIN="$node_base_domain"
     else
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
         SUB_CERT_DOMAIN="$SUB_DOMAIN"
@@ -4934,8 +4936,9 @@ installation_panel() {
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
+        local sub_base_domain=$(extract_domain "$SUB_DOMAIN")
         PANEL_CERT_DOMAIN="$base_domain"
-        SUB_CERT_DOMAIN="$base_domain"
+        SUB_CERT_DOMAIN="$sub_base_domain"
     else
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
         SUB_CERT_DOMAIN="$SUB_DOMAIN"
