@@ -63,7 +63,7 @@ export default defineConfig({
 			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/eGamesAPI/remnawave-reverse-proxy/' },
-				{ icon: 'telegram', label: 'Telegram', href: 'https://t.me/remnawave_reverse' },
+				{ icon: 'telegram', label: 'Telegram', href: 'https://t.me/+G8GtPf9dW9FlMWVi' },
 				{ icon: 'seti:zip', label: 'Used resources', href: '../../contribution/resources' }
 			],
 			sidebar: [
