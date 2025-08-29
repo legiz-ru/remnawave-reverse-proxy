@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.0"
+SCRIPT_VERSION="2.1.1"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -85,10 +85,11 @@ set_language() {
                 [MENU_3]="Manage Panel/Node"
                 [MENU_4]="Install random template for selfsteal node"
                 [MENU_5]="Custom Templates by legiz"
-                [MENU_6]="Manage IPv6"
-                [MENU_7]="Manage certificates domain"
-                [MENU_8]="Check for updates script"
-                [MENU_9]="Remove script"
+                [MENU_6]="Extensions by distillium"
+                [MENU_7]="Manage IPv6"
+                [MENU_8]="Manage certificates domain"
+                [MENU_9]="Check for updates script"
+                [MENU_10]="Remove script"
                 [PROMPT_ACTION]="Select action (0-10):"
                 [INVALID_CHOICE]="Invalid choice. Please select 0-10"
                 [WARNING_LABEL]="WARNING:"
@@ -102,9 +103,15 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="All script and panel/node data will be removed from the server. Are you sure? (y/n): "
                 [SCRIPT_REMOVED]="Script and its local files successfully removed!"
                 [ALL_REMOVED]="Script and panel/node data successfully removed!"
+                #Extensions by distillium
+                [EXTENSIONS_MENU]="Extensions by distillium"
+                [EXTENSIONS_MENU_TITLE]="Manage Extensions by distillium"
+                [EXTENSIONS_PROMPT]="Select action (0-2):"
+                [EXTENSIONS_INVALID_CHOICE]="Invalid choice. Please select 0-2."
+                [BACKUP_RESTORE]="Backup and Restore"
                 #Warp by distillium
-                [WARP_MENU]="WARP Native by distillium"
-                [WARP_MENU_TITLE]="Manage WARP Native by distillium\nOnly run on server with node"
+                [WARP_MENU]="WARP Native"
+                [WARP_MENU_TITLE]="Manage WARP Native"
                 [WARP_INSTALL]="Install WARP Native"
                 [WARP_ADD_CONFIG]="Add WARP-configuration to node configuration"
                 [WARP_DELETE_WARP_SETTINGS]="Remove WARP-configuration from node configuration"
@@ -285,7 +292,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 [CREATE_NEW_NODE]="Creating new node for %s..."
                 [CF_INVALID_NAME]="Error: The name of the configuration profile %s is already in use.\nPlease choose another name."
-                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should contain from 5 to 20 characters."
+                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should contain from 3 to 20 characters."
                 [CF_INVALID_CHARS]="Error: The name of the configuration profile should contain only English letters, numbers, and hyphens."
                 #check
                 [CHECK_UPDATE]="Check for updates"
@@ -469,10 +476,11 @@ set_language() {
                 [MENU_3]="Управление панелью/нодой"
                 [MENU_4]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_5]="Кастомные шаблоны от legiz"
-                [MENU_6]="Управление IPv6"
-                [MENU_7]="Управление сертификатами домена"
-                [MENU_8]="Проверить обновления скрипта"
-                [MENU_9]="Удалить скрипт"
+                [MENU_6]="Управление расширениями от distillium"
+                [MENU_7]="Управление IPv6"
+                [MENU_8]="Управление сертификатами домена"
+                [MENU_9]="Проверить обновления скрипта"
+                [MENU_10]="Удалить скрипт"
                 [PROMPT_ACTION]="Выберите действие (0-10):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 0-10."
                 [WARNING_LABEL]="ВНИМАНИЕ:"
@@ -486,9 +494,15 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="Все данные скрипта и панели/ноды будут удалены с сервера. Вы уверены? (y/n): "
                 [SCRIPT_REMOVED]="Скрипт и его локальные файлы успешно удалены!"
                 [ALL_REMOVED]="Скрипт и данные панели/ноды успешно удалены!"
+                #Extensions by distillium
+                [EXTENSIONS_MENU]="Расширения by distillium"
+                [EXTENSIONS_MENU_TITLE]="Управление расширениями"
+                [EXTENSIONS_PROMPT]="Выберите действие (0-2):"
+                [EXTENSIONS_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
+                [BACKUP_RESTORE]="Backup and Restore"
                 #Warp by distillium
-                [WARP_MENU]="WARP Native от distillium"
-                [WARP_MENU_TITLE]="Управление WARP Native от distillium"
+                [WARP_MENU]="WARP Native"
+                [WARP_MENU_TITLE]="Управление WARP Native"
                 [WARP_INSTALL]="Установить WARP Native"
                 [WARP_ADD_CONFIG]="Добавить WARP-настройки в конфигурацию ноды"
                 [WARP_DELETE_WARP_SETTINGS]="Удалить WARP-настройки из конфигурации ноды"
@@ -668,7 +682,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 [CREATE_NEW_NODE]="Создаём новую ноду для %s"
                 [CF_INVALID_NAME]="Ошибка: Имя конфигурационного профиля %s уже используется.\nПожалуйста, выберите другое имя."
-                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля должно содержать от 5 до 20 символов."
+                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля должно содержать от 3 до 20 символов."
                 [CF_INVALID_CHARS]="Ошибка: Имя конфигурационного профиля должно содержать только английские буквы, цифры и дефис."
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
@@ -1214,13 +1228,13 @@ show_menu() {
     echo -e ""
     echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}" # Custom Templates legiz
-    echo -e "${COLOR_YELLOW}6. ${LANG[WARP_MENU]}${COLOR_RESET}" # Manage Warp by distilium
+    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}" # Extensions distilium
     echo -e ""
-    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}" # Manage IPv6
-    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_7]}${COLOR_RESET}" # Manage certificates domain
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Manage certificates domain
     echo -e ""
-    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_8]}${COLOR_RESET}" # Check for updates
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_9]}${COLOR_RESET}" # Remove script
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Remove script
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}- ${LANG[FAST_START]//remnawave_reverse/${COLOR_GREEN}remnawave_reverse${COLOR_RESET}}"
@@ -1610,6 +1624,41 @@ show_panel_node_menu() {
     esac
 }
 #Manage Panel Node Menu
+
+manage_extensions() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[EXTENSIONS_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[WARP_MENU]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[BACKUP_RESTORE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[EXTENSIONS_PROMPT]}" EXTENSION_OPTION
+
+    case $EXTENSION_OPTION in
+        1)
+            manage_warp
+            log_clear
+            manage_extensions
+            ;;
+        2)
+            if [ -f ~/backup-restore.sh ]; then
+                rw-backup
+            else
+                curl -o ~/backup-restore.sh https://raw.githubusercontent.com/distillium/remnawave-backup-restore/main/backup-restore.sh && chmod +x ~/backup-restore.sh && ~/backup-restore.sh
+            fi
+            log_clear
+            manage_extensions
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[EXTENSIONS_INVALID_CHOICE]}${COLOR_RESET}"
+            ;;
+    esac
+}
 
 manage_warp() {
     echo -e ""
@@ -5403,7 +5452,7 @@ add_node_to_panel() {
         while true; do
         reading "${LANG[ENTER_NODE_NAME]}" entity_name
         if [[ "$entity_name" =~ ^[a-zA-Z0-9-]+$ ]]; then
-            if [ ${#entity_name} -ge 5 ] && [ ${#entity_name} -le 20 ]; then
+            if [ ${#entity_name} -ge 3 ] && [ ${#entity_name} -le 20 ]; then
                 get_panel_token
                 token=$(cat "$TOKEN_FILE")
                 local response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
@@ -5531,8 +5580,10 @@ case $OPTION in
         remnawave_reverse
         ;;
     6)
-        manage_warp
+        manage_extensions
+        sleep 2
         log_clear
+        remnawave_reverse
         ;;
     7)
         manage_ipv6
