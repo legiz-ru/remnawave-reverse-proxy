@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.1"
+SCRIPT_VERSION="2.1.1a"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -1044,7 +1044,7 @@ update_remnawave_reverse() {
 
 remove_script() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_9]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[REMOVE_SCRIPT_ONLY]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[REMOVE_SCRIPT_AND_PANEL]}${COLOR_RESET}"
@@ -3214,7 +3214,7 @@ EOL
 #Manage Certificates
 show_manage_certificates() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_7]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_8]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[CERT_UPDATE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[CERT_GENERATE]}${COLOR_RESET}"
