@@ -312,7 +312,7 @@ import { LinkButton } from '@astrojs/starlight/components';
     nano /etc/systemd/system/vmagent.service
     ```
     :::note[Внимание]
-    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить на адрес Netbird (в данном случае сервера Grafana)
+    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить IP на адрес Netbird сервера, где стоит Grafana.
     :::
     
     Вставляем следующее содержимое:
@@ -331,7 +331,7 @@ import { LinkButton } from '@astrojs/starlight/components';
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
@@ -547,7 +547,7 @@ import { LinkButton } from '@astrojs/starlight/components';
     nano /etc/systemd/system/vmagent.service
     ```
     :::note[Внимание]
-    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить на адрес Netbird (в данном случае сервера Grafana)
+    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить IP на адрес Netbird сервера, где стоит Grafana.
     :::
     
     Вставляем следующее содержимое:
@@ -566,7 +566,7 @@ import { LinkButton } from '@astrojs/starlight/components';
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
