@@ -1,6 +1,6 @@
 ---
-title: Мониторинг через Grafana и Victoria Metrics
-description: Как настроить мониторинг через интеллектуальный стек
+title: Monitoring with Grafana and Victoria Metrics
+description: How to set up monitoring with Grafana and Victoria Metrics
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -10,56 +10,56 @@ import { LinkButton } from '@astrojs/starlight/components';
 This page is not available in English yet. You can help us translate it! Check out the [contribution guide](../../contribution/guide) to get started.
 :::
 
-Автор: **[pluralplay](../../contribution/resources#pluralplay)**, **[kutovoys](../../contribution/resources#kutovoys)**  
-Развертывание интеллектуального стека мониторинга, включающего Grafana для создания динамичных дашбордов, Victoria Metrics для хранения и обработки метрик, Node Exporter для мониторинга серверов, cAdvisor для анализа контейнеров, Xray Checker для контроля сетевых соединений и Netbird для построения безопасной сетевой архитектуры. Это решение обеспечивает максимальную прозрачность, производительность и безопасность вашей инфраструктуры.
+Author: **[pluralplay](../../contribution/resources#pluralplay)**, **[kutovoys](../../contribution/resources#kutovoys)**  
+Deployment of an intelligent monitoring stack, including Grafana for creating dynamic dashboards, Victoria Metrics for storing and processing metrics, Node Exporter for monitoring servers, cAdvisor for analyzing containers, Xray Checker for controlling network connections, and Netbird for building a secure network architecture. This solution provides maximum transparency, performance, and security for your infrastructure.
 
-:::danger[Важно]
-Инструкция описывает установку сервисов на отдельный мониторинговый VPS сервер. Описан вариант действий из-под пользователя root.
+:::danger[Important]
+This guide describes the installation of services on a separate monitoring VPS server. The steps are described for a root user.
 :::
 
-- Grafana - это инструмент, который преобразует различные формы метрик, полученных от Victoria Metrics, в визуальные формы для аналитического и системного мониторинга.
+- Grafana - an instrument that transforms various forms of metrics received from Victoria Metrics into visual forms for analytical and system monitoring.
 
-- Victoria Metrics (VMetrics) - это непосредственно система сбора и хранения метрик со всех машин, полученных от агента, а vmagent - доставщик этих метрик в vmetrics.
+- Victoria Metrics (VMetrics) - is directly a system for collecting and storing metrics from all machines received from the agent, vmagent - a carrier of these metrics to vmetrics.
 
-- Node Exporter - инструмент сбора метрик. Он собирает информацию о различных ресурсах узла, таких как загрузка процессора, использование памяти, дисковый ввод-вывод, сетевая статистика и другие.
+- Node Exporter - an instrument for collecting metrics. It collects information about various resources of the node, such as processor load, memory usage, disk input-output, network statistics, and others.
 
-- cAdvisor - так-же является инструментом сбора метрик. Собирает информацию о производительности Docker-контейнеров.
+- cAdvisor - also an instrument for collecting metrics. It collects information about the performance of Docker containers.
 
-- Xray-Checker - проверка состояния ваших хостов, и отправка метрик в Victoria Metrics.
+- Xray-Checker - checks the state of your hosts and sends metrics to Victoria Metrics.
 
-## Cхема работы
+## Scheme of work
 
 ![Scheme](https://raw.githubusercontent.com/pluralplay/awesome-docs/refs/heads/main/grafana/assets/scheme.png)
 
-## Конфигурация вашего сервера с Grafana и Victoria Metrics
+## Configuration of your server with Grafana and Victoria Metrics
 
-:::danger[Важно]
-Выпуск сертификатов для вашего домена в этой статье не рассматривается. Сертификаты домена перед запуском docker-compose надо положить в `/opt/monitoring/nginx`, или прокинуть нужный volume где лежат сертификаты, например в `/etc/letsencrypt/live/yourdomain.com`.
+:::danger[Important]
+Issuing certificates for your domain is not considered in this article. Certificates for the domain must be placed in `/opt/monitoring/nginx`, or passed as a volume where the certificates are located, for example in `/etc/letsencrypt/live/yourdomain.com`.
 :::
 
 :::note
-Не забываем добавить DNS-запись указывающего на этот сервер для домена, например `grafana.yourdomain.com` который будет использоваться в `GF_SERVER_DOMAIN` и `GF_SERVER_ROOT_URL`.
+Don't forget to add a DNS record pointing to this server for the domain, for example `grafana.yourdomain.com` which will be used in `GF_SERVER_DOMAIN` and `GF_SERVER_ROOT_URL`.
 :::
 
 :::note
-Не забываем добавить этот сервер в сеть NetBird, как это сделать, можете посмотреть [тут](../netbird).
+Don't forget to add this server to the NetBird network, as this is how it is done, you can look [here](../netbird).
 :::
 
 <Steps>
 
-1. Установка Docker:
+1. Docker installation:
 
     ```bash
     curl -fsSL https://get.docker.com | sh
     ```
 
-2. Создаем директории и `docker-compose.yml `:
+2. Create directories and `docker-compose.yml`:
 
     ```bash
     mkdir -p /opt/monitoring/{cadvisor,nodeexporter,nginx,vmagent/conf.d} && cd /opt/monitoring && nano docker-compose.yml
     ```
 
-    Вставляем следующее содержимое и заменяем поля на свои:
+    Insert the following content and replace the fields with your own:
 
     ```yaml title="docker-compose.yml" "IP" "yourdomain.com" "subscription_link"
     services:
@@ -75,7 +75,7 @@ This page is not available in English yet. You can help us translate it! Check o
         networks:
           - grafana-network
         ports:
-          - IP:8428:8428 # Тут указываем адрес NetBird (в данном случае сервера Grafana)
+          - IP:8428:8428 # Here we specify the NetBird address (in this case the Grafana server)
 
       grafana:
         image: grafana/grafana:12.2.0-17027759091
@@ -86,8 +86,8 @@ This page is not available in English yet. You can help us translate it! Check o
           - grafana-data:/var/lib/grafana
           - ./grafana/provisioning:/etc/grafana/provisioning
         environment:
-          - GF_SERVER_DOMAIN=yourdomain.com # основной домен до графаны, не забываем добавить DNS-запись для него (если повесили на sub-домен, тут надо вписать целевой домен)
-          - GF_SERVER_ROOT_URL=https://grafana.yourdomain.com/grafana # полный путь до графаны
+          - GF_SERVER_DOMAIN=yourdomain.com # The main domain before Grafana, don't forget to add a DNS record for it (if you mounted a subdomain, you need to write the target domain here)
+          - GF_SERVER_ROOT_URL=https://grafana.yourdomain.com/grafana # Full path to Grafana
           - GF_SERVER_SERVE_FROM_SUB_PATH=true
           - GF_SERVER_HTTP_PORT=3000
           - GF_SERVER_PROTOCOL=http
@@ -103,7 +103,7 @@ This page is not available in English yet. You can help us translate it! Check o
         hostname: xraychecker
         restart: unless-stopped
         environment:
-          - "SUBSCRIPTION_URL=https://subscription_link" # Тут указываем ссылку-подписку для XrayChecker
+          - "SUBSCRIPTION_URL=https://subscription_link" # Here we specify the subscription link for XrayChecker
           - "PROXY_STATUS_CHECK_URL=http://google.com/generate_204"
           - "PROXY_CHECK_INTERVAL=60"
         ports:
@@ -133,13 +133,13 @@ This page is not available in English yet. You can help us translate it! Check o
         driver: bridge
         external: false
     ```
-3. Создаём `nginx.conf`:
+3. Create `nginx.conf`:
 
     ```bash
     nano /opt/monitoring/nginx/nginx.conf
     ```
 
-4. Вставляем следующее содержимое:
+4. Insert the following content:
 
     ```nginx title="nginx.conf" "yourdomain.com"
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -153,11 +153,11 @@ This page is not available in English yet. You can help us translate it! Check o
     server {
         listen 443 ssl;
         http2 on;
-        server_name grafana.yourdomain.com; # Вписываем домен, или саб-домен для доступа к grafana извне
+        server_name grafana.yourdomain.com; # Write the domain, or subdomain for external access to grafana
 
-        ssl_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
-        ssl_certificate_key "/etc/letsencrypt/live/yourdomain.com/privkey.pem"; # Указываем путь до приватного ключа
-        ssl_trusted_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
+        ssl_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Path to the certificate
+        ssl_certificate_key "/etc/letsencrypt/live/yourdomain.com/privkey.pem"; # Path to the private key
+        ssl_trusted_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Path to the certificate
 
         location /grafana {
             proxy_pass http://grafana:3000;
@@ -169,7 +169,7 @@ This page is not available in English yet. You can help us translate it! Check o
     }
     ```
 
-5. Запускаем docker-compose
+5. Run docker-compose
 
     ```bash
     docker compose up -d && docker compose logs -f -t
@@ -177,23 +177,23 @@ This page is not available in English yet. You can help us translate it! Check o
 
 </Steps>
 
-## Установка и настройка Grafana сервера
+## Installation and configuration of the Grafana server
 
 <Steps>
 
-1. Установка cadvisor, node_exporter, vmagent:
+1. Installation of cadvisor, node_exporter, vmagent:
 
     ```bash
     cd /opt/monitoring/cadvisor && wget https://github.com/google/cadvisor/releases/download/v0.53.0/cadvisor-v0.53.0-linux-amd64 && mv cadvisor-v0.53.0-linux-amd64 cadvisor && chmod +x cadvisor && cd /opt/monitoring/nodeexporter && wget https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz && tar -xvf node_exporter-1.9.1.linux-amd64.tar.gz && cd node_exporter-1.9.1.linux-amd64 && mv node_exporter /opt/monitoring/nodeexporter && cd .. && chmod +x node_exporter && rm -f node_exporter-1.9.1.linux-amd64.tar.gz && rm -r node_exporter-1.9.1.linux-amd64 && cd /opt/monitoring/vmagent && wget https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.123.0/vmutils-linux-amd64-v1.123.0.tar.gz && tar -xvf vmutils-linux-amd64-v1.123.0.tar.gz && mv vmagent-prod vmagent && find . ! -name 'vmagent' -type f -delete && chmod +x vmagent && cd
     ```
 
-2. Создаем файл конфигурации vmagent:
+2. Create vmagent configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/scrape.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```yaml title="scrape.yml"
     scrape_config_files:
@@ -203,64 +203,64 @@ This page is not available in English yet. You can help us translate it! Check o
       scrape_interval: 15s
     ```
 
-3. Создаем файл конфигурации cadvisor:
+3. Create cadvisor configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/cadvisor.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="cadvisor.yml" "ваше_название_инстанса(сервера Grafana)"
+    ```yaml title="cadvisor.yml" "your_instance_name(server Grafana)"
     - job_name: integrations/cAdvisor
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9101']
           labels:
-            instance: "ваше_название_инстанса(сервера Grafana)"
+            instance: "your_instance_name(server Grafana)"
     ```
 
-4. Создаем файл конфигурации node_exporter:
+4. Create node_exporter configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/nodeexporter.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="nodeexporter.yml" "ваше_название_инстанса(сервера Grafana)"
+    ```yaml title="nodeexporter.yml" "your_instance_name(server Grafana)"
     - job_name: integrations/node_exporter
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9100']
           labels:
-            instance: "ваше_название_инстанса(сервера Grafana)"
+            instance: "your_instance_name(server Grafana)"
     ```
 
-5. Создаем файл конфигурации xray checker:
+5. Create xray checker configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/xraychecker.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="xraychecker.yml" "ваше_название_инстанса(сервера Grafana)"
+    ```yaml title="xraychecker.yml" "your_instance_name(server Grafana)"
     - job_name: xray_checker
       scrape_interval: 15s
       static_configs:
         - targets: ['127.0.0.1:2112']
           labels:
-            instance: "ваше_название_инстанса(сервера Grafana)"
+            instance: "your_instance_name(server Grafana)"
     ```
 
-6. Создаем файл службы cadvisor:
+6. Create cadvisor service file:
 
     ```bash
     nano /etc/systemd/system/cadvisor.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="cadvisor.service"
     [Unit]
@@ -284,13 +284,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-7. Создаем файл службы node_exporter:
+7. Create node_exporter service file:
 
     ```bash
     nano /etc/systemd/system/nodeexporter.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="nodeexporter.service"
     [Unit]
@@ -310,16 +310,16 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-8. Создаем файл службы vmagent:
+8. Create vmagent service file:
 
     ```bash
     nano /etc/systemd/system/vmagent.service
     ```
-    :::note[Внимание]
-    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить на адрес Netbird (в данном случае сервера Grafana)
+    :::note[Attention]
+    In the line -remoteWrite.url=http://IP:8428/api/v1/write you need to replace with the address of Netbird (in this case the Grafana server)
     :::
     
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="vmagent.service" "IP"
     [Unit]
@@ -335,7 +335,7 @@ This page is not available in English yet. You can help us translate it! Check o
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
@@ -343,13 +343,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-9. Запускаем службы и добавляем их в автозагрузку:
+9. Start services and add them to autostart:
 
     ```bash
     systemctl daemon-reload && systemctl enable cadvisor nodeexporter vmagent && systemctl start cadvisor nodeexporter vmagent
     ```
 
-10. Проверим статус служб:
+10. Check service status:
 
     ```bash
     systemctl status cadvisor
@@ -359,22 +359,22 @@ This page is not available in English yet. You can help us translate it! Check o
 
 </Steps>
 
-## Установка и настройка сервера c панелью Remnawave
+## Installation and configuration of the server with the Remnawave panel
 
 <Steps>
-1. Создаем директории и устанавливаем cadvisor, node_exporter, vmagent:
+1. Create directories and install cadvisor, node_exporter, vmagent:
 
     ```bash
     mkdir -p /opt/monitoring/{cadvisor,nodeexporter,vmagent/conf.d} && cd /opt/monitoring/cadvisor && wget https://github.com/google/cadvisor/releases/download/v0.53.0/cadvisor-v0.53.0-linux-amd64 && mv cadvisor-v0.53.0-linux-amd64 cadvisor && chmod +x cadvisor && cd /opt/monitoring/nodeexporter && wget https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz && tar -xvf node_exporter-1.9.1.linux-amd64.tar.gz && cd node_exporter-1.9.1.linux-amd64 && mv node_exporter /opt/monitoring/nodeexporter && cd .. && chmod +x node_exporter && rm -f node_exporter-1.9.1.linux-amd64.tar.gz && rm -r node_exporter-1.9.1.linux-amd64 && cd /opt/monitoring/vmagent && wget https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.123.0/vmutils-linux-amd64-v1.123.0.tar.gz && tar -xvf vmutils-linux-amd64-v1.123.0.tar.gz && mv vmagent-prod vmagent && find . ! -name 'vmagent' -type f -delete && chmod +x vmagent && cd
     ```
 
-2. Создаем файл конфигурации vmagent:
+2. Create vmagent configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/scrape.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```yaml title="scrape.yml"
     scrape_config_files:
@@ -384,52 +384,52 @@ This page is not available in English yet. You can help us translate it! Check o
       scrape_interval: 15s
     ```
 
-3. Создаем файл конфигурации cadvisor:
+3. Create cadvisor configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/cadvisor.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="cadvisor.yml" "ваше_название_инстанса(сервера Remnawave панели)"
+    ```yaml title="cadvisor.yml" "your_instance_name(server Remnawave panel)"
     - job_name: integrations/cAdvisor
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9101']
           labels:
-            instance: "ваше_название_инстанса(сервера Remnawave панели)"
+            instance: "your_instance_name(server Remnawave panel)"
     ```
 
-4. Создаем файл конфигурации node_exporter:
+4. Create node_exporter configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/nodeexporter.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="nodeexporter.yml" "ваше_название_инстанса(сервера Remnawave панели)"
+    ```yaml title="nodeexporter.yml" "your_instance_name(server Remnawave panel)"
     - job_name: integrations/node_exporter
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9100']
           labels:
-            instance: "ваше_название_инстанса(сервера Remnawave панели)"
+            instance: "your_instance_name(server Remnawave panel)"
     ```
-5. Создаем файл конфигурации remnawave панели:
+5. Create remnawave panel configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/remnawave.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    :::danger[Важно]
-    Замените username и password на свои данные, которые находятся по пути `/opt/remnawave/.env` (секция `### PROMETHEUS ###`)
+    :::danger[Important]
+    Replace username and password with your data, which are located at `/opt/remnawave/.env` (section `### PROMETHEUS ###`)
     ::: 
 
-    Пример
+    Example
     ```bash title=".env" "gjlToiPH" "VsCNutHF"
 
     ### PROMETHEUS ###
@@ -438,25 +438,25 @@ This page is not available in English yet. You can help us translate it! Check o
     METRICS_PASS=VsCNutHF
     ```
 
-    ```yaml title="remnawave.yml" "ваше_название_инстанса(сервера Remnawave панели)" "xxxxxxx"
+    ```yaml title="remnawave.yml" "your_instance_name(server Remnawave panel)" "xxxxxxx"
     - job_name: remnawave
       scrape_interval: 15s
       static_configs:
         - targets: ['127.0.0.1:3001']
           labels:
-            instance: "ваше_название_инстанса(сервера Remnawave панели)"
+            instance: "your_instance_name(server Remnawave panel)"
       basic_auth:
         username: "xxxxxxx"
         password: "xxxxxxx"
     ```
 
-6. Прокидываем порт метрики в `docker-compose.yml`:
+6. Forward the metrics port in `docker-compose.yml`:
 
     ```bash
     nano /opt/remnawave/docker-compose.yml
     ```
 
-    Находим следующее содержимое и добавляем:
+    Find the following content and add:
 
     ```yaml title="docker-compose.yml" "127.0.0.1:3001:3001"
     remnawave:
@@ -468,7 +468,7 @@ This page is not available in English yet. You can help us translate it! Check o
         - .env
       ports:
         - '127.0.0.1:3000:3000'
-        - '127.0.0.1:3001:3001' # Порт метрики
+        - '127.0.0.1:3001:3001' # Metrics port
       networks:
         - remnawave-network
       depends_on:
@@ -483,19 +483,19 @@ This page is not available in English yet. You can help us translate it! Check o
           max-file: '5'
     ```
 
-7. Перезапускаем docker-compose::
+7. Restart docker-compose::
 
     ```bash
     cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f -t
     ```
 
-8. Создаем файл службы cadvisor:
+8. Create cadvisor service file:
 
     ```bash
     nano /etc/systemd/system/cadvisor.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="cadvisor.service"
     [Unit]
@@ -519,13 +519,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-9. Создаем файл службы node_exporter:
+9. Create node_exporter service file:
 
     ```bash
     nano /etc/systemd/system/nodeexporter.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="nodeexporter.service"
     [Unit]
@@ -545,16 +545,16 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-10. Создаем файл службы vmagent:
+10. Create vmagent service file:
 
     ```bash
     nano /etc/systemd/system/vmagent.service
     ```
-    :::note[Внимание]
-    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить на адрес Netbird (в данном случае сервера Grafana)
+    :::note[Attention]
+    In the line -remoteWrite.url=http://IP:8428/api/v1/write you need to replace with the address of Netbird (in this case the Grafana server)
     :::
     
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="vmagent.service" "IP"
     [Unit]
@@ -570,7 +570,7 @@ This page is not available in English yet. You can help us translate it! Check o
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
@@ -578,13 +578,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-11. Запускаем службы и добавляем их в автозагрузку:
+11. Start services and add them to autostart:
 
     ```bash
     systemctl daemon-reload && systemctl enable cadvisor nodeexporter vmagent && systemctl start cadvisor nodeexporter vmagent
     ```
 
-12. Проверим статус служб:
+12. Check service status:
 
     ```bash
     systemctl status cadvisor
@@ -594,23 +594,23 @@ This page is not available in English yet. You can help us translate it! Check o
 
 </Steps>
 
-## Установка и настройка сервера c нодой Remnawave
+## Installation and configuration of the server with the Remnawave node
 
 <Steps>
 
-1. Создаем директории и устанавливаем cadvisor, node_exporter, vmagent:
+1. Create directories and install cadvisor, node_exporter, vmagent:
 
     ```bash
     mkdir -p /opt/monitoring/{cadvisor,nodeexporter,vmagent/conf.d} && cd /opt/monitoring/cadvisor && wget https://github.com/google/cadvisor/releases/download/v0.53.0/cadvisor-v0.53.0-linux-amd64 && mv cadvisor-v0.53.0-linux-amd64 cadvisor && chmod +x cadvisor && cd /opt/monitoring/nodeexporter && wget https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz && tar -xvf node_exporter-1.9.1.linux-amd64.tar.gz && cd node_exporter-1.9.1.linux-amd64 && mv node_exporter /opt/monitoring/nodeexporter && cd .. && chmod +x node_exporter && rm -f node_exporter-1.9.1.linux-amd64.tar.gz && rm -r node_exporter-1.9.1.linux-amd64 && cd /opt/monitoring/vmagent && wget https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.123.0/vmutils-linux-amd64-v1.123.0.tar.gz && tar -xvf vmutils-linux-amd64-v1.123.0.tar.gz && mv vmagent-prod vmagent && find . ! -name 'vmagent' -type f -delete && chmod +x vmagent && cd
     ```
 
-2. Создаем файл конфигурации vmagent:
+2. Create vmagent configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/scrape.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```yaml title="scrape.yml"
     scrape_config_files:
@@ -620,47 +620,47 @@ This page is not available in English yet. You can help us translate it! Check o
       scrape_interval: 15s
     ```
 
-3. Создаем файл конфигурации cadvisor:
+3. Create cadvisor configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/cadvisor.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="cadvisor.yml" "ваше_название_инстанса(сервера Remnawave ноды)"
+    ```yaml title="cadvisor.yml" "your_instance_name(server Remnawave node)"
     - job_name: integrations/cAdvisor
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9101']
           labels:
-            instance: "ваше_название_инстанса(сервера Remnawave ноды)"
+            instance: "your_instance_name(server Remnawave node)"
     ```
 
-4. Создаем файл конфигурации node_exporter:
+4. Create node_exporter configuration file:
 
     ```bash
     nano /opt/monitoring/vmagent/conf.d/nodeexporter.yml
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
-    ```yaml title="nodeexporter.yml" "ваше_название_инстанса(сервера Remnawave ноды)"
+    ```yaml title="nodeexporter.yml" "your_instance_name(server Remnawave node)"
     - job_name: integrations/node_exporter
       scrape_interval: 15s
       static_configs:
         - targets: ['localhost:9100']
           labels:
-            instance: "ваше_название_инстанса(сервера Remnawave ноды)"
+            instance: "your_instance_name(server Remnawave node)"
     ```
 
-5. Создаем файл службы cadvisor:
+5. Create cadvisor service file:
 
     ```bash
     nano /etc/systemd/system/cadvisor.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="cadvisor.service"
     [Unit]
@@ -684,13 +684,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-6. Создаем файл службы node_exporter:
+6. Create node_exporter service file:
 
     ```bash
     nano /etc/systemd/system/nodeexporter.service
     ```
 
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="nodeexporter.service"
     [Unit]
@@ -710,16 +710,16 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-7. Создаем файл службы vmagent:
+7. Create vmagent service file:
 
     ```bash
     nano /etc/systemd/system/vmagent.service
     ```
-    :::note[Внимание]
-    В строке -remoteWrite.url=http://IP:8428/api/v1/write надо заменить на адрес Netbird (в данном случае сервера Grafana)
+    :::note[Attention]
+    In the line -remoteWrite.url=http://IP:8428/api/v1/write you need to replace with the address of Netbird (in this case the Grafana server)
     :::
     
-    Вставляем следующее содержимое:
+    Insert the following content:
 
     ```ini title="vmagent.service" "IP"
     [Unit]
@@ -735,7 +735,7 @@ This page is not available in English yet. You can help us translate it! Check o
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
@@ -743,13 +743,13 @@ This page is not available in English yet. You can help us translate it! Check o
     WantedBy=multi-user.target
     ```
 
-8. Запускаем службы и добавляем их в автозагрузку:
+8. Start services and add them to autostart:
 
     ```bash
     systemctl daemon-reload && systemctl enable cadvisor nodeexporter vmagent && systemctl start cadvisor nodeexporter vmagent
     ```
 
-8. Проверим статус служб:
+9. Check service status:
 
     ```bash
     systemctl status cadvisor
@@ -759,58 +759,58 @@ This page is not available in English yet. You can help us translate it! Check o
 
 </Steps>
 
-## Настройка Grafana Dashboards
+## Configure Grafana Dashboards
 
 <Steps>
 
-1. Заходим в Grafana по адресу, который вы указали в `nginx.conf`
+1. Go to Grafana by the address you specified in `nginx.conf`
 
-    ```bash title="Пример Grafana URL"
+    ```bash title="Grafana URL Example"
     https://grafana.yourdomain.com/grafana
     ```
 
-2. Нас встречает страница авторизации, вводим `admin` и `admin`, затем меняем пароль
+2. We meet the authorization page, enter `admin` and `admin`, then change the password
 
-3. Попадаем в главное меню Grafana
+3. We get to the main menu of Grafana
 
     ![Grafana main menu](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/grafana/grafana_main_menu.png)
 
-4. Переходим в раздел **Connections** --> **Data Sources**
+4. Go to the **Connections** --> **Data Sources** section
 
-5. Нажимаем кнопку **Add data source** и выбираем **prometheus**
+5. Click the **Add data source** button and select **prometheus**
 
-6. В секции Connection в поле `URL` вводим `http://vmsingle:8428`
+6. In the Connection section, in the `URL` field, enter `http://vmsingle:8428`
 
     ![Grafana data source](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/grafana/grafana_connection.png)
 
-7. Нажимаем в самом низу страницы кнопку **Save & Test** и проверяем, что подключение установлено
+7. Click the **Save & Test** button at the bottom of the page and check that the connection is established
 
 </Steps>
 
-## Добавление новых Dashboard
+## Adding new Dashboard
 
-Список Dashboard:
+List of Dashboard:
 
-- [Remnawave Dashboard](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/remnawave-dashboard.json) от [kastov](https://github.com/kastov)
-- [cAdvisor Dashboard](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/cadvisor.json) от [grafana official](https://github.com/grafana)
-- [Node Overview](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/node-overview.json) от [Kutovoys](https://github.com/Kutovoys)
-- [Network System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/network.json) от [Kutovoys](https://github.com/Kutovoys)
-- [Memory System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/memory.json) от [Kutovoys](https://github.com/Kutovoys)
-- [Filesystem Disks](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/filesystem-disks.json) от [Kutovoys](https://github.com/Kutovoys)
-- [CPU System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/cpu-system.json) от [Kutovoys](https://github.com/Kutovoys)
+- [Remnawave Dashboard](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/remnawave-dashboard.json) by [kastov](https://github.com/kastov)
+- [cAdvisor Dashboard](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/cadvisor.json) by [grafana official](https://github.com/grafana)
+- [Node Overview](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/node-overview.json) by [Kutovoys](https://github.com/Kutovoys)
+- [Network System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/network.json) by [Kutovoys](https://github.com/Kutovoys)
+- [Memory System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/memory.json) by [Kutovoys](https://github.com/Kutovoys)
+- [Filesystem Disks](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/filesystem-disks.json) by [Kutovoys](https://github.com/Kutovoys)
+- [CPU System](https://raw.githubusercontent.com/pluralplay/awesome-docs/main/grafana/dashboards/cpu-system.json) by [Kutovoys](https://github.com/Kutovoys)
 
 <Steps>
 
-1. Переходим в раздел **Dashboards**
+1. Go to the **Dashboards** section
 
-2. Нажимаем справа вверху кнопку **New** и выбираем **Import**
+2. Click the **New** button on the right and select **Import**
 
-3. Загружаем наш Dashboard
+3. Load our Dashboard
 
-4. Где victoriametrics выбираем наш prometheus
+4. Where victoriametrics select our prometheus
 
     ![Grafana Dashboard](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/grafana/grafana_dashboard.png)
 
-5. Нажимаем кнопку **Import** данный шаблон будет загружен
+5. Click the **Import** button, this template will be loaded
 
 </Steps>
