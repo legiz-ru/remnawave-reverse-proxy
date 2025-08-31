@@ -89,7 +89,7 @@ export default defineConfig({
 						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к метрикам Prometheus' } },
 						{ label: 'Beszel', slug: 'configuration/beszel', translations: { ru: 'Beszel' } },
 						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
-						{ label: 'Monitoring with Grafana', slug: 'configuration/monitoring-with-grafana', translations: { ru: 'Мониторинг через Grafana' } },
+						//{ label: 'Monitoring with Grafana', slug: 'configuration/monitoring-with-grafana', translations: { ru: 'Мониторинг через Grafana' } },
 						{ label: 'Monitoring with Grafana and Victoria Metrics', slug: 'configuration/grafana-monitoring-setup', translations: { ru: 'Мониторинг через Grafana и Victoria Metrics' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Netbird', slug: 'configuration/netbird', translations: { ru: 'Netbird' } },
 						{ label: 'SWAG (Secure Web Application Gateway)', slug: 'configuration/swag', translations: { ru: 'SWAG (Secure Web Application Gateway)' }, badge: {text: '❌ WIP', variant: 'caution'} },
