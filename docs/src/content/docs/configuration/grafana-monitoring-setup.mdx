@@ -6,10 +6,6 @@ description: How to set up monitoring with Grafana and Victoria Metrics
 import { Steps } from '@astrojs/starlight/components';
 import { LinkButton } from '@astrojs/starlight/components';
 
-:::caution
-This page is not available in English yet. You can help us translate it! Check out the [contribution guide](../../contribution/guide) to get started.
-:::
-
 Author: **[pluralplay](../../contribution/resources#pluralplay)**, **[kutovoys](../../contribution/resources#kutovoys)**  
 Deployment of an intelligent monitoring stack, including Grafana for creating dynamic dashboards, Victoria Metrics for storing and processing metrics, Node Exporter for monitoring servers, cAdvisor for analyzing containers, Xray Checker for controlling network connections, and Netbird for building a secure network architecture. This solution provides maximum transparency, performance, and security for your infrastructure.
 
@@ -483,7 +479,7 @@ Don't forget to add this server to the NetBird network, as this is how it is don
           max-file: '5'
     ```
 
-7. Restart docker-compose::
+7. Restart docker-compose:
 
     ```bash
     cd /opt/remnawave && docker compose down && docker compose up -d && docker compose logs -f -t

@@ -49,7 +49,7 @@ import { LinkButton } from '@astrojs/starlight/components';
     curl -fsSL https://get.docker.com | sh
     ```
 
-2. Создаем директории и `docker-compose.yml `:
+2. Создаем директории и `docker-compose.yml`:
 
     ```bash
     mkdir -p /opt/monitoring/{cadvisor,nodeexporter,nginx,vmagent/conf.d} && cd /opt/monitoring && nano docker-compose.yml
@@ -731,7 +731,7 @@ import { LinkButton } from '@astrojs/starlight/components';
           -httpListenAddr=127.0.0.1:8429 \
           -promscrape.config=/opt/monitoring/vmagent/scrape.yml \
           -promscrape.configCheckInterval=60s \
-          -remoteWrite.url=http://IP:8428/api/v1/write # Тут указываем адрес Netbird (в данном случае сервера Grafana)
+          -remoteWrite.url=http://IP:8428/api/v1/write
     Restart=always
     RestartSec=5
 
