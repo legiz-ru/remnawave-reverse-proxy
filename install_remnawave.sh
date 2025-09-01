@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.1a"
+SCRIPT_VERSION="2.1.2"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -3677,10 +3677,9 @@ generate_xray_keys() {
         echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}${COLOR_RESET}"
     fi
 
-    local private_key=$(echo "$keys" | grep "Private key:" | awk '{print $3}')
-    local public_key=$(echo "$keys" | grep "Public key:" | awk '{print $3}')
+    local private_key=$(echo "$keys" | grep "PrivateKey:" | awk '{print $2}')
 
-    echo "$private_key $public_key"
+    echo "$private_key"
 }
 
 create_node() {
@@ -3770,13 +3769,12 @@ create_config_profile() {
     local token=$2
     local name=$3
     local domain=$4
-    local public_key=$5
-    local private_key=$6
-    local inbound_tag="${7:-Steal}"
+    local private_key=$5
+    local inbound_tag="${6:-Steal}"
 
     local short_id=$(openssl rand -hex 8)
 
-    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg public_key "$public_key" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
+    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
         name: $name,
         config: {
             log: { loglevel: "warning" },
@@ -3799,7 +3797,6 @@ create_config_profile() {
                         dest: "/dev/shm/nginx.sock",
                         spiderX: "",
                         shortIds: [$short_id],
-                        publicKey: $public_key,
                         privateKey: $private_key,
                         serverNames: [$domain]
                     }
@@ -4643,9 +4640,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys)
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -4653,7 +4648,7 @@ EOL
 
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$private_key")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
     # Create node with config profile binding
@@ -5177,9 +5172,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys)
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -5187,7 +5180,7 @@ EOL
 
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$private_key")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
     # Create node with config profile binding
@@ -5471,13 +5464,11 @@ add_node_to_panel() {
     done
 
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys)
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$entity_name" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key" "$entity_name")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$entity_name" "$SELFSTEAL_DOMAIN" "$private_key" "$entity_name")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}: $entity_name${COLOR_RESET}"
 
     printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}$SELFSTEAL_DOMAIN${COLOR_RESET}\n"
