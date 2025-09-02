@@ -151,9 +151,9 @@ import { LinkButton } from '@astrojs/starlight/components';
         http2 on;
         server_name grafana.yourdomain.com; # Вписываем домен, или саб-домен для доступа к grafana извне
 
-        ssl_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
-        ssl_certificate_key "/etc/letsencrypt/live/yourdomain.com/privkey.pem"; # Указываем путь до приватного ключа
-        ssl_trusted_certificate "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
+        ssl_certificate "/etc/nginx/ssl/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
+        ssl_certificate_key "/etc/nginx/ssl/yourdomain.com/privkey.pem"; # Указываем путь до приватного ключа
+        ssl_trusted_certificate "/etc/nginx/ssl/yourdomain.com/fullchain.pem"; # Указываем путь до сертификата
 
         location /grafana {
             proxy_pass http://grafana:3000;
