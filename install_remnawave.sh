@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.3"
+SCRIPT_VERSION="2.1.3a"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -3677,7 +3677,7 @@ generate_xray_keys() {
         echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}${COLOR_RESET}"
     fi
 
-    local private_key=$(echo "$keys" | grep -E "PrivateKey:|Private key:" | awk '{print $2}')
+    local private_key=$(echo "$keys" | grep -E "PrivateKey:|Private key:" | sed -E 's/.*(PrivateKey|Private key):[[:space:]]*(.*)/\2/')
 
     echo "$private_key"
 }
