@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.0.0"
+SCRIPT_VERSION="2.1.4"
+UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
 SCRIPT_URL="https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh"
@@ -76,6 +77,7 @@ set_language() {
                 [SUCCESS_INSTALL]="All packages installed successfully"
                 #Menu
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="update available"
                 [VERSION_LABEL]="Version: %s"
                 [EXIT]="Exit"
                 [MENU_1]="Install Remnawave Components"
@@ -83,10 +85,11 @@ set_language() {
                 [MENU_3]="Manage Panel/Node"
                 [MENU_4]="Install random template for selfsteal node"
                 [MENU_5]="Custom Templates by legiz"
-                [MENU_6]="Manage IPv6"
-                [MENU_7]="Manage certificates domain"
-                [MENU_8]="Check for updates script"
-                [MENU_9]="Remove script"
+                [MENU_6]="Extensions by distillium"
+                [MENU_7]="Manage IPv6"
+                [MENU_8]="Manage certificates domain"
+                [MENU_9]="Check for updates script"
+                [MENU_10]="Remove script"
                 [PROMPT_ACTION]="Select action (0-10):"
                 [INVALID_CHOICE]="Invalid choice. Please select 0-10"
                 [WARNING_LABEL]="WARNING:"
@@ -100,9 +103,15 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="All script and panel/node data will be removed from the server. Are you sure? (y/n): "
                 [SCRIPT_REMOVED]="Script and its local files successfully removed!"
                 [ALL_REMOVED]="Script and panel/node data successfully removed!"
+                #Extensions by distillium
+                [EXTENSIONS_MENU]="Extensions by distillium"
+                [EXTENSIONS_MENU_TITLE]="Manage Extensions by distillium"
+                [EXTENSIONS_PROMPT]="Select action (0-2):"
+                [EXTENSIONS_INVALID_CHOICE]="Invalid choice. Please select 0-2."
+                [BACKUP_RESTORE]="Backup and Restore"
                 #Warp by distillium
-                [WARP_MENU]="WARP Native by distillium"
-                [WARP_MENU_TITLE]="Manage WARP Native by distillium\nOnly run on server with node"
+                [WARP_MENU]="WARP Native"
+                [WARP_MENU_TITLE]="Manage WARP Native"
                 [WARP_INSTALL]="Install WARP Native"
                 [WARP_ADD_CONFIG]="Add WARP-configuration to node configuration"
                 [WARP_DELETE_WARP_SETTINGS]="Remove WARP-configuration from node configuration"
@@ -201,6 +210,12 @@ set_language() {
                 [HOST_CREATED]="Host successfully created"
                 [GET_DEFAULT_SQUAD]="Getting default squad"
                 [UPDATE_SQUAD]="Squad successfully updated"
+                [NO_SQUADS_FOUND]="No squads found"
+                [INVALID_UUID_FORMAT]="Invalid UUID format"
+                [NO_VALID_SQUADS_FOUND]="No valid squads found"
+                [ERROR_GET_SQUAD]="Failed to get squad"
+                [INVALID_SQUAD_UUID]="Invalid squad UUID"
+                [INVALID_INBOUND_UUID]="Invalid inbound UUID"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Failed to change to directory %s"
                 [DIR_NOT_FOUND]="Directory /opt/remnawave not found"
@@ -241,6 +256,8 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Registration error - empty server response"
                 [ERROR_REGISTER]="Registration error"
                 [ERROR_UPDATE_SQUAD]="Failed to update squad"
+                [ERROR_GET_SQUAD_LIST]="Failed to get squad list"
+                [NO_SQUADS_TO_UPDATE]="No squads to update"
                 #Reinstall Panel/Node
                 [REINSTALL_WARNING]="All data panel/node will be deleted from the server. Are you sure? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Select reinstallation method:"
@@ -275,7 +292,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Node successfully added!"
                 [CREATE_NEW_NODE]="Creating new node for %s..."
                 [CF_INVALID_NAME]="Error: The name of the configuration profile %s is already in use.\nPlease choose another name."
-                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should contain from 5 to 20 characters."
+                [CF_INVALID_LENGTH]="Error: The name of the configuration profile should contain from 3 to 20 characters."
                 [CF_INVALID_CHARS]="Error: The name of the configuration profile should contain only English letters, numbers, and hyphens."
                 #check
                 [CHECK_UPDATE]="Check for updates"
@@ -347,18 +364,29 @@ set_language() {
                 [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
                 [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
                 [SUB_PAGE_UPDATED_SUCCESS]="Custom sub page template successfully updated."
-                [SELECT_SUB_PAGE_CUSTOM]="Select action (0-4):"
+                [SELECT_SUB_PAGE_CUSTOM]="Select action (0-7):"
                 [SELECT_SUB_PAGE_CUSTOM1]="Custom Sub Page Templates"
                 [SELECT_SUB_PAGE_CUSTOM2]="Custom Sub Page Templates\nOnly run on panel server"
-                [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-4."
+                [SELECT_SUB_PAGE_CUSTOM3]="Custom App Lists for original sub page:"
+                [SELECT_SUB_PAGE_CUSTOM4]="Custom Sub Page:"
+                [SUB_PAGE_SELECT_CHOICE]="Invalid choice. Please select 0-7."
                 [RESTORE_SUB_PAGE]="Restore default sub page"
                 [CONTAINER_NOT_FOUND]="Container %s not found"
                 [SUB_WITH_APPCONFIG_ASK]="Do you want to include app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Yes, use config from option 1 (Simple custom app list)"
                 [SUB_WITH_APPCONFIG_OPTION2]="Yes, use config from option 2 (Multiapp custom app list)"
+                [SUB_WITH_APPCONFIG_OPTION3]="Yes, use config from option 3 (HWID only app list)"
                 [SUB_WITH_APPCONFIG_SKIP]="No, skip app-config.json"
                 [SUB_WITH_APPCONFIG_INVALID]="Invalid option, skipping app-config.json"
-                [SUB_WITH_APPCONFIG_INPUT]="Select action (0-2):"
+                [SUB_WITH_APPCONFIG_INPUT]="Select action (0-3):"
+                # Custom Branding
+                [BRANDING_SUPPORT_ASK]="Add branding support to subscription page?"
+                [BRANDING_SUPPORT_YES]="Yes, add branding support"
+                [BRANDING_SUPPORT_NO]="No, skip branding"
+                [BRANDING_NAME_PROMPT]="Enter your brand name:"
+                [BRANDING_SUPPORT_URL_PROMPT]="Enter your support page URL:"
+                [BRANDING_LOGO_URL_PROMPT]="Enter your brand logo URL:"
+                [BRANDING_ADDED_SUCCESS]="Branding configuration successfully added"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Custom rules template not applied"
                 [UPLOADING_TEMPLATE]="Uploading custom rules template..."
@@ -421,6 +449,7 @@ set_language() {
                 [ERROR_ROOT]="Скрипт нужно запускать с правами root"
                 [ERROR_OS]="Поддержка только Debian 11/12 и Ubuntu 22.04/24.04"
                 [MENU_TITLE]="REMNAWAVE REVERSE-PROXY by eGames"
+				[AVAILABLE_UPDATE]="доступно обновление"
                 [VERSION_LABEL]="Версия: %s"
                 #Install Packages
                 [ERROR_UPDATE_LIST]="Ошибка: Не удалось обновить список пакетов"
@@ -447,10 +476,11 @@ set_language() {
                 [MENU_3]="Управление панелью/нодой"
                 [MENU_4]="Установить случайный шаблон для selfsteal ноды"
                 [MENU_5]="Кастомные шаблоны от legiz"
-                [MENU_6]="Управление IPv6"
-                [MENU_7]="Управление сертификатами домена"
-                [MENU_8]="Проверить обновления скрипта"
-                [MENU_9]="Удалить скрипт"
+                [MENU_6]="Управление расширениями от distillium"
+                [MENU_7]="Управление IPv6"
+                [MENU_8]="Управление сертификатами домена"
+                [MENU_9]="Проверить обновления скрипта"
+                [MENU_10]="Удалить скрипт"
                 [PROMPT_ACTION]="Выберите действие (0-10):"
                 [INVALID_CHOICE]="Неверный выбор. Выберите 0-10."
                 [WARNING_LABEL]="ВНИМАНИЕ:"
@@ -464,9 +494,15 @@ set_language() {
                 [CONFIRM_REMOVE_ALL]="Все данные скрипта и панели/ноды будут удалены с сервера. Вы уверены? (y/n): "
                 [SCRIPT_REMOVED]="Скрипт и его локальные файлы успешно удалены!"
                 [ALL_REMOVED]="Скрипт и данные панели/ноды успешно удалены!"
+                #Extensions by distillium
+                [EXTENSIONS_MENU]="Расширения by distillium"
+                [EXTENSIONS_MENU_TITLE]="Управление расширениями"
+                [EXTENSIONS_PROMPT]="Выберите действие (0-2):"
+                [EXTENSIONS_INVALID_CHOICE]="Неверный выбор. Выберите 0-2."
+                [BACKUP_RESTORE]="Backup and Restore"
                 #Warp by distillium
-                [WARP_MENU]="WARP Native от distillium"
-                [WARP_MENU_TITLE]="Управление WARP Native от distillium"
+                [WARP_MENU]="WARP Native"
+                [WARP_MENU_TITLE]="Управление WARP Native"
                 [WARP_INSTALL]="Установить WARP Native"
                 [WARP_ADD_CONFIG]="Добавить WARP-настройки в конфигурацию ноды"
                 [WARP_DELETE_WARP_SETTINGS]="Удалить WARP-настройки из конфигурации ноды"
@@ -562,6 +598,12 @@ set_language() {
                 [HOST_CREATED]="Хост успешно создан"
                 [GET_DEFAULT_SQUAD]="Получение default squad"
                 [UPDATE_SQUAD]="Squad успешно обновлен"
+                [NO_SQUADS_FOUND]="Нет squadов"
+                [INVALID_UUID_FORMAT]="Неверный формат UUID"
+                [NO_VALID_SQUADS_FOUND]="Нет валидных squadов"
+                [ERROR_GET_SQUAD]="Не удалось получить squad"
+                [INVALID_SQUAD_UUID]="Неверный UUID squad"
+                [INVALID_INBOUND_UUID]="Неверный UUID inbound"
                 #Stop/Start/Update
                 [CHANGE_DIR_FAILED]="Не удалось перейти в директорию %s"
                 [DIR_NOT_FOUND]="Директория /opt/remnawave не найдена"
@@ -605,6 +647,8 @@ set_language() {
                 [ERROR_EMPTY_RESPONSE_REGISTER]="Ошибка при регистрации - пустой ответ сервера"
                 [ERROR_REGISTER]="Ошибка регистрации"
                 [ERROR_UPDATE_SQUAD]="Ошибка обновления squad"
+                [ERROR_GET_SQUAD_LIST]="Ошибка получения списка squadов"
+                [NO_SQUADS_TO_UPDATE]="Нет сквадов для обновления"
                 #Reinstall Panel/Node
                 [REINSTALL_WARNING]="Все данные панели/ноды будут удалены с сервера. Вы уверены? (y/n):"
                 [REINSTALL_TYPE_TITLE]="Выберите способ переустановки:"
@@ -638,7 +682,7 @@ set_language() {
                 [NODE_ADDED_SUCCESS]="Нода успешно добавлена!"
                 [CREATE_NEW_NODE]="Создаём новую ноду для %s"
                 [CF_INVALID_NAME]="Ошибка: Имя конфигурационного профиля %s уже используется.\nПожалуйста, выберите другое имя."
-                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля должно содержать от 5 до 20 символов."
+                [CF_INVALID_LENGTH]="Ошибка: Имя конфигурационного профиля должно содержать от 3 до 20 символов."
                 [CF_INVALID_CHARS]="Ошибка: Имя конфигурационного профиля должно содержать только английские буквы, цифры и дефис."
                 #check
                 [CHECK_UPDATE]="Проверить обновления"
@@ -710,18 +754,29 @@ set_language() {
                 [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
                 [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
                 [SUB_PAGE_UPDATED_SUCCESS]="Пользовательский шаблон страницы подписки успешно обновлён."
-                [SELECT_SUB_PAGE_CUSTOM]="Выберите действие (0–4):"
+                [SELECT_SUB_PAGE_CUSTOM]="Выберите действие (0-7):"
                 [SELECT_SUB_PAGE_CUSTOM1]="Шаблоны страниц подписки"
                 [SELECT_SUB_PAGE_CUSTOM2]="Шаблоны страниц подписки\nЗапускать только на сервере с панелью"
-                [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 4."
+                [SELECT_SUB_PAGE_CUSTOM3]="Списки приложений для оригинальной страницы подписки:"
+                [SELECT_SUB_PAGE_CUSTOM4]="Кастомные страницы подписки:"
+                [SUB_PAGE_SELECT_CHOICE]="Недопустимый выбор. Пожалуйста, выберите от 0 до 7."
                 [RESTORE_SUB_PAGE]="Восстановить шаблон страницы подписки по умолчанию"
                 [CONTAINER_NOT_FOUND]="Контейнер %s не найден"
                 [SUB_WITH_APPCONFIG_ASK]="Добавить файл конфигурации app-config.json?"
                 [SUB_WITH_APPCONFIG_OPTION1]="Простой список приложений clash&sing"
                 [SUB_WITH_APPCONFIG_OPTION2]="Множественный список приложений"
+                [SUB_WITH_APPCONFIG_OPTION3]="Список приложений с поддержкой HWID"
                 [SUB_WITH_APPCONFIG_SKIP]="Нет, пропустить добавление конфигурации"
                 [SUB_WITH_APPCONFIG_INVALID]="Неверный выбор, конфигурация не будет добавлена"
-                [SUB_WITH_APPCONFIG_INPUT]="Выберите действие (0–2):"
+                [SUB_WITH_APPCONFIG_INPUT]="Выберите действие (0–3):"
+                # Custom Branding
+                [BRANDING_SUPPORT_ASK]="Добавить поддержку брендирования страницы подписки?"
+                [BRANDING_SUPPORT_YES]="Да, добавить поддержку брендирования"
+                [BRANDING_SUPPORT_NO]="Нет, пропустить брендирование"
+                [BRANDING_NAME_PROMPT]="Введите название вашего бренда:"
+                [BRANDING_SUPPORT_URL_PROMPT]="Введите ссылку на страницу поддержки:"
+                [BRANDING_LOGO_URL_PROMPT]="Введите ссылку на логотип вашего бренда:"
+                [BRANDING_ADDED_SUCCESS]="Конфигурация брендирования успешно добавлена"
                 # Template Upload
                 [TEMPLATE_NOT_APPLIED]="Шаблон правил не применён"
                 [UPLOADING_TEMPLATE]="Загрузка шаблона правил..."
@@ -968,7 +1023,10 @@ update_remnawave_reverse() {
         mv "$temp_script" "$update_script"
         chmod +x "$update_script"
 
-        ln -sf "$update_script" "$bin_link"
+        if [ -e "$bin_link" ]; then
+            rm -f "$bin_link"
+        fi
+        ln -s "$update_script" "$bin_link"
 
         hash -r
 
@@ -986,7 +1044,7 @@ update_remnawave_reverse() {
 
 remove_script() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_9]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_10]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[REMOVE_SCRIPT_ONLY]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[REMOVE_SCRIPT_AND_PANEL]}${COLOR_RESET}"
@@ -1100,10 +1158,69 @@ generate_password() {
     echo "$password"
 }
 
+#Displaying the availability of the update in the menu
+check_update_status() {
+    local TEMP_REMOTE_VERSION_FILE
+    TEMP_REMOTE_VERSION_FILE=$(mktemp)
+
+    if ! curl -fsSL "$SCRIPT_URL" 2>/dev/null | head -n 100 > "$TEMP_REMOTE_VERSION_FILE"; then
+        UPDATE_AVAILABLE=false
+        rm -f "$TEMP_REMOTE_VERSION_FILE"
+        return
+    fi
+
+    local REMOTE_VERSION
+    REMOTE_VERSION=$(grep -m 1 "^SCRIPT_VERSION=" "$TEMP_REMOTE_VERSION_FILE" | cut -d'"' -f2)
+    rm -f "$TEMP_REMOTE_VERSION_FILE"
+
+    if [[ -z "$REMOTE_VERSION" ]]; then
+        UPDATE_AVAILABLE=false
+        return
+    fi
+
+    compare_versions_for_check() {
+        local v1="$1"
+        local v2="$2"
+
+        local v1_num="${v1//[^0-9.]/}"
+        local v2_num="${v2//[^0-9.]/}"
+
+        local v1_sfx="${v1//$v1_num/}"
+        local v2_sfx="${v2//$v2_num/}"
+
+        if [[ "$v1_num" == "$v2_num" ]]; then
+            if [[ -z "$v1_sfx" && -n "$v2_sfx" ]]; then
+                return 0
+            elif [[ -n "$v1_sfx" && -z "$v2_sfx" ]]; then
+                return 1
+            elif [[ "$v1_sfx" < "$v2_sfx" ]]; then
+                return 0
+            else
+                return 1
+            fi
+        else
+            if printf '%s\n' "$v1_num" "$v2_num" | sort -V | head -n1 | grep -qx "$v1_num"; then
+                return 0
+            else
+                return 1
+            fi
+        fi
+    }
+
+    if compare_versions_for_check "$SCRIPT_VERSION" "$REMOTE_VERSION"; then
+        UPDATE_AVAILABLE=true
+    else
+        UPDATE_AVAILABLE=false
+    fi
+}
+
 show_menu() {
-    echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
-    printf "${COLOR_GRAY}${LANG[VERSION_LABEL]}${COLOR_RESET}\n" "$SCRIPT_VERSION"
+    if [[ "$UPDATE_AVAILABLE" == true ]]; then
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION ${COLOR_RED}${LANG[AVAILABLE_UPDATE]}${COLOR_RESET}")${COLOR_RESET}"
+    else
+		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION")${COLOR_RESET}"
+    fi
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[MENU_1]}${COLOR_RESET}" # Install Remnawave Components
     echo -e "${COLOR_YELLOW}2. ${LANG[MENU_2]}${COLOR_RESET}" # Reinstall panel/node
@@ -1111,13 +1228,13 @@ show_menu() {
     echo -e ""
     echo -e "${COLOR_YELLOW}4. ${LANG[MENU_4]}${COLOR_RESET}" # Install random template
     echo -e "${COLOR_YELLOW}5. ${LANG[MENU_5]}${COLOR_RESET}" # Custom Templates legiz
-    echo -e "${COLOR_YELLOW}6. ${LANG[WARP_MENU]}${COLOR_RESET}" # Manage Warp by distilium
+    echo -e "${COLOR_YELLOW}6. ${LANG[MENU_6]}${COLOR_RESET}" # Extensions distilium
     echo -e ""
-    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_6]}${COLOR_RESET}" # Manage IPv6
-    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_7]}${COLOR_RESET}" # Manage certificates domain
+    echo -e "${COLOR_YELLOW}7. ${LANG[MENU_7]}${COLOR_RESET}" # Manage IPv6
+    echo -e "${COLOR_YELLOW}8. ${LANG[MENU_8]}${COLOR_RESET}" # Manage certificates domain
     echo -e ""
-    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_8]}${COLOR_RESET}" # Check for updates
-    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_9]}${COLOR_RESET}" # Remove script
+    echo -e "${COLOR_YELLOW}9. ${LANG[MENU_9]}${COLOR_RESET}" # Check for updates
+    echo -e "${COLOR_YELLOW}10. ${LANG[MENU_10]}${COLOR_RESET}" # Remove script
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}- ${LANG[FAST_START]//remnawave_reverse/${COLOR_GREEN}remnawave_reverse${COLOR_RESET}}"
@@ -1374,7 +1491,7 @@ view_logs() {
 
     cd "$dir" || { echo -e "${COLOR_RED}${LANG[CHANGE_DIR_FAILED]} $dir${COLOR_RESET}"; exit 1; }
 
-    if ! docker ps -q --filter "ancestor=remnawave/backend:dev" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
+    if ! docker ps -q --filter "ancestor=remnawave/backend:latest" | grep -q . && ! docker ps -q --filter "ancestor=remnawave/node:latest" | grep -q .; then
         echo -e "${COLOR_RED}${LANG[CONTAINER_NOT_RUNNING]}${COLOR_RESET}"
         exit 1
     fi
@@ -1508,6 +1625,41 @@ show_panel_node_menu() {
 }
 #Manage Panel Node Menu
 
+manage_extensions() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[EXTENSIONS_MENU_TITLE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[WARP_MENU]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[BACKUP_RESTORE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[EXTENSIONS_PROMPT]}" EXTENSION_OPTION
+
+    case $EXTENSION_OPTION in
+        1)
+            manage_warp
+            log_clear
+            manage_extensions
+            ;;
+        2)
+            if [ -f ~/backup-restore.sh ]; then
+                rw-backup
+            else
+                curl -o ~/backup-restore.sh https://raw.githubusercontent.com/distillium/remnawave-backup-restore/main/backup-restore.sh && chmod +x ~/backup-restore.sh && ~/backup-restore.sh
+            fi
+            log_clear
+            manage_extensions
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[EXTENSIONS_INVALID_CHOICE]}${COLOR_RESET}"
+            ;;
+    esac
+}
+
 manage_warp() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[WARP_MENU_TITLE]}${COLOR_RESET}"
@@ -1528,10 +1680,10 @@ manage_warp() {
                 echo -e "${COLOR_RED}${LANG[WARP_NO_NODE]}${COLOR_RESET}"
                 exit 1
             fi
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/install.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/install.sh)
             ;;
         2)
-            curl -sSL https://raw.githubusercontent.com/distillium/warp-native/refs/heads/main/uninstall.sh | bash
+            bash <(curl -fsSL https://raw.githubusercontent.com/distillium/warp-native/main/uninstall.sh)
             ;;
         3)
             local domain_url="127.0.0.1:3000"
@@ -1619,7 +1771,9 @@ manage_warp() {
                 local warp_outbound='{
                     "tag": "warp-out",
                     "protocol": "freedom",
-                    "settings": {},
+                    "settings": {
+					    "domainStrategy": "UseIP"
+					},
                     "streamSettings": {
                         "sockopt": {
                             "interface": "warp",
@@ -1758,6 +1912,8 @@ manage_warp() {
             fi
 
             echo -e "${COLOR_GREEN}${LANG[WARP_DELETE_SUCCESS]}${COLOR_RESET}"
+            log_clear
+            manage_warp
             ;;
         0)
             echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
@@ -2126,9 +2282,6 @@ update_subscription_template() {
 
     echo -e "${COLOR_YELLOW}${LANG[UPLOADING_TEMPLATE]}${COLOR_RESET}"
 
-    get_panel_token
-    token=$(cat "$TOKEN_FILE")
-
     local template_content=$(curl -s "$template_url")
     if [ -z "$template_content" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_FETCH_TEMPLATE]}${COLOR_RESET}"
@@ -2157,6 +2310,9 @@ update_subscription_template() {
         template_field="templateJson"
         template_value="$template_content"
     fi
+
+    get_panel_token
+    token=$(cat "$TOKEN_FILE")
 
     local get_response=$(make_api_request "GET" "http://$domain_url/api/subscription-templates/$template_type" "$token")
     if [ -z "$get_response" ]; then
@@ -2206,14 +2362,78 @@ show_sub_page_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[SELECT_SUB_PAGE_CUSTOM2]}${COLOR_RESET}"
     echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[SELECT_SUB_PAGE_CUSTOM3]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}1. Simple custom app list (clash and sing)${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. Multiapp custom app list${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}3. Marzbanify web page template (clash and sing)${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}4. Material web page template (support custom app list)${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}5. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. HWID only custom app list${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[SELECT_SUB_PAGE_CUSTOM4]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. Orion web page template (support custom app list)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}5. Material web page template (support custom app list)${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}6. Marzbanify web page template (clash and sing)${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}7. ${LANG[RESTORE_SUB_PAGE]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
     echo -e ""
+}
+
+download_with_fallback() {
+    local primary_url="$1"
+    local fallback_url="$2"
+    local output_file="$3"
+
+    if curl -s -L -f -o "$output_file" "$primary_url"; then
+        return 0
+    else
+        echo -e "${COLOR_YELLOW}${LANG[DOWNLOAD_FALLBACK]}${COLOR_RESET}"
+        if curl -s -L -f -o "$output_file" "$fallback_url"; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
+
+branding_add_to_appconfig() {
+    local config_file="$1"
+    
+    if [ ! -f "$config_file" ]; then
+        echo -e "${COLOR_RED}Config file not found: $config_file${COLOR_RESET}"
+        return 1
+    fi
+    
+    echo -e "${COLOR_GREEN}${LANG[BRANDING_SUPPORT_ASK]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[BRANDING_SUPPORT_YES]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[BRANDING_SUPPORT_NO]}${COLOR_RESET}"
+    echo -e ""
+    reading "Select option (1-2):" BRANDING_OPTION
+
+    case $BRANDING_OPTION in
+        1)
+            reading "${LANG[BRANDING_NAME_PROMPT]}" BRAND_NAME
+            reading "${LANG[BRANDING_SUPPORT_URL_PROMPT]}" SUPPORT_URL
+            reading "${LANG[BRANDING_LOGO_URL_PROMPT]}" LOGO_URL
+            
+            jq --arg name "$BRAND_NAME" \
+               --arg supportUrl "$SUPPORT_URL" \
+               --arg logoUrl "$LOGO_URL" \
+               '.config.branding = {
+                   "name": $name,
+                   "supportUrl": $supportUrl,
+                   "logoUrl": $logoUrl
+               }' "$config_file" > "${config_file}.tmp" && mv "${config_file}.tmp" "$config_file"
+            
+            echo -e "${COLOR_GREEN}${LANG[BRANDING_ADDED_SUCCESS]}${COLOR_RESET}"
+            ;;
+        2)
+            echo -e "${COLOR_YELLOW}${LANG[BRANDING_SUPPORT_NO]}${COLOR_RESET}"
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            ;;
+    esac
 }
 
 manage_sub_page_upload() {
@@ -2232,39 +2452,31 @@ manage_sub_page_upload() {
     local docker_compose_file="/opt/remnawave/docker-compose.yml"
 
     case $SUB_PAGE_OPTION in
-        1|2)
+        1|2|3)
             [ -f "$index_file" ] && rm -f "$index_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            local template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
-            [ "$SUB_PAGE_OPTION" == "2" ] && template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+            local primary_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+            local fallback_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/app-config.json"
+            if [ "$SUB_PAGE_OPTION" == "2" ]; then
+                primary_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+                fallback_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/multiapp/app-config.json"
+            elif [ "$SUB_PAGE_OPTION" == "3" ]; then
+                primary_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/hwid/app-config.json"
+                fallback_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/hwid/app-config.json"
+            fi
 
-            if ! curl -s -L -o "$config_file" "$template_url"; then
+            if ! download_with_fallback "$primary_url" "$fallback_url" "$config_file"; then
                 echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
                 sleep 2
                 log_clear
                 return 1
             fi
 
-            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+            branding_add_to_appconfig "$config_file"
 
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
             /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
-            ;;
-
-        3)
-            [ -f "$config_file" ] && rm -f "$config_file"
-
-            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/customweb/clash-sing/index.html"; then
-                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
-                sleep 2
-                log_clear
-                return 1
-            fi
-
-            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
-
-            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
             ;;
 
         4)
@@ -2272,7 +2484,9 @@ manage_sub_page_upload() {
             [ -f "$index_file" ] && rm -f "$index_file"
 
             echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
-            if ! curl -s -L -o "$index_file" "https://raw.githubusercontent.com/legiz-ru/material-remnawave-subscription-page/refs/heads/main/index.html"; then
+            local primary_index_url="https://raw.githubusercontent.com/legiz-ru/Orion/refs/heads/main/index.html"
+            local fallback_index_url="https://cdn.jsdelivr.net/gh/legiz-ru/Orion@main/index.html"
+            if ! download_with_fallback "$primary_index_url" "$fallback_index_url" "$index_file"; then
                 echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
                 sleep 2
                 log_clear
@@ -2283,29 +2497,32 @@ manage_sub_page_upload() {
             echo -e ""
             echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}2. ${LANG[SUB_WITH_APPCONFIG_OPTION2]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}3. ${LANG[SUB_WITH_APPCONFIG_OPTION3]}${COLOR_RESET}"
             echo -e ""
             echo -e "${COLOR_YELLOW}0. ${LANG[SUB_WITH_APPCONFIG_SKIP]}${COLOR_RESET}"
             echo -e ""
             reading "${LANG[SUB_WITH_APPCONFIG_INPUT]}" SUB_WITH_APPCONFIG
 
             case $SUB_WITH_APPCONFIG in
-                1)
-                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
-                    curl -s -L -o "$config_file" "$template_url" || {
+                1|2|3)
+                    local primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+                    local fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/app-config.json"
+                    if [ "$SUB_WITH_APPCONFIG" == "2" ]; then
+                        primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+                        fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/multiapp/app-config.json"
+                    elif [ "$SUB_WITH_APPCONFIG" == "3" ]; then
+                        primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/hwid/app-config.json"
+                        fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/hwid/app-config.json"
+                    fi
+                    
+                    if ! download_with_fallback "$primary_config_url" "$fallback_config_url" "$config_file"; then
                         echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
                         sleep 2
                         log_clear
                         return 1
-                    }
-                    ;;
-                2)
-                    template_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
-                    curl -s -L -o "$config_file" "$template_url" || {
-                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
-                        sleep 2
-                        log_clear
-                        return 1
-                    }
+                    fi
+
+                    branding_add_to_appconfig "$config_file"
                     ;;
                 0)
                     [ -f "$config_file" ] && rm -f "$config_file"
@@ -2324,8 +2541,87 @@ manage_sub_page_upload() {
                 /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
             fi
             ;;
-        
+
         5)
+            [ -f "$config_file" ] && rm -f "$config_file"
+            [ -f "$index_file" ] && rm -f "$index_file"
+
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            local primary_index_url="https://raw.githubusercontent.com/legiz-ru/material-remnawave-subscription-page/refs/heads/main/index.html"
+            local fallback_index_url="https://cdn.jsdelivr.net/gh/legiz-ru/material-remnawave-subscription-page@main/index.html"
+            if ! download_with_fallback "$primary_index_url" "$fallback_index_url" "$index_file"; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                return 1
+            fi
+
+            echo -e "${COLOR_GREEN}${LANG[SUB_WITH_APPCONFIG_ASK]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}1. ${LANG[SUB_WITH_APPCONFIG_OPTION1]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}2. ${LANG[SUB_WITH_APPCONFIG_OPTION2]}${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}3. ${LANG[SUB_WITH_APPCONFIG_OPTION3]}${COLOR_RESET}"
+            echo -e ""
+            echo -e "${COLOR_YELLOW}0. ${LANG[SUB_WITH_APPCONFIG_SKIP]}${COLOR_RESET}"
+            echo -e ""
+            reading "${LANG[SUB_WITH_APPCONFIG_INPUT]}" SUB_WITH_APPCONFIG
+
+            case $SUB_WITH_APPCONFIG in
+                1|2|3)
+                    local primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/app-config.json"
+                    local fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/app-config.json"
+                    if [ "$SUB_WITH_APPCONFIG" == "2" ]; then
+                        primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/multiapp/app-config.json"
+                        fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/multiapp/app-config.json"
+                    elif [ "$SUB_WITH_APPCONFIG" == "3" ]; then
+                        primary_config_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/hwid/app-config.json"
+                        fallback_config_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/hwid/app-config.json"
+                    fi
+
+                    if ! download_with_fallback "$primary_config_url" "$fallback_config_url" "$config_file"; then
+                        echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                        sleep 2
+                        log_clear
+                        return 1
+                    fi
+                    branding_add_to_appconfig "$config_file"
+                    ;;
+                0)
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    [ -f "$index_file" ] && rm -f "$index_file"
+                    ;;
+                *)
+                    echo -e "${COLOR_RED}${LANG[SUB_WITH_APPCONFIG_INVALID]}${COLOR_RESET}"
+                    [ -f "$config_file" ] && rm -f "$config_file"
+                    ;;
+            esac
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
+
+            if [ -f "$config_file" ]; then
+                /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./app-config.json:/opt/app/frontend/assets/app-config.json"]' -i "$docker_compose_file"
+            fi
+            ;;
+
+        6)
+            [ -f "$config_file" ] && rm -f "$config_file"
+
+            echo -e "${COLOR_YELLOW}${LANG[UPLOADING_SUB_PAGE]}${COLOR_RESET}"
+            local primary_url="https://raw.githubusercontent.com/legiz-ru/my-remnawave/refs/heads/main/sub-page/customweb/clash-sing/index.html"
+            local fallback_url="https://cdn.jsdelivr.net/gh/legiz-ru/my-remnawave@main/sub-page/customweb/clash-sing/index.html"
+            if ! download_with_fallback "$primary_url" "$fallback_url" "$index_file"; then
+                echo -e "${COLOR_RED}${LANG[ERROR_FETCH_SUB_PAGE]}${COLOR_RESET}"
+                sleep 2
+                log_clear
+                return 1
+            fi
+
+            /usr/bin/yq eval 'del(.services."remnawave-subscription-page".volumes)' -i "$docker_compose_file"
+            /usr/bin/yq eval '.services."remnawave-subscription-page".volumes += ["./index.html:/opt/app/frontend/index.html"]' -i "$docker_compose_file"
+            ;;
+        
+        7)
             [ -f "$config_file" ] && rm -f "$config_file"
             [ -f "$index_file" ] && rm -f "$index_file"
 
@@ -2647,7 +2943,7 @@ install_packages() {
     sysctl -p >/dev/null
 
     # UFW
-    if ! ufw --force reset || ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
+    if ! ufw allow 22/tcp comment 'SSH' || ! ufw allow 443/tcp comment 'HTTPS' || ! ufw --force enable; then
         echo -e "${COLOR_RED}${LANG[ERROR_CONFIGURE_UFW]}${COLOR_RESET}" >&2
         return 1
     fi
@@ -2918,7 +3214,7 @@ EOL
 #Manage Certificates
 show_manage_certificates() {
     echo -e ""
-    echo -e "${COLOR_GREEN}${LANG[MENU_7]}${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}${LANG[MENU_8]}${COLOR_RESET}"
     echo -e ""
     echo -e "${COLOR_YELLOW}1. ${LANG[CERT_UPDATE]}${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}2. ${LANG[CERT_GENERATE]}${COLOR_RESET}"
@@ -3028,11 +3324,20 @@ EOL
         fi
 
         if [ "$days_left" -le "$renew_threshold" ]; then
+            if [ "$cert_method" == "2" ]; then
+                ufw allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             certbot renew --cert-name "$domain" --no-random-sleep-on-renew >> /var/log/letsencrypt/letsencrypt.log 2>&1 &
             local cert_pid=$!
             spinner $cert_pid "${LANG[WAITING]}"
             wait $cert_pid
             local certbot_exit_code=$?
+
+            if [ "$cert_method" == "2" ]; then
+                ufw delete allow 80/tcp && ufw reload >/dev/null 2>&1
+            fi
+
             if [ "$certbot_exit_code" -ne 0 ]; then
                 cert_status["$cert_domain"]="${LANG[ERROR_UPDATE]}: ${LANG[RATE_LIMIT_EXCEEDED]}"
                 continue
@@ -3264,10 +3569,13 @@ get_panel_token() {
     ENV_FILE="/opt/remnawave/.env"
     local domain_url="127.0.0.1:3000"
     
-    local telegram_oauth_enabled=false
+    local oauth_enabled=false
     if [ -f "$ENV_FILE" ]; then
-        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE"; then
-            telegram_oauth_enabled=true
+        if grep -q "^TELEGRAM_OAUTH_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_GITHUB_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_POCKETID_ENABLED=true" "$ENV_FILE" || \
+           grep -q "^OAUTH2_YANDEX_ENABLED=true" "$ENV_FILE"; then
+            oauth_enabled=true
         fi
     fi
     
@@ -3275,14 +3583,20 @@ get_panel_token() {
         token=$(cat "$TOKEN_FILE")
         echo -e "${COLOR_YELLOW}${LANG[USING_SAVED_TOKEN]}${COLOR_RESET}"
         local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
-            echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+        
+        if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+            if echo "$test_response" | grep -q '"statusCode":401' || \
+               echo "$test_response" | jq -e '.message | test("Unauthorized")' > /dev/null 2>&1; then
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
+            fi
             token=""
         fi
     fi
     
     if [ -z "$token" ]; then
-        if [ "$telegram_oauth_enabled" = true ]; then
+        if [ "$oauth_enabled" = true ]; then
             echo -e "${COLOR_YELLOW}=================================================${COLOR_RESET}"
             echo -e "${COLOR_RED}${LANG[WARNING_LABEL]}${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}${LANG[TELEGRAM_OAUTH_WARNING]}${COLOR_RESET}"
@@ -3294,7 +3608,7 @@ get_panel_token() {
             fi
             
             local test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
-            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.' > /dev/null 2>&1; then
+            if [ -z "$test_response" ] || ! echo "$test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
                 echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $test_response${COLOR_RESET}"
                 return 1
             fi
@@ -3314,6 +3628,12 @@ get_panel_token() {
         echo -e "${COLOR_GREEN}${LANG[TOKEN_RECEIVED_AND_SAVED]}${COLOR_RESET}"
     else
         echo -e "${COLOR_GREEN}${LANG[TOKEN_USED_SUCCESSFULLY]}${COLOR_RESET}"
+    fi
+    
+    local final_test_response=$(make_api_request "GET" "${domain_url}/api/config-profiles" "$token")
+    if [ -z "$final_test_response" ] || ! echo "$final_test_response" | jq -e '.response.configProfiles' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[INVALID_SAVED_TOKEN]}: $final_test_response${COLOR_RESET}"
+        return 1
     fi
 }
 
@@ -3346,21 +3666,28 @@ EOL
 }
 
 generate_xray_keys() {
-    docker run --rm ghcr.io/xtls/xray-core x25519 > /tmp/xray_keys.txt 2>&1 &
-    spinner $! "${LANG[WAITING]}"
-    wait $!
+    local domain_url=$1
+    local token=$2
 
-    local keys=$(cat /tmp/xray_keys.txt)
-    rm -f /tmp/xray_keys.txt
+    local api_response=$(make_api_request "GET" "http://$domain_url/api/system/tools/x25519/generate" "$token")
 
-    if [ -z "$keys" ]; then
+    if [ -z "$api_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}${COLOR_RESET}"
+        return 1
     fi
 
-    local private_key=$(echo "$keys" | grep "Private key:" | awk '{print $3}')
-    local public_key=$(echo "$keys" | grep "Public key:" | awk '{print $3}')
+    if echo "$api_response" | jq -e '.errorCode' > /dev/null 2>&1; then
+        local error_message=$(echo "$api_response" | jq -r '.message')
+        echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}: $error_message${COLOR_RESET}"
+    fi
 
-    echo "$private_key $public_key"
+    local private_key=$(echo "$api_response" | jq -r '.response.keypairs[0].privateKey')
+
+    if [ -z "$private_key" ] || [ "$private_key" = "null" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EXTRACT_PRIVATE_KEY]}${COLOR_RESET}"
+    fi
+
+    echo "$private_key"
 }
 
 create_node() {
@@ -3450,13 +3777,12 @@ create_config_profile() {
     local token=$2
     local name=$3
     local domain=$4
-    local public_key=$5
-    local private_key=$6
-    local inbound_tag="${7:-Steal}"
+    local private_key=$5
+    local inbound_tag="${6:-Steal}"
 
     local short_id=$(openssl rand -hex 8)
 
-    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg public_key "$public_key" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
+    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
         name: $name,
         config: {
             log: { loglevel: "warning" },
@@ -3469,7 +3795,7 @@ create_config_profile() {
                 port: 443,
                 protocol: "vless",
                 settings: { clients: [], decryption: "none" },
-                sniffing: { enabled: true, destOverride: ["http", "tls", "quic"] },
+                sniffing: { enabled: true, destOverride: ["http", "tls"] },
                 streamSettings: {
                     network: "tcp",
                     security: "reality",
@@ -3479,7 +3805,6 @@ create_config_profile() {
                         dest: "/dev/shm/nginx.sock",
                         spiderX: "",
                         shortIds: [$short_id],
-                        publicKey: $public_key,
                         privateKey: $private_key,
                         serverNames: [$domain]
                     }
@@ -3556,11 +3881,36 @@ get_default_squad() {
     local token=$2
 
     local response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
-    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.internalSquads' > /dev/null; then
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.internalSquads' > /dev/null 2>&1; then
         echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $response${COLOR_RESET}"
+        return 1
     fi
 
-    echo "$response" | jq -r '.response.internalSquads[].uuid'
+    local squad_uuids=$(echo "$response" | jq -r '.response.internalSquads[].uuid' 2>/dev/null)
+    if [ -z "$squad_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_SQUADS_FOUND]}${COLOR_RESET}"
+        return 0
+    fi
+
+    local valid_uuids=""
+    while IFS= read -r uuid; do
+        if [ -z "$uuid" ]; then
+            continue
+        fi
+        if [[ $uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+            valid_uuids+="$uuid\n"
+        else
+            echo -e "${COLOR_RED}${LANG[INVALID_UUID_FORMAT]}: $uuid${COLOR_RESET}"
+        fi
+    done <<< "$squad_uuids"
+
+    if [ -z "$valid_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_VALID_SQUADS_FOUND]}${COLOR_RESET}"
+        return 0
+    fi
+
+    echo -e "$valid_uuids" | sed '/^$/d'
+    return 0
 }
 
 update_squad() {
@@ -3569,11 +3919,23 @@ update_squad() {
     local squad_uuid=$3
     local inbound_uuid=$4
 
-    local squad_response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
-    if [ -z "$squad_response" ] || ! echo "$squad_response" | jq -e '.response.internalSquads' > /dev/null; then
-        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $squad_response${COLOR_RESET}"
+    if [[ ! $squad_uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+        echo -e "${COLOR_RED}${LANG[INVALID_SQUAD_UUID]}: $squad_uuid${COLOR_RESET}"
+        return 1
     fi
-    local existing_inbounds=$(echo "$squad_response" | jq -r --arg uuid "$squad_uuid" '.response.internalSquads[] | select(.uuid == $uuid) | .inbounds[].uuid')
+
+    if [[ ! $inbound_uuid =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+        echo -e "${COLOR_RED}${LANG[INVALID_INBOUND_UUID]}: $inbound_uuid${COLOR_RESET}"
+        return 1
+    fi
+
+    local squad_response=$(make_api_request "GET" "http://$domain_url/api/internal-squads" "$token")
+    if [ -z "$squad_response" ] || ! echo "$squad_response" | jq -e '.response.internalSquads' > /dev/null 2>&1; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD]}: $squad_response${COLOR_RESET}"
+        return 1
+    fi
+
+    local existing_inbounds=$(echo "$squad_response" | jq -r --arg uuid "$squad_uuid" '.response.internalSquads[] | select(.uuid == $uuid) | .inbounds[].uuid' 2>/dev/null)
     if [ -z "$existing_inbounds" ]; then
         existing_inbounds="[]"
     else
@@ -3588,9 +3950,12 @@ update_squad() {
     }')
 
     local response=$(make_api_request "PATCH" "http://$domain_url/api/internal-squads" "$token" "$request_body")
-    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null; then
+    if [ -z "$response" ] || ! echo "$response" | jq -e '.response.uuid' > /dev/null 2>&1; then
         echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_SQUAD]}: $response${COLOR_RESET}"
+        return 1
     fi
+
+    return 0
 }
 
 ### API Functions ###
@@ -3697,19 +4062,26 @@ handle_certificates() {
         done
     fi
 
+    local cron_command
+    if [ "$cert_method" == "2" ]; then
+        cron_command="ufw allow 80 && /usr/bin/certbot renew --quiet && ufw delete allow 80 && ufw reload"
+    else
+        cron_command="/usr/bin/certbot renew --quiet"
+    fi
+
     if ! crontab -u root -l 2>/dev/null | grep -q "/usr/bin/certbot renew"; then
         echo -e "${COLOR_YELLOW}${LANG[ADDING_CRON_FOR_EXISTING_CERTS]}${COLOR_RESET}"
         if [ "$min_days_left" -le 30 ]; then
             echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
-            add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
+            add_cron_rule "0 5 * * * $cron_command"
         else
-            add_cron_rule "0 5 1 */2 * /usr/bin/certbot renew --quiet"
+            add_cron_rule "0 5 1 */2 * $cron_command"
         fi
-    elif [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * * /usr/bin/certbot renew"; then
+    elif [ "$min_days_left" -le 30 ] && ! crontab -u root -l 2>/dev/null | grep -q "0 5 * * *.*$cron_command"; then
         echo -e "${COLOR_YELLOW}${LANG[CERT_EXPIRY_SOON]} $min_days_left ${LANG[DAYS]}${COLOR_RESET}"
         echo -e "${COLOR_YELLOW}${LANG[UPDATING_CRON]}${COLOR_RESET}"
         crontab -u root -l 2>/dev/null | grep -v "/usr/bin/certbot renew" | crontab -u root -
-        add_cron_rule "0 5 * * * /usr/bin/certbot renew --quiet"
+        add_cron_rule "0 5 * * * $cron_command"
     else
         echo -e "${COLOR_YELLOW}${LANG[CRON_ALREADY_EXISTS]}${COLOR_RESET}"
     fi
@@ -3810,6 +4182,10 @@ REDIS_PORT=6379
 ### JWT ###
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
+
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
 
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
@@ -3917,7 +4293,7 @@ EOL
     cat > docker-compose.yml <<EOL
 services:
   remnawave-db:
-    image: postgres:17
+    image: postgres:17.6
     container_name: 'remnawave-db'
     hostname: remnawave-db
     restart: always
@@ -4023,9 +4399,11 @@ installation() {
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
+        local sub_base_domain=$(extract_domain "$SUB_DOMAIN")
+        local node_base_domain=$(extract_domain "$SELFSTEAL_DOMAIN")
         PANEL_CERT_DOMAIN="$base_domain"
-        SUB_CERT_DOMAIN="$base_domain"
-        NODE_CERT_DOMAIN="$base_domain"
+        SUB_CERT_DOMAIN="$sub_base_domain"
+        NODE_CERT_DOMAIN="$node_base_domain"
     else
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
         SUB_CERT_DOMAIN="$SUB_DOMAIN"
@@ -4270,9 +4648,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -4280,7 +4656,7 @@ EOL
 
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$private_key")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
     # Create node with config profile binding
@@ -4398,6 +4774,10 @@ REDIS_PORT=6379
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
+# Set the session idle timeout in the panel to avoid daily logins.
+# Value in hours: 12–168
+JWT_AUTH_LIFETIME=168
+
 ### TELEGRAM NOTIFICATIONS ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
 TELEGRAM_BOT_TOKEN=change_me
@@ -4504,7 +4884,7 @@ EOL
     cat > docker-compose.yml <<EOL
 services:
   remnawave-db:
-    image: postgres:17
+    image: postgres:17.6
     container_name: 'remnawave-db'
     hostname: remnawave-db
     restart: always
@@ -4608,8 +4988,9 @@ installation_panel() {
 
     if [ "$CERT_METHOD" == "1" ]; then
         local base_domain=$(extract_domain "$PANEL_DOMAIN")
+        local sub_base_domain=$(extract_domain "$SUB_DOMAIN")
         PANEL_CERT_DOMAIN="$base_domain"
-        SUB_CERT_DOMAIN="$base_domain"
+        SUB_CERT_DOMAIN="$sub_base_domain"
     else
         PANEL_CERT_DOMAIN="$PANEL_DOMAIN"
         SUB_CERT_DOMAIN="$SUB_DOMAIN"
@@ -4717,7 +5098,7 @@ server {
 
     location / {
         if (\$authorized = 0) {
-            return 404;
+            return 444;
         }
         proxy_http_version 1.1;
         proxy_pass http://remnawave;
@@ -4799,9 +5180,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -4809,7 +5188,7 @@ EOL
 
     # Create config profile
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$private_key")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
     # Create node with config profile binding
@@ -5074,7 +5453,7 @@ add_node_to_panel() {
         while true; do
         reading "${LANG[ENTER_NODE_NAME]}" entity_name
         if [[ "$entity_name" =~ ^[a-zA-Z0-9-]+$ ]]; then
-            if [ ${#entity_name} -ge 5 ] && [ ${#entity_name} -le 20 ]; then
+            if [ ${#entity_name} -ge 3 ] && [ ${#entity_name} -le 20 ]; then
                 get_panel_token
                 token=$(cat "$TOKEN_FILE")
                 local response=$(make_api_request "GET" "http://$domain_url/api/config-profiles" "$token")
@@ -5093,13 +5472,11 @@ add_node_to_panel() {
     done
 
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
-    local keys=$(generate_xray_keys)
-    local private_key=$(echo "$keys" | awk '{print $1}')
-    local public_key=$(echo "$keys" | awk '{print $2}')
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
-    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$entity_name" "$SELFSTEAL_DOMAIN" "$public_key" "$private_key" "$entity_name")
+    read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "$entity_name" "$SELFSTEAL_DOMAIN" "$private_key" "$entity_name")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}: $entity_name${COLOR_RESET}"
 
     printf "${COLOR_YELLOW}${LANG[CREATE_NEW_NODE]}$SELFSTEAL_DOMAIN${COLOR_RESET}\n"
@@ -5109,10 +5486,22 @@ add_node_to_panel() {
     create_host "$domain_url" "$token" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid" "$entity_name"
 
     echo -e "${COLOR_YELLOW}${LANG[GET_DEFAULT_SQUAD]}${COLOR_RESET}"
-    local squad_uuid=$(get_default_squad "$domain_url" "$token")
-
-    update_squad "$domain_url" "$token" "$squad_uuid" "$inbound_uuid"
-    echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
+    local squad_uuids=$(get_default_squad "$domain_url" "$token")
+    if [ $? -ne 0 ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_GET_SQUAD_LIST]}${COLOR_RESET}"
+    elif [ -z "$squad_uuids" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[NO_SQUADS_TO_UPDATE]}${COLOR_RESET}"
+    else
+        for squad_uuid in $squad_uuids; do
+            echo -e "${COLOR_YELLOW}${LANG[UPDATING_SQUAD]} $squad_uuid${COLOR_RESET}"
+            update_squad "$domain_url" "$token" "$squad_uuid" "$inbound_uuid"
+            if [ $? -eq 0 ]; then
+                echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]} $squad_uuid${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}${LANG[ERROR_UPDATE_SQUAD]} $squad_uuid${COLOR_RESET}"
+            fi
+        done
+    fi
 
     echo -e "${COLOR_GREEN}${LANG[NODE_ADDED_SUCCESS]}${COLOR_RESET}"
     echo -e "${COLOR_RED}-------------------------------------------------${COLOR_RESET}"
@@ -5137,6 +5526,7 @@ fi
 check_root
 check_os
 install_script_if_missing
+check_update_status
 show_menu
 
 reading "${LANG[PROMPT_ACTION]}" OPTION
@@ -5189,7 +5579,7 @@ case $OPTION in
         remnawave_reverse
         ;;
     6)
-        manage_warp
+        manage_extensions
         sleep 2
         log_clear
         remnawave_reverse
