@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.3a"
+SCRIPT_VERSION="2.1.4"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -3666,18 +3666,26 @@ EOL
 }
 
 generate_xray_keys() {
-    docker run --rm ghcr.io/xtls/xray-core x25519 > /tmp/xray_keys.txt 2>&1 &
-    spinner $! "${LANG[WAITING]}"
-    wait $!
+    local domain_url=$1
+    local token=$2
 
-    local keys=$(cat /tmp/xray_keys.txt)
-    rm -f /tmp/xray_keys.txt
+    local api_response=$(make_api_request "GET" "http://$domain_url/api/system/tools/x25519/generate" "$token")
 
-    if [ -z "$keys" ]; then
+    if [ -z "$api_response" ]; then
         echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}${COLOR_RESET}"
+        return 1
     fi
 
-    local private_key=$(echo "$keys" | grep -E "PrivateKey:|Private key:" | sed -E 's/.*(PrivateKey|Private key):[[:space:]]*(.*)/\2/')
+    if echo "$api_response" | jq -e '.errorCode' > /dev/null 2>&1; then
+        local error_message=$(echo "$api_response" | jq -r '.message')
+        echo -e "${COLOR_RED}${LANG[ERROR_GENERATE_KEYS]}: $error_message${COLOR_RESET}"
+    fi
+
+    local private_key=$(echo "$api_response" | jq -r '.response.keypairs[0].privateKey')
+
+    if [ -z "$private_key" ] || [ "$private_key" = "null" ]; then
+        echo -e "${COLOR_RED}${LANG[ERROR_EXTRACT_PRIVATE_KEY]}${COLOR_RESET}"
+    fi
 
     echo "$private_key"
 }
@@ -4640,7 +4648,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local private_key=$(generate_xray_keys)
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -5172,7 +5180,7 @@ EOL
     # Generate Xray keys
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
-    local private_key=$(generate_xray_keys)
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     # Delete default config profile
@@ -5464,7 +5472,7 @@ add_node_to_panel() {
     done
 
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
-    local private_key=$(generate_xray_keys)
+    local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
