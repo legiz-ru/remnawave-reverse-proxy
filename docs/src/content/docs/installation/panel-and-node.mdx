@@ -18,6 +18,14 @@ Enter the command on your server:
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
 
+:::note
+If you would like to install using 1.6.16 version, you can use the following command:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
+```
+:::
+
 ## Install panel and node on one server
 
 :::danger[Warning]
@@ -30,15 +38,15 @@ For the best experience and stable operation, please choose the [`Panel Only`](h
 
 1. Select `Install Remnawave components`
 
-    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/main_menu.png)
+    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/main_menu.webp)
 
 2. Then select `Install panel and node on one server`
 
-    ![Install panel and node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/install_panel_node.png)
+    ![Install panel and node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/install_panel_node.webp)
 
 3. After the process is complete, the script will automatically restart the panel and provide all the necessary login information.
 
-    ![Menu end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/menu_end.png)
+    ![Menu end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/menu_end.webp)
 
 </Steps>
 
@@ -57,10 +65,12 @@ Without this URL, **you will not be able** to log into the panel.
 
 Make sure to update the script before running things in it. You can do this by selecting `Check for updates script` in the script menu or by viewing the GitHub repository for updates.
 
-<LinkButton
-    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
-    icon="github"
-    iconPlacement="start"
->
-    View latest release
-</LinkButton>
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
+    <LinkButton
+        href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+        icon="github"
+        iconPlacement="start"
+    >
+        View latest release
+    </LinkButton>
+</div>

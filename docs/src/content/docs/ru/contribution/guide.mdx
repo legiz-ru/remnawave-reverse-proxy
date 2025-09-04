@@ -3,8 +3,7 @@ title: Руководство по внесению изменений
 description: Как внести изменения в проект Remnawave Reverse-proxy
 ---
 
-import { Steps } from '@astrojs/starlight/components';
-import { LinkButton } from '@astrojs/starlight/components';
+import { Steps, LinkButton, FileTree } from '@astrojs/starlight/components';
 
 ## Установка Node.js и npm
 
@@ -54,7 +53,7 @@ import { LinkButton } from '@astrojs/starlight/components';
 
 Это запустит локальный сервер разработки, и вы сможете просмотреть документацию по адресу `http://localhost:4321`.
 
-## Документация, включенная в Starlight
+## ✨ Документация, включенная в Starlight
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
@@ -62,18 +61,26 @@ import { LinkButton } from '@astrojs/starlight/components';
 
 Внутри вашего проекта Astro + Starlight вы увидите следующие папки и файлы:
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   ├── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
+<FileTree>
+
+- **docs** корневая директория документации
+    - public/
+    - src
+        - assets/
+            - en/
+            - ru/
+        - components/
+        - **content/docs** корневая (en) директория документации
+            - index.mdx
+            - **ru/** i18n файлы
+                - index.mdx
+        - styles/
+        - content.config.ts
+- astro.config.mjs
+- package.json
+- tsconfig.json
+
+</FileTree>
 
 Starlight ищет файлы `.md` или `.mdx` в директории `src/content/docs/`. Каждый файл доступен как маршрут на основе его имени.
 
@@ -98,10 +105,12 @@ Starlight ищет файлы `.md` или `.mdx` в директории `src/c
 
 Посмотрите [документацию Starlight](https://starlight.astro.build/), прочитайте [документацию Astro](https://docs.astro.build) или присоединяйтесь к [серверу Discord Astro](https://astro.build/chat).
 
-<LinkButton
-    href="https://docs.astro.build"
-    icon="open-book"
-    iconPlacement="start"
->
-    Перейти в документацию
-</LinkButton>
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
+    <LinkButton
+        href="https://starlight.astro.build"
+        icon="open-book"
+        iconPlacement="start"
+    >
+        Перейти в документацию
+    </LinkButton>
+</div>

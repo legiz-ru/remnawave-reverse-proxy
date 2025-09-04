@@ -18,29 +18,37 @@ import { LinkButton } from '@astrojs/starlight/components';
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
 
+:::note
+Если вы хотите установить версию 1.6.16, вы можете использовать следующую команду:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
+```
+:::
+
 ## Установка ноды
 
 <Steps>
 
 1. Выберите пункт `Установка компонентов Remnawave`
 
-    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/main_menu.png)
+    ![Main menu RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/main_menu.webp)
 
 2. Затем выберите пункт `Установить только ноду`
 
-    ![Install node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/install_node.png)
+    ![Install node RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/install_node.webp)
 
 3. Зайдите в панель управления, перейдите в раздел `Ноды` → `Управление`, выберите нужную ноду и нажмите на кнопку `Важная информация`. В появившемся окне вы увидите иконку для копирования сертификата — нажмите на неё.
 
-    ![SSL_CERT RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/ssl_cert.png)
+    ![SSL_CERT RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/ssl_cert.webp)
 
 4. Скрипт запросит домен `selfsteal`, который вы указали при первоначальной установке панели или через пункт `Добавить ноду в панель`, ip-адрес и сертификат панели.
 
-    ![Menu node end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/menu_node_end.png)
+    ![Menu node end RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/menu_node_end.webp)
 
 5. Затем скрипт запустит ноду и подключит её к панели.
 
-    ![Menu node end2 RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/menu_node_end2.png)
+    ![Menu node end2 RU](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/ru/menu_node_end2.webp)
 
 </Steps>
 
@@ -48,10 +56,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 
 Убедитесь, что вы обновили скрипт перед выполнением каких-либо действий в нем. Вы можете сделать это, выбрав `Проверить обновления скрипта` в меню скрипта или просмотрев репозиторий GitHub на наличие обновлений.
 
-<LinkButton
-    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
-    icon="github"
-    iconPlacement="start"
->
-    Посмотреть последнее обновление
-</LinkButton>
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
+    <LinkButton
+        href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+        icon="github"
+        iconPlacement="start"
+    >
+        Посмотреть последнее обновление
+    </LinkButton>
+</div>

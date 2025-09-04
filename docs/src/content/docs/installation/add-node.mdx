@@ -12,11 +12,23 @@ import { LinkButton } from '@astrojs/starlight/components';
 Script must be run as **root**.
 :::
 
+:::danger[Warning]
+You need to run the script on the server where the Remnawave panel is installed.
+:::
+
 Enter the command on your server:
 
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/install_remnawave.sh)
 ```
+
+:::note
+If you would like to install using 1.6.16 version, you can use the following command:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/tags/v.1.7.5/install_remnawave.sh)
+```
+:::
 
 ## Add node to panel
 
@@ -24,15 +36,15 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 
 1. Select `Install Remnawave components`
 
-    ![Main menu EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/main_menu.png)
+    ![Main menu EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/main_menu.webp)
 
 2. Then select `Add node to panel`
 
-    ![Add node to panel EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/add_node_to_panel.png)
+    ![Add node to panel EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/add_node_to_panel.webp)
 
 3. Enter your new domain `selfsteal` which will be used to connect the node to the panel, as well as the name for the node.
 
-    ![Add node to panel2 EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/add_node_to_panel2.png)
+    ![Add node to panel2 EN](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/add_node_to_panel2.webp)
 
 4. After successfully adding the node to the panel, run the script on your new server, select `Install Remnawave components`, and then [`Install only the node`](https://wiki.egam.es/installation/node-only/).
 
@@ -42,10 +54,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-pr
 
 Make sure to update the script before running things in it. You can do this by selecting `Check for updates script` in the script menu or by viewing the GitHub repository for updates.
 
-<LinkButton
-    href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
-    icon="github"
-    iconPlacement="start"
->
-    View latest release
-</LinkButton>
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
+    <LinkButton
+        href="https://github.com/eGamesAPI/remnawave-reverse-proxy/releases/latest"
+        icon="github"
+        iconPlacement="start"
+    >
+        View latest release
+    </LinkButton>
+</div>

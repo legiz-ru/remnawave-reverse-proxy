@@ -10,7 +10,7 @@ import { LinkButton } from '@astrojs/starlight/components';
 Полная инструкция по настройке мониторинга панели [Remnawave](https://remna.st) с помощью Prometheus, Grafana и Node Exporter, а также безопасного доступа к метрикам через SSH-туннель и Nginx.
 
 :::danger[Важно]
-Инструкция описывает установку сервисов на __отдельный__ мониторинговый VPS сервер. Описан вариант действий из-под пользователя root
+Инструкция описывает "упрощенную/базовую" установку сервисов на __отдельный__ мониторинговый VPS сервер. Описан вариант действий из-под пользователя root
 :::
 
 ## 📦 Настройка `docker-compose.yml` на сервере с Remnawave
@@ -207,18 +207,17 @@ remnawave:
       scrape_interval: 15s
 
     scrape_configs:
-      - job_name: 'node_exporter'
+      # Для корректной работы Grafana-дашбордов, которые указаны в ссылках ниже
+      # используйте job_name: integrations/node_exporter.
+      - job_name: 'node_exporter' 
         static_configs:
           - targets: ['127.0.0.1:9002']
             labels:
-              label: "Remnaserver"
-      - job_name: 'integrations/node_exporter'
+              cluster: "test"
+              instance: "127.0.0.1:9002"
+      - job_name: 'remnawave_exporter'
         static_configs:
           - targets: ['127.0.0.1:9001']
-            labels:
-              cluster: "test"
-              job: "integrations/node_exporter"
-              instance: "127.0.0.1:9001"
         basic_auth:
           username: "XXXXXXXXXXXXXXX"
           password: "XXXXXXXXXXXXXXX"

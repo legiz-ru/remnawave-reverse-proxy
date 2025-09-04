@@ -29,3 +29,43 @@ This opens access to the API from the outside, while the API will still be prote
 :::danger
 Right after this, in the `.env` file, replace the line `IS_DOCS_ENABLED=true` with `IS_DOCS_ENABLED=false` to avoid "exposing" the documentation to the external internet.
 :::
+
+## Accessing API through cookies
+
+### Acquiring cookie
+
+Open nginx.conf and search for `map $http_cookie $auth_cookie`. We'll need the values that go after `*`, i.e. for
+
+```
+map $http_cookie $auth_cookie {
+default 0;
+"~*aEmFnBcC=WbYWpixX" 1;
+}
+```
+
+our cookies will be `aEmFnBcC=WbYWpixX`.
+
+### Sending the cookies in header
+
+Using the HTTP client `httpx` and the `COOKIES` entry in your project's `.env` file as an example, let's look at sending cookies in the header:
+
+```json
+COOKIES={"aEmFnBcC":"WbYWpixX"}
+```
+
+```python
+token = os.getenv("API_TOKEN", "")
+base_url = os.getenv("REMNAWAVE_BASE_URL", "")
+cookies = json.loads(os.getenv("COOKIES", "{}"))
+
+async def get_all_nodes():
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+    }
+
+    async with httpx.AsyncClient(cookies=cookies) as async_client:
+        response = await async_client.get(f"{base_url}/api/nodes", headers=headers)
+
+    return response.json()
+```

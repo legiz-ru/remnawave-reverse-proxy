@@ -34,15 +34,15 @@ export default defineConfig({
 				starlightKbd({
 					globalPicker: false,
 					types: [
-						{ id: 'mac', label: 'macOS', default: true },
-						{ id: 'windows', label: 'Windows' },
+						{ id: 'mac', label: 'macOS' },
+						{ id: 'windows', label: 'Windows', default: true },
 						{ id: 'linux', label: 'Linux' },
 					]
 				})
 			],
 			title: 'Remnawave Reverse-Proxy',
 			logo: {
-				src: './src/assets/logo.png',
+				src: './src/assets/logo.webp',
 			},
 			customCss: [
 				'./src/styles/custom.css',
@@ -64,7 +64,7 @@ export default defineConfig({
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/eGamesAPI/remnawave-reverse-proxy/' },
 				{ icon: 'telegram', label: 'Telegram', href: 'https://t.me/remnawave_reverse' },
-				{ icon: 'seti:folder', label: 'Used resources', href: '../../contribution/resources' }
+				{ icon: 'seti:zip', label: 'Used resources', href: '../../contribution/resources' }
 			],
 			sidebar: [
 				{
@@ -77,24 +77,31 @@ export default defineConfig({
 					label: 'Installation', translations: { ru: 'Установка' },
 					items: [
 						{ label: 'Requirements', slug: 'installation/requirements', translations: { ru: 'Обязательные условия' } },
-						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' }, badge: {text: 'New', variant: 'default'} },
-						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' }, badge: {text: 'New', variant: 'default'} },
+						{ label: 'Panel and node', slug: 'installation/panel-and-node', translations: { ru: 'Панель и нода' } },
+						{ label: 'Panel only', slug: 'installation/panel-only', translations: { ru: 'Только панель' } },
+						{ label: 'Node only', slug: 'installation/node-only', translations: { ru: 'Только нода' } },
+						{ label: 'Add node to panel', slug: 'installation/add-node', translations: { ru: 'Добавление ноды в панель' } },
 					],
 				},
 				{
 					label: 'Configuration', translations: { ru: 'Настройка' },
 					items: [
+						{ label: 'Certwarden', slug: 'configuration/certwarden', translations: { ru: 'Certwarden' }, badge: {text: '🎉 New', variant: 'default'} },
+						{ label: 'Warp Native', slug: 'configuration/warp-native', translations: { ru: 'Warp Native' } },
+						{ label: 'Beszel', slug: 'configuration/beszel', translations: { ru: 'Beszel' } },
+						{ label: 'Netbird', slug: 'configuration/netbird', translations: { ru: 'Netbird' } },
+						{ label: 'Monitoring with Grafana and Victoria Metrics', slug: 'configuration/grafana-monitoring-setup', translations: { ru: 'Мониторинг через Grafana и Victoria Metrics' }, badge: {text: '🎉 New', variant: 'default'} },
 						{ label: 'Access to Prometheus metrics', slug: 'configuration/prometheus-metrics', translations: { ru: 'Доступ к метрикам Prometheus' } },
+						//{ label: 'Monitoring with Grafana', slug: 'configuration/monitoring-with-grafana', translations: { ru: 'Мониторинг через Grafana' } },
+						{ label: 'SWAG (Secure Web Application Gateway)', slug: 'configuration/swag', translations: { ru: 'SWAG (Secure Web Application Gateway)' }, badge: {text: '❌ WIP', variant: 'caution'} },
 						{ label: 'External access to API', slug: 'configuration/external-api', translations: { ru: 'Внешний доступ к API' } },
-						{ label: 'Monitoring with Grafana', slug: 'configuration/grafana-monitoring', translations: { ru: 'Мониторинг через Grafana' } },
 					],
 				},
 				{
 					label: 'Troubleshooting', translations: { ru: 'Устранение неполадок' },
 					items: [
-						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' }, badge: {text: 'WIP', variant: 'caution'} },
+						{ label: 'Common issues', slug: 'troubleshooting/common-issues', translations: { ru: 'Частые проблемы' } },
+						{ label: 'Docker related issues', slug: 'troubleshooting/docker-issues', translations: { ru: 'Проблемы, связанные с Docker' } },
 						// { label: 'Logs', slug: 'troubleshooting/logs', translations: { ru: 'Логи' } },
 					],
 				},
@@ -113,6 +120,6 @@ export default defineConfig({
 
 
 // TODO:
-// add more content to the "Common Issues" page
+// add https://starlight-github-alerts.netlify.app/getting-started/
 // https://www.create.bingo/
 // https://octo.guide/
