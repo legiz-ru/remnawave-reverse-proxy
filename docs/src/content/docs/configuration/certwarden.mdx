@@ -64,7 +64,7 @@ We will use the **dns-01 Cloudflare** method, but you can use other methods.
       remnawave-network:
         name: remnawave-network
         driver: bridge
-        external: false
+        external: true
     ```
 
 2. Run Cert Warden
@@ -338,7 +338,7 @@ Analogously, it is installed on other servers that will receive certificates
         remnawave-network:
           name: remnawave-network
           driver: bridge
-          external: false
+          external: true
     ```
 
 2. `CW_CLIENT_AES_KEY_BASE64` - Specify the key generated in the `Certificates` -> `Post Processing` -> `Client AES Key` section. Click the `GENERATE` button to obtain the key.
