@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="2.1.5"
+SCRIPT_VERSION="2.1.6"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -3695,7 +3695,7 @@ create_node() {
     local token=$2
     local config_profile_uuid=$3
     local inbound_uuid=$4
-    local node_address="${5:-$(curl -s -4 ifconfig.me || curl -s -4 api.ipify.org || curl -s -4 ipinfo.io/ip)}"
+    local node_address="${5:-172.30.0.1}"
     local node_name="${6:-Steal}"
 
     local node_data=$(cat <<EOF
@@ -4332,6 +4332,12 @@ services:
       - '127.0.0.1:3000:3000'
     networks:
       - remnawave-network
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:\${METRICS_PORT:-3001}/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     depends_on:
       remnawave-db:
         condition: service_healthy
@@ -4353,7 +4359,7 @@ services:
     volumes:
       - remnawave-redis-data:/data
     healthcheck:
-      test: [ "CMD", "valkey-cli", "ping" ]
+      test: ['CMD', 'valkey-cli', 'ping']
       interval: 3s
       timeout: 10s
       retries: 3
@@ -4923,6 +4929,12 @@ services:
       - '127.0.0.1:3000:3000'
     networks:
       - remnawave-network
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:\${METRICS_PORT:-3001}/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     depends_on:
       remnawave-db:
         condition: service_healthy
@@ -4944,7 +4956,7 @@ services:
     volumes:
       - remnawave-redis-data:/data
     healthcheck:
-      test: [ "CMD", "valkey-cli", "ping" ]
+      test: ['CMD', 'valkey-cli', 'ping']
       interval: 3s
       timeout: 10s
       retries: 3
