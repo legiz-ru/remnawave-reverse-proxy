@@ -245,9 +245,11 @@ We will use the **dns-01 Cloudflare** method, but you can use other methods.
 
 4. In the ACME Account field, select the previously created account
 
-5. In the Subject (and Common Name) field, enter the domain for which we will be receiving wildcard certificates (for example, `*.example.com`)
+5. In the `Subject (and Common Name)` field, enter the domain 2 levels, for example `example.com`
 
-6. Click on the Submit button
+6. Click on the `ADD` button and in the `Alternate Name 1` field enter the already wildcard domain `*.example.com`
+
+7. Click on the Submit button
 
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <img 
@@ -257,15 +259,15 @@ We will use the **dns-01 Cloudflare** method, but you can use other methods.
       />
     </div>
 
-7. A window with ACME Orders will pop up
+8. A window with ACME Orders will pop up
 
       ![Cert Warden ACME Orders](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/certwarden/certwarden_acme_orders.png)
 
-8. Click on the `PLACE NEW ORDER` button
+9. Click on the `PLACE NEW ORDER` button
 
-9. Now we wait for the certificate to be received, we can track the status in the `ACME Queue` section, as soon as the domain disappears, the certificate is received
+10. Now we wait for the certificate to be received, we can track the status in the `ACME Queue` section, as soon as the domain disappears, the certificate is received
 
-10. Go to the `Dashboard` section and see that the certificate is received and how many days are left until the expiration date
+11. Go to the `Dashboard` section and see that the certificate is received and how many days are left until the expiration date
 
       ![Cert Warden Dashboard](https://raw.githubusercontent.com/eGamesAPI/remnawave-reverse-proxy/refs/heads/main/docs/src/assets/en/certwarden/certwarden_dashboard_certificate.png) 
 
