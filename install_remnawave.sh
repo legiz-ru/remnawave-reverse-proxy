@@ -362,6 +362,71 @@ set_language() {
                 [PORT_8443_ALREADY_CLOSED]="Port 8443 already closed in UFW."
                 #Legiz Extensions
                 [LEGIZ_EXTENSIONS_PROMPT]="Select action (0-3):"
+                #Full app-config.json editor
+                [ACJEDIT_CONFIG_EDITOR_MENU]="Полный редактор конфигурации"
+                [ACJEDIT_CONFIG_LANGUAGES_MENU]="Управление языками"
+                [ACJEDIT_CONFIG_BRANDING_MENU]="Управление брендингом"
+                [ACJEDIT_CONFIG_PLATFORMS_MENU]="Управление платформами и приложениями"
+                [ACJEDIT_CONFIG_BACKUP_RESTORE]="Резервное копирование и восстановление"
+                [ACJEDIT_CURRENT_LANGUAGES]="Текущие дополнительные языки:"
+                [ACJEDIT_ADD_LANGUAGE]="Добавить язык"
+                [ACJEDIT_REMOVE_LANGUAGE]="Удалить язык"
+                [ACJEDIT_AVAILABLE_LANGUAGES]="Доступные языки:"
+                [ACJEDIT_SELECT_LANGUAGE_ADD]="Выберите язык для добавления:"
+                [ACJEDIT_SELECT_LANGUAGE_REMOVE]="Выберите язык для удаления:"
+                [ACJEDIT_LANGUAGE_ADDED]="Язык успешно добавлен"
+                [ACJEDIT_LANGUAGE_REMOVED]="Язык успешно удален"
+                [ACJEDIT_LANGUAGE_ALREADY_EXISTS]="Язык уже существует"
+                [ACJEDIT_NO_ADDITIONAL_LANGUAGES]="Дополнительные языки не настроены"
+                [ACJEDIT_CURRENT_BRANDING]="Текущая конфигурация брендинга:"
+                [ACJEDIT_BRANDING_ENABLED]="Брендинг: Включен"
+                [ACJEDIT_BRANDING_DISABLED]="Брендинг: Отключен"
+                [ACJEDIT_ENABLE_BRANDING]="Включить брендинг"
+                [ACJEDIT_DISABLE_BRANDING]="Отключить брендинг"
+                [ACJEDIT_PLATFORM_MANAGEMENT]="Управление платформами"
+                [ACJEDIT_SELECT_PLATFORM]="Выберите платформу для управления:"
+                [ACJEDIT_APPS_COUNT]="приложений"
+                [ACJEDIT_ADD_NEW_APP]="Добавить новое приложение"
+                [ACJEDIT_EDIT_EXISTING_APP]="Редактировать существующее приложение"
+                [ACJEDIT_REMOVE_APP]="Удалить приложение"
+                [ACJEDIT_APP_EDITOR]="Редактор приложений"
+                [ACJEDIT_APP_ID]="ID приложения"
+                [ACJEDIT_APP_NAME]="Название приложения"
+                [ACJEDIT_APP_FEATURED]="Рекомендуемое приложение"
+                [ACJEDIT_APP_URL_SCHEME]="URL-схема"
+                [ACJEDIT_APP_BASE64_ENCODING]="Требует Base64 кодирование"
+                [ACJEDIT_ENTER_APP_ID]="Введите ID приложения (строчные буквы, без пробелов):"
+                [ACJEDIT_ENTER_APP_NAME]="Введите отображаемое название приложения:"
+                [ACJEDIT_APP_FEATURED_PROMPT]="Отметить как рекомендуемое приложение? (y/n):"
+                [ACJEDIT_ENTER_URL_SCHEME]="Введите URL-схему (например, app://add/):"
+                [ACJEDIT_BASE64_PROMPT]="Требует Base64 кодирование? (y/n):"
+                [ACJEDIT_INSTALLATION_STEP]="Конфигурация шага установки"
+                [ACJEDIT_ADD_SUBSCRIPTION_STEP]="Конфигурация шага добавления подписки"
+                [ACJEDIT_CONNECT_STEP]="Конфигурация шага подключения и использования"
+                [ACJEDIT_ADD_BUTTON]="Добавить кнопку"
+                [ACJEDIT_EDIT_BUTTONS]="Редактировать кнопки"
+                [ACJEDIT_EDIT_DESCRIPTION]="Редактировать описание"
+                [ACJEDIT_ENTER_BUTTON_URL]="Введите URL кнопки:"
+                [ACJEDIT_ENTER_BUTTON_TEXT]="Введите текст кнопки для"
+                [ACJEDIT_BUTTON_ADDED]="Кнопка успешно добавлена"
+                [ACJEDIT_ENTER_DESCRIPTION]="Введите описание для"
+                [ACJEDIT_DESCRIPTION_UPDATED]="Описание успешно обновлено"
+                [ACJEDIT_APP_SAVED]="Конфигурация приложения сохранена"
+                [ACJEDIT_BACKUP_CREATED]="Резервная копия успешно создана"
+                [ACJEDIT_BACKUP_RESTORED]="Конфигурация успешно восстановлена"
+                [ACJEDIT_CREATE_BACKUP]="Создать резервную копию конфигурации"
+                [ACJEDIT_RESTORE_BACKUP]="Восстановить из резервной копии"
+                [ACJEDIT_CONFIRM_RESTORE]="Это перезапишет текущую конфигурацию. Продолжить? (y/n):"
+                [ACJEDIT_BACKUP_FILE_NOT_FOUND]="Файл резервной копии не найден"
+                [ACJEDIT_INVALID_APP_ID]="Неверный ID приложения. Используйте только строчные буквы, цифры и дефисы."
+                [ACJEDIT_APP_ID_EXISTS]="ID приложения уже существует на этой платформе"
+                [ACJEDIT_ADDITIONAL_STEPS]="Конфигурация дополнительных шагов"
+                [ACJEDIT_ADD_BEFORE_STEP]="Добавить шаг перед подпиской"
+                [ACJEDIT_ADD_AFTER_STEP]="Добавить шаг после подписки"
+                [ACJEDIT_STEP_TITLE]="Заголовок шага"
+                [ACJEDIT_ENTER_STEP_TITLE]="Введите заголовок шага для"
+                [ACJEDIT_STEP_DESCRIPTION]="Описание шага"
+                [ACJEDIT_CONFIGURE_BUTTONS]="Настроить кнопки для этого шага"
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Uploading custom sub page template..."
                 [ERROR_FETCH_SUB_PAGE]="Failed to fetch custom sub page template."
@@ -774,6 +839,71 @@ set_language() {
                 [PORT_8443_ALREADY_CLOSED]="Порт 8443 уже закрыт в UFW."
                 #Legiz Extensions
                 [LEGIZ_EXTENSIONS_PROMPT]="Выберите действие (0-3):"
+                #Full app-config.json editor
+                [ACJEDIT_CONFIG_EDITOR_MENU]="Full Configuration Editor"
+                [ACJEDIT_CONFIG_LANGUAGES_MENU]="Manage Languages"
+                [ACJEDIT_CONFIG_BRANDING_MENU]="Manage Branding"
+                [ACJEDIT_CONFIG_PLATFORMS_MENU]="Manage Platforms & Applications"
+                [ACJEDIT_CONFIG_BACKUP_RESTORE]="Backup & Restore Configuration"
+                [ACJEDIT_CURRENT_LANGUAGES]="Current additional languages:"
+                [ACJEDIT_ADD_LANGUAGE]="Add language"
+                [ACJEDIT_REMOVE_LANGUAGE]="Remove language"
+                [ACJEDIT_AVAILABLE_LANGUAGES]="Available languages:"
+                [ACJEDIT_SELECT_LANGUAGE_ADD]="Select language to add:"
+                [ACJEDIT_SELECT_LANGUAGE_REMOVE]="Select language to remove:"
+                [ACJEDIT_LANGUAGE_ADDED]="Language successfully added"
+                [ACJEDIT_LANGUAGE_REMOVED]="Language successfully removed"
+                [ACJEDIT_LANGUAGE_ALREADY_EXISTS]="Language already exists"
+                [ACJEDIT_NO_ADDITIONAL_LANGUAGES]="No additional languages configured"
+                [ACJEDIT_CURRENT_BRANDING]="Current branding configuration:"
+                [ACJEDIT_BRANDING_ENABLED]="Branding: Enabled"
+                [ACJEDIT_BRANDING_DISABLED]="Branding: Disabled"
+                [ACJEDIT_ENABLE_BRANDING]="Enable branding"
+                [ACJEDIT_DISABLE_BRANDING]="Disable branding"
+                [ACJEDIT_PLATFORM_MANAGEMENT]="Platform Management"
+                [ACJEDIT_SELECT_PLATFORM]="Select platform to manage:"
+                [ACJEDIT_APPS_COUNT]="applications"
+                [ACJEDIT_ADD_NEW_APP]="Add new application"
+                [ACJEDIT_EDIT_EXISTING_APP]="Edit existing application"
+                [ACJEDIT_REMOVE_APP]="Remove application"
+                [ACJEDIT_APP_EDITOR]="Application Editor"
+                [ACJEDIT_APP_ID]="Application ID"
+                [ACJEDIT_APP_NAME]="Application Name"
+                [ACJEDIT_APP_FEATURED]="Featured Application"
+                [ACJEDIT_APP_URL_SCHEME]="URL Scheme"
+                [ACJEDIT_APP_BASE64_ENCODING]="Requires Base64 Encoding"
+                [ACJEDIT_ENTER_APP_ID]="Enter application ID (lowercase, no spaces):"
+                [ACJEDIT_ENTER_APP_NAME]="Enter application display name:"
+                [ACJEDIT_APP_FEATURED_PROMPT]="Mark as featured application? (y/n):"
+                [ACJEDIT_ENTER_URL_SCHEME]="Enter URL scheme (e.g., app://add/):"
+                [ACJEDIT_BASE64_PROMPT]="Requires Base64 encoding? (y/n):"
+                [ACJEDIT_INSTALLATION_STEP]="Installation Step Configuration"
+                [ACJEDIT_ADD_SUBSCRIPTION_STEP]="Add Subscription Step Configuration"
+                [ACJEDIT_CONNECT_STEP]="Connect & Use Step Configuration"
+                [ACJEDIT_ADD_BUTTON]="Add button"
+                [ACJEDIT_EDIT_BUTTONS]="Edit buttons"
+                [ACJEDIT_EDIT_DESCRIPTION]="Edit description"
+                [ACJEDIT_ENTER_BUTTON_URL]="Enter button URL:"
+                [ACJEDIT_ENTER_BUTTON_TEXT]="Enter button text for"
+                [ACJEDIT_BUTTON_ADDED]="Button successfully added"
+                [ACJEDIT_ENTER_DESCRIPTION]="Enter description for"
+                [ACJEDIT_DESCRIPTION_UPDATED]="Description successfully updated"
+                [ACJEDIT_APP_SAVED]="Application configuration saved"
+                [ACJEDIT_BACKUP_CREATED]="Backup created successfully"
+                [ACJEDIT_BACKUP_RESTORED]="Configuration restored successfully"
+                [ACJEDIT_CREATE_BACKUP]="Create configuration backup"
+                [ACJEDIT_RESTORE_BACKUP]="Restore from backup"
+                [ACJEDIT_CONFIRM_RESTORE]="This will overwrite current configuration. Continue? (y/n):"
+                [ACJEDIT_BACKUP_FILE_NOT_FOUND]="Backup file not found"
+                [ACJEDIT_INVALID_APP_ID]="Invalid application ID. Use only lowercase letters, numbers, and hyphens."
+                [ACJEDIT_APP_ID_EXISTS]="Application ID already exists in this platform"
+                [ACJEDIT_ADDITIONAL_STEPS]="Additional Steps Configuration"
+                [ACJEDIT_ADD_BEFORE_STEP]="Add step before subscription"
+                [ACJEDIT_ADD_AFTER_STEP]="Add step after subscription"
+                [ACJEDIT_STEP_TITLE]="Step title"
+                [ACJEDIT_ENTER_STEP_TITLE]="Enter step title for"
+                [ACJEDIT_STEP_DESCRIPTION]="Step description"
+                [ACJEDIT_CONFIGURE_BUTTONS]="Configure buttons for this step"
                 # Sub Page Upload
                 [UPLOADING_SUB_PAGE]="Загрузка пользовательского шаблона страницы подписки..."
                 [ERROR_FETCH_SUB_PAGE]="Не удалось получить пользовательский шаблон страницы подписки."
@@ -2730,7 +2860,15 @@ manage_custom_app_list() {
         return 1
     fi
     
-    show_custom_app_menu
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[CUSTOM_APP_LIST_MENU]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[EDIT_BRANDING]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[DELETE_APPS]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[ACJEDIT_CONFIG_EDITOR_MENU]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
     reading "${LANG[IPV6_PROMPT]}" APP_OPTION
     
     case $APP_OPTION in
@@ -2739,6 +2877,9 @@ manage_custom_app_list() {
             ;;
         2)
             delete_applications "$config_file"
+            ;;
+        3)
+            acjedit_manage_config_editor
             ;;
         0)
             echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
@@ -2933,6 +3074,725 @@ delete_applications() {
     fi
 }
 #Custom Templates and Extensions by legiz
+
+#Full app-config.json editor
+
+acjedit_show_config_editor_menu() {
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CONFIG_EDITOR_MENU]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[ACJEDIT_CONFIG_LANGUAGES_MENU]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[ACJEDIT_CONFIG_BRANDING_MENU]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}3. ${LANG[ACJEDIT_CONFIG_PLATFORMS_MENU]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}4. ${LANG[ACJEDIT_CONFIG_BACKUP_RESTORE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+}
+
+acjedit_manage_config_editor() {
+    local acjedit_config_file="/opt/remnawave/app-config.json"
+    
+    if [ ! -f "$acjedit_config_file" ]; then
+        echo -e "${COLOR_RED}${LANG[CUSTOM_APP_LIST_NOT_FOUND]}${COLOR_RESET}"
+        sleep 2
+        return 1
+    fi
+    
+    acjedit_show_config_editor_menu
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_CONFIG_OPTION
+    
+    case $ACJEDIT_CONFIG_OPTION in
+        1)
+            acjedit_manage_languages "$acjedit_config_file"
+            acjedit_manage_config_editor
+            ;;
+        2)
+            acjedit_manage_branding "$acjedit_config_file"
+            acjedit_manage_config_editor
+            ;;
+        3)
+            acjedit_manage_platforms "$acjedit_config_file"
+            acjedit_manage_config_editor
+            ;;
+        4)
+            acjedit_manage_backup_restore "$acjedit_config_file"
+            acjedit_manage_config_editor
+            ;;
+        0)
+            echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            acjedit_manage_config_editor
+            ;;
+    esac
+}
+
+# Управление языками
+acjedit_manage_languages() {
+    local acjedit_config_file="$1"
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CURRENT_LANGUAGES]}${COLOR_RESET}"
+    local acjedit_languages=$(jq -r '.config.additionalLocales[]?' "$acjedit_config_file" 2>/dev/null)
+    if [ -z "$acjedit_languages" ]; then
+        echo -e "${COLOR_YELLOW}${LANG[ACJEDIT_NO_ADDITIONAL_LANGUAGES]}${COLOR_RESET}"
+    else
+        echo "$acjedit_languages" | while IFS= read -r acjedit_lang; do
+            echo -e "${COLOR_WHITE}- $acjedit_lang${COLOR_RESET}"
+        done
+    fi
+    
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[ACJEDIT_ADD_LANGUAGE]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[ACJEDIT_REMOVE_LANGUAGE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_LANG_OPTION
+    
+    case $ACJEDIT_LANG_OPTION in
+        1)
+            acjedit_add_language "$acjedit_config_file"
+            ;;
+        2)
+            acjedit_remove_language "$acjedit_config_file"
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            acjedit_manage_languages "$acjedit_config_file"
+            ;;
+    esac
+}
+
+acjedit_add_language() {
+    local acjedit_config_file="$1"
+    local acjedit_available_langs=("fa" "ru" "zh")
+    local acjedit_lang_names=("Persian (Farsi)" "Russian" "Chinese")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_AVAILABLE_LANGUAGES]}${COLOR_RESET}"
+    for acjedit_i in "${!acjedit_available_langs[@]}"; do
+        echo -e "${COLOR_YELLOW}$((acjedit_i+1)). ${acjedit_available_langs[acjedit_i]} - ${acjedit_lang_names[acjedit_i]}${COLOR_RESET}"
+    done
+    echo -e ""
+    reading "${LANG[ACJEDIT_SELECT_LANGUAGE_ADD]}" ACJEDIT_LANG_INDEX
+    
+    if [[ "$ACJEDIT_LANG_INDEX" =~ ^[1-3]$ ]]; then
+        local acjedit_selected_lang=${acjedit_available_langs[$((ACJEDIT_LANG_INDEX-1))]}
+        
+        # Check if language already exists
+        if jq -e --arg lang "$acjedit_selected_lang" '.config.additionalLocales[] | select(. == $lang)' "$acjedit_config_file" > /dev/null 2>&1; then
+            echo -e "${COLOR_YELLOW}${LANG[ACJEDIT_LANGUAGE_ALREADY_EXISTS]}${COLOR_RESET}"
+        else
+            jq --arg lang "$acjedit_selected_lang" '.config.additionalLocales += [$lang]' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+            echo -e "${COLOR_GREEN}${LANG[ACJEDIT_LANGUAGE_ADDED]}: $acjedit_selected_lang${COLOR_RESET}"
+            acjedit_restart_subscription_container
+        fi
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+    fi
+    sleep 2
+}
+
+acjedit_remove_language() {
+    local acjedit_config_file="$1"
+    local acjedit_languages=($(jq -r '.config.additionalLocales[]?' "$acjedit_config_file" 2>/dev/null))
+    
+    if [ ${#acjedit_languages[@]} -eq 0 ]; then
+        echo -e "${COLOR_YELLOW}${LANG[ACJEDIT_NO_ADDITIONAL_LANGUAGES]}${COLOR_RESET}"
+        sleep 2
+        return
+    fi
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_SELECT_LANGUAGE_REMOVE]}${COLOR_RESET}"
+    for acjedit_i in "${!acjedit_languages[@]}"; do
+        echo -e "${COLOR_YELLOW}$((acjedit_i+1)). ${acjedit_languages[acjedit_i]}${COLOR_RESET}"
+    done
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_LANG_INDEX
+    
+    if [[ "$ACJEDIT_LANG_INDEX" =~ ^[0-9]+$ ]] && [ "$ACJEDIT_LANG_INDEX" -ge 1 ] && [ "$ACJEDIT_LANG_INDEX" -le ${#acjedit_languages[@]} ]; then
+        local acjedit_selected_lang=${acjedit_languages[$((ACJEDIT_LANG_INDEX-1))]}
+        jq --arg lang "$acjedit_selected_lang" '.config.additionalLocales = (.config.additionalLocales - [$lang])' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+        echo -e "${COLOR_GREEN}${LANG[ACJEDIT_LANGUAGE_REMOVED]}: $acjedit_selected_lang${COLOR_RESET}"
+        acjedit_restart_subscription_container
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+    fi
+    sleep 2
+}
+
+# Управление брендингом (расширенная версия существующей функции)
+acjedit_manage_branding() {
+    local acjedit_config_file="$1"
+    
+    # Show current branding status
+    if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+        echo -e "${COLOR_GREEN}${LANG[ACJEDIT_BRANDING_ENABLED]}${COLOR_RESET}"
+        echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CURRENT_BRANDING]}${COLOR_RESET}"
+        local acjedit_logo_url=$(jq -r '.config.branding.logoUrl // "N/A"' "$acjedit_config_file")
+        local acjedit_name=$(jq -r '.config.branding.name // "N/A"' "$acjedit_config_file")
+        local acjedit_support_url=$(jq -r '.config.branding.supportUrl // "N/A"' "$acjedit_config_file")
+        
+        echo -e "${COLOR_YELLOW}${LANG[BRANDING_LOGO_URL]} ${COLOR_WHITE}$acjedit_logo_url${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[BRANDING_NAME]} ${COLOR_WHITE}$acjedit_name${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${LANG[BRANDING_SUPPORT_URL]} ${COLOR_WHITE}$acjedit_support_url${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}${LANG[ACJEDIT_BRANDING_DISABLED]}${COLOR_RESET}"
+    fi
+    
+    echo -e ""
+    if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+        echo -e "${COLOR_YELLOW}1. ${LANG[EDIT_LOGO]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}2. ${LANG[EDIT_NAME]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}3. ${LANG[EDIT_SUPPORT_URL]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}4. ${LANG[ACJEDIT_DISABLE_BRANDING]}${COLOR_RESET}"
+    else
+        echo -e "${COLOR_YELLOW}1. ${LANG[ACJEDIT_ENABLE_BRANDING]}${COLOR_RESET}"
+    fi
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_BRANDING_OPTION
+    
+    local acjedit_needs_restart=false
+    
+    case $ACJEDIT_BRANDING_OPTION in
+        1)
+            if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+                # Edit logo
+                reading "${LANG[ENTER_NEW_LOGO]}" acjedit_new_logo
+                reading "${LANG[CONFIRM_CHANGE]}" acjedit_confirm
+                if [[ "$acjedit_confirm" == "y" || "$acjedit_confirm" == "Y" ]]; then
+                    jq --arg logo "$acjedit_new_logo" '.config.branding.logoUrl = $logo' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+                    acjedit_needs_restart=true
+                fi
+            else
+                # Enable branding
+                reading "${LANG[ENTER_NEW_LOGO]}" acjedit_new_logo
+                reading "${LANG[ENTER_NEW_NAME]}" acjedit_new_name
+                reading "${LANG[ENTER_NEW_SUPPORT]}" acjedit_new_support
+                jq --arg logo "$acjedit_new_logo" --arg name "$acjedit_new_name" --arg support "$acjedit_new_support" '
+                .config.branding = {
+                    "logoUrl": $logo,
+                    "name": $name,
+                    "supportUrl": $support
+                }' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+                acjedit_needs_restart=true
+            fi
+            ;;
+        2)
+            if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+                reading "${LANG[ENTER_NEW_NAME]}" acjedit_new_name
+                reading "${LANG[CONFIRM_CHANGE]}" acjedit_confirm
+                if [[ "$acjedit_confirm" == "y" || "$acjedit_confirm" == "Y" ]]; then
+                    jq --arg name "$acjedit_new_name" '.config.branding.name = $name' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+                    acjedit_needs_restart=true
+                fi
+            fi
+            ;;
+        3)
+            if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+                reading "${LANG[ENTER_NEW_SUPPORT]}" acjedit_new_support
+                reading "${LANG[CONFIRM_CHANGE]}" acjedit_confirm
+                if [[ "$acjedit_confirm" == "y" || "$acjedit_confirm" == "Y" ]]; then
+                    jq --arg support "$acjedit_new_support" '.config.branding.supportUrl = $support' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+                    acjedit_needs_restart=true
+                fi
+            fi
+            ;;
+        4)
+            if jq -e '.config.branding' "$acjedit_config_file" > /dev/null 2>&1; then
+                reading "${LANG[CONFIRM_CHANGE]}" acjedit_confirm
+                if [[ "$acjedit_confirm" == "y" || "$acjedit_confirm" == "Y" ]]; then
+                    jq 'del(.config.branding)' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+                    acjedit_needs_restart=true
+                fi
+            fi
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_YELLOW}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            acjedit_manage_branding "$acjedit_config_file"
+            return
+            ;;
+    esac
+    
+    if [ "$acjedit_needs_restart" = true ]; then
+        echo -e "${COLOR_GREEN}${LANG[BRANDING_ADDED_SUCCESS]}${COLOR_RESET}"
+        acjedit_restart_subscription_container
+    fi
+    
+    sleep 2
+    acjedit_manage_branding "$acjedit_config_file"
+}
+
+# Управление платформами и приложениями
+acjedit_manage_platforms() {
+    local acjedit_config_file="$1"
+    local acjedit_platforms=("ios" "android" "linux" "macos" "windows" "androidTV" "appleTV")
+    local acjedit_platform_names=("iOS" "Android" "Linux" "macOS" "Windows" "Android TV" "Apple TV")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_PLATFORM_MANAGEMENT]}${COLOR_RESET}"
+    echo -e ""
+    
+    for acjedit_i in "${!acjedit_platforms[@]}"; do
+        local acjedit_platform=${acjedit_platforms[acjedit_i]}
+        local acjedit_count=$(jq --arg platform "$acjedit_platform" '.platforms[$platform] | length' "$acjedit_config_file" 2>/dev/null || echo "0")
+        echo -e "${COLOR_YELLOW}$((acjedit_i+1)). ${acjedit_platform_names[acjedit_i]} ($acjedit_count ${LANG[ACJEDIT_APPS_COUNT]})${COLOR_RESET}"
+    done
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[ACJEDIT_SELECT_PLATFORM]}" ACJEDIT_PLATFORM_INDEX
+    
+    if [[ "$ACJEDIT_PLATFORM_INDEX" =~ ^[1-7]$ ]]; then
+        local acjedit_selected_platform=${acjedit_platforms[$((ACJEDIT_PLATFORM_INDEX-1))]}
+        acjedit_manage_platform_apps "$acjedit_config_file" "$acjedit_selected_platform"
+        acjedit_manage_platforms "$acjedit_config_file"
+    elif [ "$ACJEDIT_PLATFORM_INDEX" = "0" ]; then
+        return 0
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+        sleep 2
+        acjedit_manage_platforms "$acjedit_config_file"
+    fi
+}
+
+acjedit_manage_platform_apps() {
+    local acjedit_config_file="$1"
+    local acjedit_platform="$2"
+    
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_PLATFORM_MANAGEMENT]}: $acjedit_platform${COLOR_RESET}"
+    echo -e ""
+    
+    # Show existing apps
+    local acjedit_apps=$(jq -r --arg platform "$acjedit_platform" '.platforms[$platform][] | .name // .id' "$acjedit_config_file" 2>/dev/null)
+    if [ -n "$acjedit_apps" ]; then
+        echo -e "${COLOR_YELLOW}Existing applications:${COLOR_RESET}"
+        local acjedit_i=1
+        while IFS= read -r acjedit_app; do
+            echo -e "${COLOR_WHITE}$acjedit_i. $acjedit_app${COLOR_RESET}"
+            ((acjedit_i++))
+        done <<< "$acjedit_apps"
+        echo -e ""
+    fi
+    
+    echo -e "${COLOR_YELLOW}1. ${LANG[ACJEDIT_ADD_NEW_APP]}${COLOR_RESET}"
+    if [ -n "$acjedit_apps" ]; then
+        echo -e "${COLOR_YELLOW}2. ${LANG[ACJEDIT_EDIT_EXISTING_APP]}${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}3. ${LANG[ACJEDIT_REMOVE_APP]}${COLOR_RESET}"
+    fi
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_APP_OPTION
+    
+    case $ACJEDIT_APP_OPTION in
+        1)
+            acjedit_add_new_app "$acjedit_config_file" "$acjedit_platform"
+            ;;
+        2)
+            if [ -n "$acjedit_apps" ]; then
+                acjedit_edit_existing_app "$acjedit_config_file" "$acjedit_platform"
+            else
+                echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+                sleep 2
+            fi
+            ;;
+        3)
+            if [ -n "$acjedit_apps" ]; then
+                acjedit_remove_app_from_platform "$acjedit_config_file" "$acjedit_platform"
+            else
+                echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+                sleep 2
+            fi
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            sleep 2
+            ;;
+    esac
+    
+    acjedit_manage_platform_apps "$acjedit_config_file" "$acjedit_platform"
+}
+
+acjedit_add_new_app() {
+    local acjedit_config_file="$1"
+    local acjedit_platform="$2"
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_ADD_NEW_APP]} - $acjedit_platform${COLOR_RESET}"
+    echo -e ""
+    
+    # Get app basic info
+    local acjedit_app_id=""
+    while [ -z "$acjedit_app_id" ]; do
+        reading "${LANG[ACJEDIT_ENTER_APP_ID]}" acjedit_app_id
+        if [[ ! "$acjedit_app_id" =~ ^[a-z0-9-]+$ ]]; then
+            echo -e "${COLOR_RED}${LANG[ACJEDIT_INVALID_APP_ID]}${COLOR_RESET}"
+            acjedit_app_id=""
+            continue
+        fi
+        
+        # Check if ID already exists
+        if jq -e --arg platform "$acjedit_platform" --arg id "$acjedit_app_id" '.platforms[$platform][] | select(.id == $id)' "$acjedit_config_file" > /dev/null 2>&1; then
+            echo -e "${COLOR_RED}${LANG[ACJEDIT_APP_ID_EXISTS]}${COLOR_RESET}"
+            acjedit_app_id=""
+            continue
+        fi
+    done
+    
+    reading "${LANG[ACJEDIT_ENTER_APP_NAME]}" acjedit_app_name
+    
+    reading "${LANG[ACJEDIT_APP_FEATURED_PROMPT]}" acjedit_featured_input
+    local acjedit_featured="false"
+    if [[ "$acjedit_featured_input" == "y" || "$acjedit_featured_input" == "Y" ]]; then
+        acjedit_featured="true"
+    fi
+    
+    reading "${LANG[ACJEDIT_ENTER_URL_SCHEME]}" acjedit_url_scheme
+    
+    reading "${LANG[ACJEDIT_BASE64_PROMPT]}" acjedit_base64_input
+    local acjedit_needs_base64=""
+    if [[ "$acjedit_base64_input" == "y" || "$acjedit_base64_input" == "Y" ]]; then
+        acjedit_needs_base64='"isNeedBase64Encoding": true,'
+    fi
+    
+    # Get available languages
+    local acjedit_languages=("en")
+    local acjedit_additional_langs=($(jq -r '.config.additionalLocales[]?' "$acjedit_config_file" 2>/dev/null))
+    acjedit_languages+=("${acjedit_additional_langs[@]}")
+    
+    # Create basic app structure
+    local acjedit_app_json=$(cat <<EOF
+{
+    "id": "$acjedit_app_id",
+    "name": "$acjedit_app_name",
+    "isFeatured": $acjedit_featured,
+    $acjedit_needs_base64
+    "urlScheme": "$acjedit_url_scheme",
+    "installationStep": {
+        "buttons": [],
+        "description": {}
+    },
+    "addSubscriptionStep": {
+        "description": {}
+    },
+    "connectAndUseStep": {
+        "description": {}
+    }
+}
+EOF
+    )
+    
+    # Remove empty isNeedBase64Encoding line if not needed
+    if [ -z "$acjedit_needs_base64" ]; then
+        acjedit_app_json=$(echo "$acjedit_app_json" | sed '/^[[:space:]]*,$/d')
+    fi
+    
+    # Configure installation step
+    acjedit_configure_installation_step acjedit_app_json "${acjedit_languages[@]}"
+    
+    # Configure add subscription step
+    acjedit_configure_add_subscription_step acjedit_app_json "${acjedit_languages[@]}"
+    
+    # Configure connect step
+    acjedit_configure_connect_step acjedit_app_json "${acjedit_languages[@]}"
+    
+    # Ask for additional steps
+    acjedit_configure_additional_steps acjedit_app_json "${acjedit_languages[@]}"
+    
+    # Add app to platform
+    local acjedit_temp_app_file="/tmp/new_app.json"
+    echo "$acjedit_app_json" > "$acjedit_temp_app_file"
+    
+    jq --arg platform "$acjedit_platform" --slurpfile new_app "$acjedit_temp_app_file" '
+    .platforms[$platform] += $new_app
+    ' "$acjedit_config_file" > "${acjedit_config_file}.tmp" && mv "${acjedit_config_file}.tmp" "$acjedit_config_file"
+    
+    rm -f "$acjedit_temp_app_file"
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_APP_SAVED]}${COLOR_RESET}"
+    acjedit_restart_subscription_container
+    sleep 2
+}
+
+acjedit_configure_installation_step() {
+    local -n acjedit_app_ref=$1
+    shift
+    local acjedit_languages=("$@")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_INSTALLATION_STEP]}${COLOR_RESET}"
+    
+    # Add buttons
+    while true; do
+        reading "${LANG[ACJEDIT_ADD_BUTTON]}? (y/n):" acjedit_add_button
+        if [[ "$acjedit_add_button" != "y" && "$acjedit_add_button" != "Y" ]]; then
+            break
+        fi
+        
+        reading "${LANG[ACJEDIT_ENTER_BUTTON_URL]}" acjedit_button_url
+        
+        local acjedit_button_text_json="{"
+        for acjedit_lang in "${acjedit_languages[@]}"; do
+            reading "${LANG[ACJEDIT_ENTER_BUTTON_TEXT]} $acjedit_lang:" acjedit_button_text
+            acjedit_button_text_json+='"'$acjedit_lang'": "'$acjedit_button_text'"'
+            if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+                acjedit_button_text_json+=","
+            fi
+        done
+        acjedit_button_text_json+="}"
+        
+        # Add button to app_json
+        local acjedit_button_json='{"buttonLink": "'$acjedit_button_url'", "buttonText": '$acjedit_button_text_json'}'
+        acjedit_app_ref=$(echo "$acjedit_app_ref" | jq --argjson button "$acjedit_button_json" '.installationStep.buttons += [$button]')
+        
+        echo -e "${COLOR_GREEN}${LANG[ACJEDIT_BUTTON_ADDED]}${COLOR_RESET}"
+    done
+    
+    # Add description
+    local acjedit_desc_json="{"
+    for acjedit_lang in "${acjedit_languages[@]}"; do
+        reading "${LANG[ACJEDIT_ENTER_DESCRIPTION]} $acjedit_lang:" acjedit_description
+        acjedit_desc_json+='"'$acjedit_lang'": "'$acjedit_description'"'
+        if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+            acjedit_desc_json+=","
+        fi
+    done
+    acjedit_desc_json+="}"
+    
+    acjedit_app_ref=$(echo "$acjedit_app_ref" | jq --argjson desc "$acjedit_desc_json" '.installationStep.description = $desc')
+}
+
+acjedit_configure_add_subscription_step() {
+    local -n acjedit_app_ref=$1
+    shift
+    local acjedit_languages=("$@")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_ADD_SUBSCRIPTION_STEP]}${COLOR_RESET}"
+    
+    local acjedit_desc_json="{"
+    for acjedit_lang in "${acjedit_languages[@]}"; do
+        reading "${LANG[ACJEDIT_ENTER_DESCRIPTION]} $acjedit_lang:" acjedit_description
+        acjedit_desc_json+='"'$acjedit_lang'": "'$acjedit_description'"'
+        if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+            acjedit_desc_json+=","
+        fi
+    done
+    acjedit_desc_json+="}"
+    
+    acjedit_app_ref=$(echo "$acjedit_app_ref" | jq --argjson desc "$acjedit_desc_json" '.addSubscriptionStep.description = $desc')
+}
+
+acjedit_configure_connect_step() {
+    local -n acjedit_app_ref=$1
+    shift
+    local acjedit_languages=("$@")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CONNECT_STEP]}${COLOR_RESET}"
+    
+    local acjedit_desc_json="{"
+    for acjedit_lang in "${acjedit_languages[@]}"; do
+        reading "${LANG[ACJEDIT_ENTER_DESCRIPTION]} $acjedit_lang:" acjedit_description
+        acjedit_desc_json+='"'$acjedit_lang'": "'$acjedit_description'"'
+        if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+            acjedit_desc_json+=","
+        fi
+    done
+    acjedit_desc_json+="}"
+    
+    acjedit_app_ref=$(echo "$acjedit_app_ref" | jq --argjson desc "$acjedit_desc_json" '.connectAndUseStep.description = $desc')
+}
+
+acjedit_configure_additional_steps() {
+    local -n acjedit_app_ref=$1
+    shift
+    local acjedit_languages=("$@")
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_ADDITIONAL_STEPS]}${COLOR_RESET}"
+    
+    # Before subscription step
+    reading "${LANG[ACJEDIT_ADD_BEFORE_STEP]}? (y/n):" acjedit_add_before
+    if [[ "$acjedit_add_before" == "y" || "$acjedit_add_before" == "Y" ]]; then
+        acjedit_app_ref=$(acjedit_configure_titled_step "$acjedit_app_ref" "additionalBeforeAddSubscriptionStep" "${acjedit_languages[@]}")
+    fi
+    
+    # After subscription step
+    reading "${LANG[ACJEDIT_ADD_AFTER_STEP]}? (y/n):" acjedit_add_after
+    if [[ "$acjedit_add_after" == "y" || "$acjedit_add_after" == "Y" ]]; then
+        acjedit_app_ref=$(acjedit_configure_titled_step "$acjedit_app_ref" "additionalAfterAddSubscriptionStep" "${acjedit_languages[@]}")
+    fi
+}
+
+acjedit_configure_titled_step() {
+    local acjedit_app_json="$1"
+    local acjedit_step_name="$2"
+    shift 2
+    local acjedit_languages=("$@")
+    
+    # Add title
+    local acjedit_title_json="{"
+    for acjedit_lang in "${acjedit_languages[@]}"; do
+        reading "${LANG[ACJEDIT_ENTER_STEP_TITLE]} $acjedit_lang:" acjedit_title
+        acjedit_title_json+='"'$acjedit_lang'": "'$acjedit_title'"'
+        if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+            acjedit_title_json+=","
+        fi
+    done
+    acjedit_title_json+="}"
+    
+    # Add description
+    local acjedit_desc_json="{"
+    for acjedit_lang in "${acjedit_languages[@]}"; do
+        reading "${LANG[ACJEDIT_ENTER_DESCRIPTION]} $acjedit_lang:" acjedit_description
+        acjedit_desc_json+='"'$acjedit_lang'": "'$acjedit_description'"'
+        if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+            acjedit_desc_json+=","
+        fi
+    done
+    acjedit_desc_json+="}"
+    
+    # Initialize step with title, description, and empty buttons array
+    acjedit_app_json=$(echo "$acjedit_app_json" | jq --arg stepName "$acjedit_step_name" --argjson title "$acjedit_title_json" --argjson desc "$acjedit_desc_json" '
+    .[$stepName] = {
+        "title": $title,
+        "description": $desc,
+        "buttons": []
+    }')
+    
+    # Add buttons
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CONFIGURE_BUTTONS]}${COLOR_RESET}"
+    while true; do
+        reading "${LANG[ACJEDIT_ADD_BUTTON]}? (y/n):" acjedit_add_button
+        if [[ "$acjedit_add_button" != "y" && "$acjedit_add_button" != "Y" ]]; then
+            break
+        fi
+        
+        reading "${LANG[ACJEDIT_ENTER_BUTTON_URL]}" acjedit_button_url
+        
+        local acjedit_button_text_json="{"
+        for acjedit_lang in "${acjedit_languages[@]}"; do
+            reading "${LANG[ACJEDIT_ENTER_BUTTON_TEXT]} $acjedit_lang:" acjedit_button_text
+            acjedit_button_text_json+='"'$acjedit_lang'": "'$acjedit_button_text'"'
+            if [ "$acjedit_lang" != "${acjedit_languages[-1]}" ]; then
+                acjedit_button_text_json+=","
+            fi
+        done
+        acjedit_button_text_json+="}"
+        
+        # Add button to step
+        local acjedit_button_json='{"buttonLink": "'$acjedit_button_url'", "buttonText": '$acjedit_button_text_json'}'
+        acjedit_app_json=$(echo "$acjedit_app_json" | jq --arg stepName "$acjedit_step_name" --argjson button "$acjedit_button_json" '.[$stepName].buttons += [$button]')
+        
+        echo -e "${COLOR_GREEN}${LANG[ACJEDIT_BUTTON_ADDED]}${COLOR_RESET}"
+    done
+    
+    echo "$acjedit_app_json"
+}
+
+acjedit_edit_existing_app() {
+    local acjedit_config_file="$1"
+    local acjedit_platform="$2"
+    
+    # Show apps and let user select
+    local acjedit_apps=($(jq -r --arg platform "$acjedit_platform" '.platforms[$platform][] | @base64' "$acjedit_config_file" 2>/dev/null))
+    
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_EDIT_EXISTING_APP]}${COLOR_RESET}"
+    echo -e ""
+    
+    for acjedit_i in "${!acjedit_apps[@]}"; do
+        local acjedit_app=$(echo "${acjedit_apps[acjedit_i]}" | base64 --decode)
+        local acjedit_app_name=$(echo "$acjedit_app" | jq -r '.name // .id')
+        echo -e "${COLOR_YELLOW}$((acjedit_i+1)). $acjedit_app_name${COLOR_RESET}"
+    done
+    echo -e ""
+    reading "${LANG[ACJEDIT_SELECT_PLATFORM]}" ACJEDIT_APP_INDEX
+    
+    if [[ "$ACJEDIT_APP_INDEX" =~ ^[0-9]+$ ]] && [ "$ACJEDIT_APP_INDEX" -ge 1 ] && [ "$ACJEDIT_APP_INDEX" -le ${#acjedit_apps[@]} ]; then
+        local acjedit_selected_app_index=$((ACJEDIT_APP_INDEX-1))
+        # Implementation for editing existing app would go here
+        # This is a complex feature that would require a full app editor interface
+        echo -e "${COLOR_YELLOW}Feature coming soon...${COLOR_RESET}"
+        sleep 2
+    else
+        echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+        sleep 2
+    fi
+}
+
+acjedit_remove_app_from_platform() {
+    local acjedit_config_file="$1"
+    local acjedit_platform="$2"
+    
+    # Reuse the existing delete_applications function logic
+    delete_applications "$acjedit_config_file"
+}
+
+# Резервное копирование и восстановление
+acjedit_manage_backup_restore() {
+    local acjedit_config_file="$1"
+    local acjedit_backup_file="/opt/remnawave/app-config.backup.json"
+    
+    echo -e ""
+    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_CONFIG_BACKUP_RESTORE]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}1. ${LANG[ACJEDIT_CREATE_BACKUP]}${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}2. ${LANG[ACJEDIT_RESTORE_BACKUP]}${COLOR_RESET}"
+    echo -e ""
+    echo -e "${COLOR_YELLOW}0. ${LANG[EXIT]}${COLOR_RESET}"
+    echo -e ""
+    reading "${LANG[IPV6_PROMPT]}" ACJEDIT_BACKUP_OPTION
+    
+    case $ACJEDIT_BACKUP_OPTION in
+        1)
+            cp "$acjedit_config_file" "$acjedit_backup_file"
+            echo -e "${COLOR_GREEN}${LANG[ACJEDIT_BACKUP_CREATED]}: $acjedit_backup_file${COLOR_RESET}"
+            ;;
+        2)
+            if [ -f "$acjedit_backup_file" ]; then
+                reading "${LANG[ACJEDIT_CONFIRM_RESTORE]}" acjedit_confirm
+                if [[ "$acjedit_confirm" == "y" || "$acjedit_confirm" == "Y" ]]; then
+                    cp "$acjedit_backup_file" "$acjedit_config_file"
+                    echo -e "${COLOR_GREEN}${LANG[ACJEDIT_BACKUP_RESTORED]}${COLOR_RESET}"
+                    acjedit_restart_subscription_container
+                fi
+            else
+                echo -e "${COLOR_RED}${LANG[ACJEDIT_BACKUP_FILE_NOT_FOUND]}${COLOR_RESET}"
+            fi
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            echo -e "${COLOR_RED}${LANG[INVALID_CHOICE]}${COLOR_RESET}"
+            ;;
+    esac
+    sleep 2
+}
+
+# Вспомогательная функция для перезапуска контейнера
+acjedit_restart_subscription_container() {
+    cd /opt/remnawave || return 1
+    docker compose down remnawave-subscription-page > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+    docker compose up -d remnawave-subscription-page > /dev/null 2>&1 &
+    spinner $! "${LANG[WAITING]}"
+}
+
+#Full app-config.json editor
 
 add_cron_rule() {
     local rule="$1"
